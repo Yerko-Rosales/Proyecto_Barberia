@@ -1,0 +1,374 @@
+## Slide 1
+
+Plataforma Web y App Móvil
+para Barbería
+
+Agenda de citas, perfil de clientes, abonos de reserva
+y fidelización digital para un servicio de corte y barbería.
+
+Estudiante:  Jonathan Ojeda – Yerko Rosales.
+
+Curso / Profesor:  Capstone / Fernando Herrera
+
+Fecha:  21 de Agosto del 2026
+
+## Slide 2
+
+CONTEXTO
+
+La atención actual en la barbería
+
+1
+
+Atención por orden de llegada
+
+No existe un sistema de reservas: se atiende a quien llega primero, sin agenda previa.
+
+2
+
+Clientes que se van sin atención
+
+Cuando hay mucha demanda, no todos pueden esperar o volver más tarde, y se pierde la atención.
+
+3
+
+Registro manual en Excel
+
+Cada atención se anota a mano, indicando el colaborador que la realizó y el monto cobrado.
+
+4
+
+Sin perfiles ni historial digital
+
+No existe información centralizada de clientes, colaboradores ni del negocio.
+
+PROYECTO BARBERÍA · WEB + APP MÓVIL
+
+2
+
+## Slide 3
+
+OBJETIVOS
+
+Qué queremos lograr
+
+OBJETIVO GENERAL
+
+Diseñar e implementar una plataforma web y app móvil que reemplace la atención por orden de llegada y el registro manual en Excel, con perfiles para clientes, colaboradores y administradores.
+
+OBJETIVOS ESPECÍFICOS
+
+Permitir a cada cliente crear su perfil y agendar su servicio habitual o solicitar uno nuevo.
+
+Implementar el abono de un porcentaje del servicio para asegurar la asistencia y el cupo reservado.
+
+Habilitar el ingreso como invitado, con un pop-up promocional que incentive el registro.
+
+Incorporar perfiles para colaboradores y administradores, reemplazando el registro manual en Excel de atenciones y montos.
+
+PROYECTO BARBERÍA · WEB + APP MÓVIL
+
+3
+
+## Slide 4
+
+MODELO
+
+Propuesta de valor
+
+El sistema conecta al cliente, el negocio y la gestión administrativa para generar valor e innovación en torno al servicio.
+
+CLIENTE
+
+Valor recibido:
+comodidad, confianza
+y beneficios
+
+NEGOCIO
+
+Transacción:
+agenda, abono y
+servicio prestado
+
+GESTIÓN
+
+Control:
+decisiones, reportes
+y mejora continua
+
+WEB / APP  →  BASE DE DATOS  →  DATOS MAESTROS DEL CLIENTE
+
+Innovación y valor organizacional se sostienen en la información centralizada del cliente y del negocio.
+
+PROYECTO BARBERÍA · WEB + APP MÓVIL
+
+4
+
+## Slide 5
+
+FUNCIONALIDADES
+
+Perfil de cliente y agendamiento
+
+Todo cliente registrado gestiona su propia experiencia de reserva desde su perfil.
+
+1
+
+Registro e inicio de sesión de cliente habitual.
+
+2
+
+Perfil con historial de servicios y datos de contacto.
+
+3
+
+Agendar el servicio habitual en un solo paso.
+
+4
+
+Solicitar un servicio nuevo desde el catálogo disponible.
+
+Referencia — Sitio web
+
+PROYECTO BARBERÍA · WEB + APP MÓVIL
+
+5
+
+## Slide 6
+
+FUNCIONALIDADES
+
+Reserva asegurada con abono
+
+El abono protege el cupo de atención y reduce la inasistencia de clientes.
+
+1
+
+El cliente elige servicio, profesional y horario disponible.
+
+2
+
+Debe abonar un porcentaje del valor del servicio para confirmar.
+
+3
+
+La cita queda tomada solo tras validarse el abono.
+
+4
+
+Sin abono, el cupo no se reserva y queda disponible para otros.
+
+Referencia — App móvil
+
+PROYECTO BARBERÍA · WEB + APP MÓVIL
+
+6
+
+## Slide 7
+
+FUNCIONALIDADES
+
+Ingreso como invitado
+
+Un cliente no habitual puede reservar igualmente, y se le invita a fidelizarse.
+
+1
+
+Acceso rápido como invitado, sin necesidad de registro previo.
+
+2
+
+Pop-up promocional inmediato con beneficios y descuentos.
+
+3
+
+Invitación a completar sus datos para crear perfil habitual.
+
+4
+
+Conversión de invitado a cliente fidelizado dentro del mismo flujo.
+
+Referencia — App móvil
+
+PROYECTO BARBERÍA · WEB + APP MÓVIL
+
+7
+
+## Slide 8
+
+USUARIOS
+
+Tres perfiles, un mismo sistema
+
+La plataforma diferencia el acceso y la información disponible según el tipo de usuario.
+
+1
+
+Cliente
+
+Crea su perfil, agenda servicios habituales o nuevos, abona su reserva y revisa su historial de atenciones.
+
+2
+
+Colaborador
+
+Registra digitalmente los servicios que realiza, solo confirmando su atención con el detalle y el monto de cada atención, reemplazando el Excel manual.
+
+3
+
+Administrador
+
+Supervisa la agenda general, el desempeño de los colaboradores y los reportes del negocio.
+
+PROYECTO BARBERÍA · WEB + APP MÓVIL
+
+8
+
+## Slide 9
+
+ARQUITECTURA
+
+Cómo se organiza el sistema
+
+SITIO WEB
++ APP MÓVIL
+
+BASE DE
+DATOS (BBDD)
+
+DATOS MAESTROS
+DEL CLIENTE
+
+MÓDULOS DEL SISTEMA
+
+1
+
+Mantenedor
+
+Administración de perfiles de clientes, colaboradores y administradores, junto con servicios y horarios.
+
+2
+
+Negocio (Transacciones)
+
+Agendamiento, cálculo y registro de abonos, confirmación de citas.
+
+3
+
+Gestión
+
+Toma de decisiones, control operativo y reportes de desempeño.
+
+Cliente  →  Valor  ·  Negociaciones  →  Gestión operativa e innovación
+
+PROYECTO BARBERÍA · WEB + APP MÓVIL
+
+9
+
+## Slide 10
+
+PROTOTIPOS
+
+Primeros mockups de la solución
+
+Sitio web — landing de presentación del servicio
+
+App móvil — pantalla de ingreso
+
+PROYECTO BARBERÍA · WEB + APP MÓVIL
+
+10
+
+## Slide 11
+
+PLANIFICACIÓN
+
+Plan de trabajo y cronograma
+
+1
+
+Propuesta
+
+Definición del alcance, problema y propuesta de valor.
+
+2
+
+Diseño → Arquitectura
+
+Diseño de interfaces, flujo de usuario y arquitectura de datos.
+
+3
+
+Programación y desarrollo
+
+Construcción del sitio web, la app móvil y la base de datos.
+
+4
+
+Cierre y entrega
+
+Pruebas, ajustes finales y entrega del proyecto.
+
+AVANCE GENERAL DEL PROYECTO
+
+30%
+
+Meta próxima etapa: 70%
+
+PROYECTO BARBERÍA · WEB + APP MÓVIL
+
+11
+
+## Slide 12
+
+CONTROL
+
+Riesgos y mitigación
+
+RIESGO
+
+MITIGACIÓN
+
+Baja adopción por parte de los clientes
+
+Registro simple y beneficios visibles desde el primer ingreso.
+
+Fallas en el módulo de pago del abono
+
+Pruebas exhaustivas y uso de una pasarela de pago confiable.
+
+Atrasos en la etapa de desarrollo
+
+Metodología ágil, con entregas parciales por sprint.
+
+Resistencia del personal a usar el sistema
+
+Capacitación breve y panel de gestión simple e intuitivo.
+
+PROYECTO BARBERÍA · WEB + APP MÓVIL
+
+13
+
+## Slide 13
+
+TEMAS ABIERTOS
+
+—
+
+Definir la pasarela de pago a integrar para el abono.
+
+—
+
+Establecer la política de reembolso ante cancelaciones.
+
+—
+
+Fijar el porcentaje estándar de abono por servicio.
+
+Gracias
+
+Preguntas y comentarios son bienvenidos.
+
+PROYECTO BARBERÍA · WEB + APP MÓVIL
+
+14
