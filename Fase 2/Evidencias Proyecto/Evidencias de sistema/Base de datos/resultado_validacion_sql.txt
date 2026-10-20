@@ -1,0 +1,27 @@
+OK | Script DDL completo ejecutado sin errores
+OK | Reserva válida
+OK | Doble reserva traslapada (mismo barbero) es rechazada → conflicting key value violates exclusion constraint "reserva_id_barbero_tstzrange_excl"
+OK | Reserva en horario cancelado previamente se permite
+OK | Más de 2 reagendamientos es rechazado → new row for relation "reserva" violates check constraint "reserva_cantidad_reagendamientos
+OK | Reagendamiento con menos de 24 h es rechazado → new row for relation "reagendamiento" violates check constraint "reagendamiento_horas_anti
+OK | Invitado sin usuario permitido
+OK | Cliente no invitado sin usuario es rechazado → new row for relation "cliente" violates check constraint "cliente_check"
+OK | Pago sin datos de tarjeta (solo ID y estado)
+OK | Atención sin reserva ni turno es rechazada → new row for relation "atencion" violates check constraint "atencion_check"
+OK | Turno por orden de llegada y atención asociada
+OK | Atención sin cajero que la registre es rechazada → null value in column "registrada_por" of relation "atencion" violates not-null constraint
+OK | Solicitud de derecho calcula plazo de 30 días
+OK | Auditoría es de solo inserción (UPDATE rechazado) → registro_auditoria es de solo inserción
+OK | Configuración de abono por porcentaje en una sucursal (sin cambiar modelo)
+OK | Primer Dueño del sistema se asigna (arranque)
+OK | Dueño crea perfil de cajero/a con contraseña temporal
+OK | Colaborador autorregistrado (sin Dueño creador) es rechazado → Solo el Dueño puede crear perfiles de colaboradores (rol BARBERO)
+OK | Perfil creado por un no-Dueño es rechazado → Solo el Dueño puede crear perfiles de colaboradores (rol BARBERO)
+OK | Cliente se autorregistra con rol CLIENTE
+OK | Servicio de más de 60 minutos es rechazado (máximo confirmado) → new row for relation "servicio" violates check constraint "servicio_duracion_min_check"
+OK | Configuración GLOBAL con sucursal es rechazada → new row for relation "configuracion" violates check constraint "configuracion_check"
+INFO | Días de plazo calculados | 30
+INFO | Abono vigente por sucursal | [{"id_sucursal":1,"tipo_valor":"MONTO","valor":"3000"},{"id_sucursal":2,"tipo_valor":"MONTO","valor":"3000"},{"id_sucursal":3,"tipo_valor":"PORCENTAJE","valor":"20"}]
+INFO | Tablas creadas | 26
+INFO | Vista del barbero (atenciones, total acumulado) | {"atenciones_acumuladas":1,"total_acumulado":"11900"}
+INFO | Servicios cargados (n, mínimo, máximo) | {"n":9,"minimo":"2380","maximo":"23800"}

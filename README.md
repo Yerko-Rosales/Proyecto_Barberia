@@ -1,71 +1,80 @@
-# Plataforma Web y App Móvil para Barbería
+# Proyecto Barbería Big-Boys
 
-Sistema digital de agendamiento y gestión para un servicio de barbería, que reemplaza la atención por orden de llegada y el registro manual en Excel. Incluye agenda de citas, perfil de clientes, abono de reserva y fidelización digital.
+Sistema de gestión y agendamiento para **Barbería Big-Boys** (plataforma web + app móvil Android), que **complementa** la atención por orden de llegada y **reemplaza por completo** el registro manual en Excel en sus tres sucursales.
 
-**Estudiantes:** Jonathan Ojeda · Yerko Rosales
-**Curso / Profesor:** Capstone / Fernando Herrera
+**Estudiantes:** Yerko Rosales (Jefe de Proyecto, Analista y UX/UI) · Jonathan Ojeda (Backend y Base de Datos)
+**Asignatura / Docente:** PTY4614 Capstone / Fernando Herrera
+**Período:** 14-08-2026 al 13-11-2026 · Defensa probable: 27-11-2026
 
 ---
 
-## Contexto
+## Sucursales
 
-Actualmente la barbería opera de forma manual:
+| Código | Sucursal | Dirección |
+| --- | --- | --- |
+| SUC-01 | Peñaflor – Sucursal 21 de Mayo | 21 de Mayo 4566, Peñaflor |
+| SUC-02 | Peñaflor – Sucursal Alcalde Luis Araya Cereceda | Alcalde Luis Araya Cereceda 4387, Peñaflor |
+| SUC-03 | Talagante | Boulevard del Centro, local 3, Talagante |
 
-- No existe un sistema de reservas; se atiende por orden de llegada.
-- Con alta demanda, clientes se van sin ser atendidos.
-- Las atenciones (colaborador, monto) se registran a mano en Excel.
-- No hay perfiles ni historial digital de clientes, colaboradores ni del negocio.
+## Problema y oportunidad (día peak)
 
-## Objetivo general
+En días de mayor demanda se atienden ~130 clientes y **26 se van sin atención (16,7%)**: ~4.326 clientes y **$51.484.160** perdidos al año, valorizados solo con el precio del corte ($11.900), ya que no se sabe qué servicio habría tomado cada cliente. Rango de sensibilidad: $36,0 M (Barba, $8.330) a $103,0 M (S. Completo, $23.800). Supuestos por validar en el Plan de Costos.
 
-Diseñar e implementar una plataforma web y app móvil que reemplace la atención por orden de llegada y el registro manual en Excel, con perfiles diferenciados para clientes, colaboradores y administradores.
+## Servicios y precios
 
-## Objetivos específicos
-
-- Permitir a cada cliente crear su perfil y agendar su servicio habitual o solicitar uno nuevo.
-- Implementar el abono de un porcentaje del servicio para asegurar la asistencia y el cupo reservado.
-- Habilitar el ingreso como invitado, con un pop-up promocional que incentive el registro.
-- Incorporar perfiles para colaboradores y administradores, reemplazando el registro manual en Excel.
-
-## Perfiles de usuario
-
-| Perfil | Funciones principales |
+| Servicio | Precio |
 | --- | --- |
-| **Cliente** | Crea su perfil, agenda servicios habituales o nuevos, abona su reserva y revisa su historial. |
-| **Colaborador** | Registra digitalmente los servicios que realiza (detalle y monto), reemplazando el Excel manual. |
-| **Administrador** | Supervisa la agenda general, el desempeño de los colaboradores y los reportes del negocio. |
+| Corte | $11.900 |
+| Corte + Cejas | $15.470 |
+| Corte + Barba | $20.230 |
+| S. Completo | $23.800 |
+| Corte + Cejas + Lavado | $17.850 |
+| Barba | $8.330 |
+| Lavado (complemento) | $3.570 |
+| Cejas (complemento) | $3.570 |
+| Mascarillas Faciales (complemento) | $2.380 |
 
-## Arquitectura (módulos del sistema)
+## Producto
 
-- **Mantenedor:** administración de perfiles (clientes, colaboradores, administradores), servicios y horarios.
-- **Negocio (Transacciones):** agendamiento, cálculo y registro de abonos, confirmación de citas.
-- **Gestión:** toma de decisiones, control operativo y reportes de desempeño.
+- Perfil de cliente, agendamiento del servicio habitual o nuevo e ingreso como invitado (pop-up promocional).
+- **Abono de reserva de $3.000** fijo y parametrizable (por sucursal o servicio); se descuenta del servicio. Reagendar con ≥ 24 h (máx. 2 veces); anulación < 24 h o no-show pierde el abono.
+- Fila digital por orden de llegada y registro digital de atenciones (reemplazo del Excel).
+- KPIs por sucursal, subtotal Peñaflor y consolidado.
+- **Cumplimiento anticipado de la Ley N° 21.719**: consentimientos, módulo «Mis datos» (acceso, rectificación, supresión, oposición, portabilidad, bloqueo), auditoría, retención y políticas.
+- Arquitectura: web (React) + app Android (Kotlin/MVVM) → API REST → **PostgreSQL** (base de datos relacional).
 
-`Sitio web + App móvil → Base de datos → Datos maestros del cliente`
+## Documentación (raíz de la carpeta del semestre)
+
+| Documento | Descripción |
+| --- | --- |
+| 00 Inventario y Resumen de Cambios | Qué se actualizó el 06-10-2026 y supuestos por validar |
+| 02 a 15 | Planes de gestión (interesados, dirección, requerimientos, alcance, EDT, Gantt, costos, calidad, recursos, cambios, avance, cierre, riesgos) |
+| 16 Diseño de Base de Datos | MER, modelo relacional, diccionario y DDL |
+| 17 Especificación de Casos de Uso | 40 casos de uso |
+| Anexo A | Cumplimiento normativo y gobierno de datos |
+| Acta, Kick-Off, ERS rev. 04, DAS v3.0, RACI | Documentos base del proyecto |
+| Diagramas/ | 34 diagramas (PNG, SVG y código PlantUML) |
+| Base_de_Datos/ | Script `bigboys_ddl.sql` validado |
 
 ## Estructura del repositorio
 
 ```
-├── Fase 1/
-│   ├── Evidencias Individuales/   # Autoevaluaciones y diario de reflexión por alumno
-│   └── Evidencias Grupales/       # Presentación, formativa y guía de definición del proyecto
+├── Fase 1/ (Evidencias individuales y grupales)
 ├── Fase 2/
-│   ├── Evidencias Individuales/   # Diario de reflexión por alumno
-│   ├── Evidencias Grupales/       # Guías de desarrollo e informe final
-│   └── Evidencias Proyecto/       # Presentación, documentación y evidencias del sistema (app + BD)
-└── Fase 3/
-    ├── Evidencias Individuales/   # Diario de reflexión por alumno
-    └── Evidencias Grupales/       # Presentación final del proyecto
+│   ├── Evidencias Grupales/      # Guías 2.4 y 2.6 (pendientes)
+│   ├── Evidencias Individuales/  # Diarios de reflexión (pendientes)
+│   ├── Evidencias Proyecto/
+│   │   ├── Avance_Proyecto_Barberia.pptx
+│   │   ├── Evidencias de documentación/  # Documentos del proyecto
+│   │   └── Evidencias de sistema/
+│   │       ├── Aplicación/               # Código (pendiente de subir sin secretos)
+│   │       └── Base de datos/            # Script DDL y diagramas de BD
+│   └── Seguimiento semanal/
+└── Fase 3/ (Presentación final y diarios, pendientes)
 ```
 
-> Las planillas de evaluación marcadas como "Enviada por correo" no se incluyen en el repositorio.
+## Estado del proyecto (06-10-2026, semana 8 de 13)
 
-## Estado del proyecto
-
-Avance general: **30%** — Meta próxima etapa: **70%**
-
-## Temas abiertos
-
-- Definir la pasarela de pago a integrar para el abono.
-- Establecer la política de reembolso ante cancelaciones.
-- Fijar el porcentaje estándar de abono por servicio.
+- Documentación de diseño completa (4+1, modelo relacional, cumplimiento Ley N° 21.719, KPIs y costos).
+- Prototipos web y app funcionales; el código está en pausa y se retoma el 13-10-2026 con la migración a PostgreSQL.
+- Temas abiertos: validar supuestos con el/la dueño/a, nombre del patrocinador y aprobación formal de los cambios SC-02, SC-03, SC-05 y SC-06.

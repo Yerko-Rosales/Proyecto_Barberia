@@ -1,0 +1,395 @@
+@startuml DIAG-28_Modelo_relacional_logico_de_la_base_de_datos
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam titleFontSize 16
+skinparam titleFontStyle bold
+skinparam titleFontColor #1F3864
+skinparam ArrowColor #1F3864
+skinparam BorderColor #1F3864
+skinparam BackgroundColor #FFFFFF
+skinparam class {
+  BackgroundColor #F3F6FB
+  HeaderBackgroundColor #DCE6F2
+  BorderColor #1F3864
+}
+skinparam usecase {
+  BackgroundColor #F3F6FB
+  BorderColor #1F3864
+}
+skinparam actorBorderColor #1F3864
+skinparam packageBorderColor #1F3864
+skinparam componentBackgroundColor #F3F6FB
+skinparam nodeBackgroundColor #F7F7F7
+skinparam databaseBackgroundColor #FFF4D6
+skinparam activityBackgroundColor #F3F6FB
+skinparam activityBorderColor #1F3864
+skinparam stateBackgroundColor #F3F6FB
+skinparam stateBorderColor #1F3864
+skinparam sequenceParticipantBackgroundColor #F3F6FB
+skinparam sequenceLifeLineBorderColor #8899AA
+skinparam noteBackgroundColor #FFF9E6
+skinparam noteBorderColor #C9A227
+
+title DIAG-28 — Modelo relacional (lógico) de la base de datos
+hide circle
+skinparam linetype ortho
+skinparam classFontSize 11
+skinparam defaultFontSize 10
+left to right direction
+entity "sucursal" as sucursal {
+  * <b>id_sucursal</b> : SMALLSERIAL <<PK>>
+  --
+  * codigo : VARCHAR(10) <<UQ>>
+  * nombre : VARCHAR(80) <<UQ>>
+  * direccion : VARCHAR(150)
+  * comuna : VARCHAR(60)
+    telefono : VARCHAR(20)
+  * es_casa_matriz : BOOLEAN
+  * activa : BOOLEAN
+  * creado_en : TIMESTAMPTZ
+}
+entity "rol" as rol {
+  * <b>id_rol</b> : SMALLINT <<PK>>
+  --
+  * codigo : VARCHAR(20) <<UQ>>
+  * descripcion : VARCHAR(120)
+}
+entity "usuario" as usuario {
+  * <b>id_usuario</b> : BIGSERIAL <<PK>>
+  --
+  * email : VARCHAR(120) <<UQ>>
+  * password_hash : VARCHAR(255)
+  * nombre : VARCHAR(80)
+    apellido : VARCHAR(80)
+    telefono : VARCHAR(20)
+  * estado : VARCHAR(15)
+  * intentos_fallidos : SMALLINT
+  * debe_cambiar_clave : BOOLEAN
+    creado_por : BIGINT <<FK>>
+    ultimo_acceso : TIMESTAMPTZ
+  * creado_en : TIMESTAMPTZ
+    actualizado_en : TIMESTAMPTZ
+    suprimido_en : TIMESTAMPTZ
+}
+entity "usuario_rol" as usuario_rol {
+  * <b>id_usuario_rol</b> : BIGSERIAL <<PK>>
+  --
+  * id_usuario : BIGINT <<FK>>
+  * id_rol : SMALLINT <<FK>>
+    id_sucursal : SMALLINT <<FK>>
+  * creado_en : TIMESTAMPTZ
+}
+entity "cliente" as cliente {
+  * <b>id_cliente</b> : BIGSERIAL <<PK>>
+  --
+    id_usuario : BIGINT <<FK, UQ>>
+  * es_invitado : BOOLEAN
+  * nombre_contacto : VARCHAR(80)
+    telefono_contacto : VARCHAR(20)
+    email_contacto : VARCHAR(120)
+  * puntos : INTEGER
+    ultima_actividad : TIMESTAMPTZ
+  * creado_en : TIMESTAMPTZ
+}
+entity "barbero" as barbero {
+  * <b>id_barbero</b> : SERIAL <<PK>>
+  --
+  * id_usuario : BIGINT <<FK, UQ>>
+  * id_sucursal : SMALLINT <<FK>>
+  * nombre_publico : VARCHAR(80)
+    especialidad : VARCHAR(80)
+  * activo : BOOLEAN
+  * creado_en : TIMESTAMPTZ
+}
+entity "servicio" as servicio {
+  * <b>id_servicio</b> : SERIAL <<PK>>
+  --
+  * nombre : VARCHAR(80) <<UQ>>
+  * categoria : VARCHAR(30)
+  * reservable_individual : BOOLEAN
+  * duracion_min : SMALLINT
+  * precio_base : NUMERIC(10,0)
+  * activo : BOOLEAN
+}
+entity "servicio_sucursal" as servicio_sucursal {
+  * <b>id_servicio</b> : INTEGER <<PK, FK>>
+  * <b>id_sucursal</b> : SMALLINT <<PK, FK>>
+  --
+    precio : NUMERIC(10,0)
+  * activo : BOOLEAN
+}
+entity "horario_barbero" as horario_barbero {
+  * <b>id_horario</b> : SERIAL <<PK>>
+  --
+  * id_barbero : INTEGER <<FK>>
+  * dia_semana : SMALLINT
+  * hora_inicio : TIME
+  * hora_fin : TIME
+}
+entity "bloqueo_horario" as bloqueo_horario {
+  * <b>id_bloqueo</b> : BIGSERIAL <<PK>>
+  --
+  * id_barbero : INTEGER <<FK>>
+  * inicio : TIMESTAMPTZ
+  * fin : TIMESTAMPTZ
+    motivo : VARCHAR(120)
+  * creado_por : BIGINT <<FK>>
+}
+entity "configuracion" as configuracion {
+  * <b>id_config</b> : SERIAL <<PK>>
+  --
+  * clave : VARCHAR(60)
+  * ambito : VARCHAR(10)
+    id_sucursal : SMALLINT <<FK>>
+    id_servicio : INTEGER <<FK>>
+  * tipo_valor : VARCHAR(10)
+  * valor : VARCHAR(60)
+  * vigente_desde : TIMESTAMPTZ
+    vigente_hasta : TIMESTAMPTZ
+    modificado_por : BIGINT <<FK>>
+}
+entity "reserva" as reserva {
+  * <b>id_reserva</b> : BIGSERIAL <<PK>>
+  --
+  * codigo : VARCHAR(12) <<UQ>>
+  * id_cliente : BIGINT <<FK>>
+  * id_sucursal : SMALLINT <<FK>>
+  * id_barbero : INTEGER <<FK>>
+  * id_servicio : INTEGER <<FK>>
+  * inicio : TIMESTAMPTZ
+  * fin : TIMESTAMPTZ
+  * estado : VARCHAR(15)
+  * monto_abono : NUMERIC(10,0)
+  * cantidad_reagendamientos : SMALLINT
+  * canal : VARCHAR(5)
+    expira_en : TIMESTAMPTZ
+    cancelada_en : TIMESTAMPTZ
+    motivo_cancelacion : VARCHAR(120)
+  * creado_en : TIMESTAMPTZ
+    actualizado_en : TIMESTAMPTZ
+}
+entity "reagendamiento" as reagendamiento {
+  * <b>id_reagendamiento</b> : BIGSERIAL <<PK>>
+  --
+  * id_reserva : BIGINT <<FK>>
+  * inicio_anterior : TIMESTAMPTZ
+  * inicio_nuevo : TIMESTAMPTZ
+  * horas_anticipacion : NUMERIC(6,1)
+  * creado_en : TIMESTAMPTZ
+}
+entity "pago" as pago {
+  * <b>id_pago</b> : BIGSERIAL <<PK>>
+  --
+  * id_reserva : BIGINT <<FK>>
+  * proveedor : VARCHAR(15)
+  * id_transaccion : VARCHAR(100) <<UQ>>
+    codigo_autorizacion : VARCHAR(20)
+    tipo_medio : VARCHAR(10)
+  * monto : NUMERIC(10,0)
+  * estado : VARCHAR(12)
+  * creado_en : TIMESTAMPTZ
+    actualizado_en : TIMESTAMPTZ
+}
+entity "turno_fila" as turno_fila {
+  * <b>id_turno</b> : BIGSERIAL <<PK>>
+  --
+  * id_sucursal : SMALLINT <<FK>>
+  * fecha : DATE
+  * numero : SMALLINT
+    nombre_llamado : VARCHAR(40)
+    id_cliente : BIGINT <<FK>>
+    id_servicio : INTEGER <<FK>>
+    id_barbero_preferido : INTEGER <<FK>>
+  * estado : VARCHAR(12)
+  * hora_llegada : TIMESTAMPTZ
+    hora_llamado : TIMESTAMPTZ
+    hora_termino : TIMESTAMPTZ
+}
+entity "atencion" as atencion {
+  * <b>id_atencion</b> : BIGSERIAL <<PK>>
+  --
+    id_reserva : BIGINT <<FK, UQ>>
+    id_turno : BIGINT <<FK, UQ>>
+    id_cliente : BIGINT <<FK>>
+  * id_sucursal : SMALLINT <<FK>>
+  * id_barbero : INTEGER <<FK>>
+  * id_servicio : INTEGER <<FK>>
+  * inicio : TIMESTAMPTZ
+    fin : TIMESTAMPTZ
+  * monto_cobrado : NUMERIC(10,0)
+  * abono_aplicado : NUMERIC(10,0)
+  * propina : NUMERIC(10,0)
+    medio_pago_local : VARCHAR(15)
+  * registrada_por : BIGINT <<FK>>
+  * creado_en : TIMESTAMPTZ
+}
+entity "promocion" as promocion {
+  * <b>id_promocion</b> : SERIAL <<PK>>
+  --
+    codigo : VARCHAR(20) <<UQ>>
+  * nombre : VARCHAR(80)
+  * tipo : VARCHAR(12)
+  * tipo_descuento : VARCHAR(10)
+  * valor : NUMERIC(10,2)
+    id_sucursal : SMALLINT <<FK>>
+  * vigente_desde : DATE
+    vigente_hasta : DATE
+    cupos : INTEGER
+  * activa : BOOLEAN
+}
+entity "cupon_cliente" as cupon_cliente {
+  * <b>id_cupon</b> : BIGSERIAL <<PK>>
+  --
+  * id_promocion : INTEGER <<FK>>
+  * id_cliente : BIGINT <<FK>>
+    pin : CHAR(4)
+  * estado : VARCHAR(10)
+    id_atencion : BIGINT <<FK>>
+  * asignado_en : TIMESTAMPTZ
+    canjeado_en : TIMESTAMPTZ
+}
+entity "movimiento_puntos" as movimiento_puntos {
+  * <b>id_movimiento</b> : BIGSERIAL <<PK>>
+  --
+  * id_cliente : BIGINT <<FK>>
+    id_atencion : BIGINT <<FK>>
+  * tipo : VARCHAR(8)
+  * puntos : INTEGER
+  * creado_en : TIMESTAMPTZ
+}
+entity "notificacion" as notificacion {
+  * <b>id_notificacion</b> : BIGSERIAL <<PK>>
+  --
+    id_cliente : BIGINT <<FK>>
+    id_usuario : BIGINT <<FK>>
+    id_reserva : BIGINT <<FK>>
+  * canal : VARCHAR(6)
+  * tipo : VARCHAR(15)
+  * asunto : VARCHAR(150)
+  * estado : VARCHAR(10)
+    programada_para : TIMESTAMPTZ
+    enviada_en : TIMESTAMPTZ
+}
+entity "politica" as politica {
+  * <b>id_politica</b> : SERIAL <<PK>>
+  --
+  * tipo : VARCHAR(10)
+  * version : VARCHAR(10)
+  * publicada_en : DATE
+  * url : VARCHAR(200)
+  * hash_sha256 : CHAR(64)
+  * vigente : BOOLEAN
+}
+entity "consentimiento" as consentimiento {
+  * <b>id_consentimiento</b> : BIGSERIAL <<PK>>
+  --
+  * id_cliente : BIGINT <<FK>>
+  * id_politica : INTEGER <<FK>>
+  * finalidad : VARCHAR(12)
+  * otorgado : BOOLEAN
+  * canal : VARCHAR(5)
+  * registrado_en : TIMESTAMPTZ
+    revocado_en : TIMESTAMPTZ
+}
+entity "solicitud_derecho" as solicitud_derecho {
+  * <b>id_solicitud</b> : BIGSERIAL <<PK>>
+  --
+  * codigo : VARCHAR(14) <<UQ>>
+  * id_cliente : BIGINT <<FK>>
+  * tipo : VARCHAR(14)
+  * estado : VARCHAR(15)
+    detalle : VARCHAR(500)
+  * fecha_ingreso : TIMESTAMPTZ
+  * fecha_limite : DATE
+    prorrogada_hasta : DATE
+    fecha_respuesta : TIMESTAMPTZ
+    respuesta : VARCHAR(1000)
+    atendida_por : BIGINT <<FK>>
+}
+entity "registro_auditoria" as registro_auditoria {
+  * <b>id_log</b> : BIGSERIAL <<PK>>
+  --
+  * ocurrido_en : TIMESTAMPTZ
+    id_usuario : BIGINT <<FK>>
+    rol : VARCHAR(20)
+  * accion : VARCHAR(25)
+  * entidad : VARCHAR(40)
+    id_entidad : VARCHAR(40)
+    detalle : JSONB
+    ip_origen : INET
+}
+entity "incidente_seguridad" as incidente_seguridad {
+  * <b>id_incidente</b> : SERIAL <<PK>>
+  --
+  * detectado_en : TIMESTAMPTZ
+  * descripcion : VARCHAR(1000)
+    categorias_datos : VARCHAR(200)
+    titulares_afectados : INTEGER
+  * nivel_riesgo : VARCHAR(6)
+    notificado_agencia_en : TIMESTAMPTZ
+    notificado_titulares_en : TIMESTAMPTZ
+  * estado : VARCHAR(10)
+}
+entity "actividad_tratamiento" as actividad_tratamiento {
+  * <b>id_actividad</b> : SERIAL <<PK>>
+  --
+  * nombre : VARCHAR(80) <<UQ>>
+  * finalidad : VARCHAR(300)
+  * base_licitud : VARCHAR(30)
+  * categorias_datos : VARCHAR(300)
+    destinatarios : VARCHAR(300)
+    transferencia_internacional : VARCHAR(200)
+  * plazo_conservacion : VARCHAR(150)
+  * medidas_seguridad : VARCHAR(300)
+}
+usuario |o--o{ usuario
+usuario ||--o{ usuario_rol
+rol ||--o{ usuario_rol
+sucursal |o--o{ usuario_rol
+usuario |o--o{ cliente
+usuario ||--o{ barbero
+sucursal ||--o{ barbero
+servicio ||--o{ servicio_sucursal
+sucursal ||--o{ servicio_sucursal
+barbero ||--o{ horario_barbero
+barbero ||--o{ bloqueo_horario
+usuario ||--o{ bloqueo_horario
+sucursal |o--o{ configuracion
+servicio |o--o{ configuracion
+usuario |o--o{ configuracion
+cliente ||--o{ reserva
+sucursal ||--o{ reserva
+barbero ||--o{ reserva
+servicio ||--o{ reserva
+reserva ||--o{ reagendamiento
+reserva ||--o{ pago
+sucursal ||--o{ turno_fila
+cliente |o--o{ turno_fila
+servicio |o--o{ turno_fila
+barbero |o--o{ turno_fila
+reserva |o--o{ atencion
+turno_fila |o--o{ atencion
+cliente |o--o{ atencion
+sucursal ||--o{ atencion
+barbero ||--o{ atencion
+servicio ||--o{ atencion
+usuario ||--o{ atencion
+sucursal |o--o{ promocion
+promocion ||--o{ cupon_cliente
+cliente ||--o{ cupon_cliente
+atencion |o--o{ cupon_cliente
+cliente ||--o{ movimiento_puntos
+atencion |o--o{ movimiento_puntos
+cliente |o--o{ notificacion
+usuario |o--o{ notificacion
+reserva |o--o{ notificacion
+cliente ||--o{ consentimiento
+politica ||--o{ consentimiento
+cliente ||--o{ solicitud_derecho
+usuario |o--o{ solicitud_derecho
+usuario |o--o{ registro_auditoria
+
+footer Proyecto Barbería Big-Boys · DIAG-28 — Modelo relacional (lógico) de la base de datos
+@enduml
