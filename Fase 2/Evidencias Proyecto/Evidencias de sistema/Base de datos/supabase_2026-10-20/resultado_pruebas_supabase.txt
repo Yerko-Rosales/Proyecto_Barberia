@@ -1,0 +1,35 @@
+Proyecto Barbería Big-Boys — Validación en Supabase (proyecto «Big Boys Project», PostgreSQL 17, región us-west-2)
+Fecha: 20-10-2026. Migraciones aplicadas: respaldo_modelo_20261020, esquema_relacional_v1_1.
+Las pruebas se ejecutaron dentro de una transacción que se deshizo al final (no quedaron datos de prueba).
+
+OK | Migración del esquema aplicada sin errores (26 tablas, 3 triggers, 3 vistas, RLS activo en las 26)
+OK | Reserva válida
+OK | Doble reserva traslapada rechazada -> conflicting key value violates exclusion constraint "reserva_id_barbero_tstzrange_excl"
+OK | Reserva en horario cancelado se permite
+OK | Más de 2 reagendamientos rechazado -> check constraint "reserva_cantidad_reagendamientos_check"
+OK | Reagendamiento con menos de 24 h rechazado -> check constraint "reagendamiento_horas_anticipacion_check"
+OK | Invitado sin usuario permitido
+OK | Cliente no invitado sin usuario rechazado -> check constraint "cliente_check"
+OK | Pago sin datos de tarjeta
+OK | Atención sin reserva ni turno rechazada -> check constraint "atencion_check"
+OK | Turno por orden de llegada y atención
+OK | Atención sin cajero rechazada -> null value in column "registrada_por"
+OK | Solicitud de derecho con plazo de 30 días
+OK | Auditoría solo inserción (UPDATE rechazado) -> registro_auditoria es de solo inserción
+OK | Abono por porcentaje en una sucursal
+OK | Primer Dueño del sistema se asigna
+OK | Dueño crea cajero/a con clave temporal
+OK | Colaborador autorregistrado rechazado -> Solo el Dueño puede crear perfiles de colaboradores (rol BARBERO)
+OK | Perfil creado por no-Dueño rechazado -> Solo el Dueño puede crear perfiles de colaboradores (rol BARBERO)
+OK | Cliente se autorregistra con rol CLIENTE
+OK | Servicio de más de 60 min rechazado -> check constraint "servicio_duracion_min_check"
+OK | Configuración GLOBAL con sucursal rechazada -> check constraint "configuracion_check"
+INFO | Resultado: 22 / 22 OK (21 reglas + ejecución del esquema)
+INFO | Plazo de derechos calculado: 30 días
+INFO | Vista del barbero: 1 atención, total $11.900
+INFO | Abono vigente: SUC-01 y SUC-02 MONTO 3000; SUC-03 PORCENTAJE 20 (solo dentro de la prueba)
+INFO | Datos cargados: 3 sucursales, 9 servicios (3 complementos no agendables), 27 servicio_sucursal, 7 parámetros, 2 políticas, 5 actividades de tratamiento
+INFO | Acceso de la API pública (anon/authenticated) a las 26 tablas y 3 vistas: ninguno
+INFO | Avisos de seguridad de Supabase: solo «RLS Enabled No Policy» (INFO), esperado hasta definir las políticas por rol
+INFO | Tablas del prototipo (locations, barbers, users, appointments, coupons, reviews, mail): sin cambios
+INFO | Respaldo de los datos previos: esquema respaldo_20261020 (26 tablas, 53 filas)

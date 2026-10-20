@@ -1,6 +1,6 @@
 -- =====================================================================
 -- Proyecto Barbería Big-Boys — Script DDL de referencia (PostgreSQL 15+)
--- Modelo relacional v1.0 — 06-10-2026
+-- Modelo relacional v1.1 — 08-10-2026 (RAT actualizado el 20-10-2026: alojamiento en Supabase, EE. UU.)
 -- Generado desde la definición única del modelo (diccionario de datos).
 -- No almacena datos de tarjetas: el pago se delega a la pasarela (solo ID y estado).
 -- =====================================================================
@@ -473,8 +473,8 @@ INSERT INTO politica (tipo, version, publicada_en, url, hash_sha256, vigente) VA
   ('TERMINOS', '1.0', DATE '2026-11-13', 'https://[dominio-por-definir]/terminos', repeat('0', 64), true);
 
 INSERT INTO actividad_tratamiento (nombre, finalidad, base_licitud, categorias_datos, destinatarios, transferencia_internacional, plazo_conservacion, medidas_seguridad) VALUES
-  ('Gestión de cuentas y reservas', 'Crear la cuenta, agendar, confirmar y recordar citas', 'CONTRATO', 'Nombre, correo, teléfono, historial de reservas', 'Proveedor de hosting; proveedor de correo transaccional', 'No (datos alojados en Chile)', 'Mientras la cuenta esté activa; anonimización a los 24 meses de inactividad o al ejercer supresión', 'TLS, cifrado en reposo, RBAC, auditoría, respaldos'),
-  ('Cobro de abono de reserva', 'Garantizar la asistencia mediante abono de $3.000', 'CONTRATO', 'ID de transacción, monto, estado (sin datos de tarjeta)', 'Transbank / Mercado Pago (encargados)', 'No', '6 años (respaldo contable/tributario); el vínculo con el titular se anonimiza al suprimir la cuenta', 'Pago delegado a pasarela certificada PCI DSS'),
-  ('Comunicaciones promocionales', 'Enviar ofertas y beneficios', 'CONSENTIMIENTO', 'Nombre, correo, teléfono', 'Proveedor de correo', 'No', 'Hasta revocación del consentimiento', 'Consentimiento separado y revocable'),
-  ('Atención por orden de llegada', 'Gestionar la fila y medir abandono', 'INTERES_LEGITIMO', 'Nombre de pila (opcional)', 'Ninguno', 'No', '24 horas para el nombre; estadística anónima 6 años', 'Minimización'),
-  ('Ejercicio de derechos del titular', 'Atender solicitudes ARCO-P y bloqueo', 'OBLIGACION_LEGAL', 'Identificación y detalle de la solicitud', 'Ninguno', 'No', '5 años desde el cierre de la solicitud', 'Trazabilidad completa y plazos automáticos');
+  ('Gestión de cuentas y reservas', 'Crear la cuenta, agendar, confirmar y recordar citas', 'CONTRATO', 'Nombre, correo, teléfono, historial de reservas', 'Proveedor de hosting; proveedor de correo transaccional', 'Sí: EE. UU. (base de datos en Supabase, región us-west-2, Oregón; garantías contractuales del proveedor)', 'Mientras la cuenta esté activa; anonimización a los 24 meses de inactividad o al ejercer supresión', 'TLS, cifrado en reposo, RBAC, auditoría, respaldos'),
+  ('Cobro de abono de reserva', 'Garantizar la asistencia mediante abono de $3.000', 'CONTRATO', 'ID de transacción, monto, estado (sin datos de tarjeta)', 'Transbank / Mercado Pago (encargados)', 'Sí: EE. UU. (base de datos en Supabase, región us-west-2, Oregón; garantías contractuales del proveedor)', '6 años (respaldo contable/tributario); el vínculo con el titular se anonimiza al suprimir la cuenta', 'Pago delegado a pasarela certificada PCI DSS'),
+  ('Comunicaciones promocionales', 'Enviar ofertas y beneficios', 'CONSENTIMIENTO', 'Nombre, correo, teléfono', 'Proveedor de correo', 'Sí: EE. UU. (base de datos en Supabase, región us-west-2, Oregón; garantías contractuales del proveedor)', 'Hasta revocación del consentimiento', 'Consentimiento separado y revocable'),
+  ('Atención por orden de llegada', 'Gestionar la fila y medir abandono', 'INTERES_LEGITIMO', 'Nombre de pila (opcional)', 'Ninguno', 'Sí: EE. UU. (base de datos en Supabase, región us-west-2, Oregón; garantías contractuales del proveedor)', '24 horas para el nombre; estadística anónima 6 años', 'Minimización'),
+  ('Ejercicio de derechos del titular', 'Atender solicitudes ARCO-P y bloqueo', 'OBLIGACION_LEGAL', 'Identificación y detalle de la solicitud', 'Ninguno', 'Sí: EE. UU. (base de datos en Supabase, región us-west-2, Oregón; garantías contractuales del proveedor)', '5 años desde el cierre de la solicitud', 'Trazabilidad completa y plazos automáticos');
