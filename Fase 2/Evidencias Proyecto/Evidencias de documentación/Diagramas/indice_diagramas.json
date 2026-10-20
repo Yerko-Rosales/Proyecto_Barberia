@@ -1,0 +1,177 @@
+{
+ "DIAG-01": [
+  "Vista lógica: capas y paquetes del sistema",
+  "Organización lógica en capas: presentación (web y app), servicios de aplicación expuestos por la API, dominio y persistencia. Cada paquete agrupa las clases de un módulo funcional de la ERS.",
+  "DIAG-01_Vista_logica_capas_y_paquetes_del_sistema"
+ ],
+ "DIAG-02": [
+  "Vista lógica: modelo de clases del dominio",
+  "Clases del dominio con atributos, métodos, relaciones y multiplicidades. La clase Configuracion parametriza el abono (monto o porcentaje) por sucursal o servicio; Consentimiento y SolicitudDerecho implementan la Ley N° 21.719.",
+  "DIAG-02_Vista_logica_modelo_de_clases_del_dominio"
+ ],
+ "DIAG-03": [
+  "Vista de procesos: secuencia de reserva con abono",
+  "Flujo crítico de agendamiento: la reserva se crea en estado PENDIENTE_PAGO, la base de datos impide traslapes, la pasarela autoriza el abono de $3.000 y recién entonces la cita queda CONFIRMADA y se notifica.",
+  "DIAG-03_Vista_de_procesos_secuencia_de_reserva_con_abono"
+ ],
+ "DIAG-04": [
+  "Vista de procesos: secuencia de atención por orden de llegada",
+  "La plataforma complementa la atención presencial. El administrador de sucursal (cajero/a) registra el turno, lo llama, confirma el servicio que se prestará, inicia la atención y registra el término y el monto, reemplazando el Excel. El barbero solo presta el servicio. Si el cliente se retira, se registra el abandono, que alimenta el KPI de clientes perdidos.",
+  "DIAG-04_Vista_de_procesos_secuencia_de_atencion_por_orden_de_llegada"
+ ],
+ "DIAG-05": [
+  "Vista de procesos: secuencia de cancelación, reprogramación y no-show",
+  "Aplicación automática de las reglas del abono: con 24 horas o más se puede reprogramar (máximo 2 veces con el mismo abono) o cancelar dejando saldo a favor; con menos de 24 horas o inasistencia el abono se pierde. El no-show y la cancelación por el local los registra el administrador de sucursal (cajero/a).",
+  "DIAG-05_Vista_de_procesos_secuencia_de_cancelacion_reprogramacion_y_no_show"
+ ],
+ "DIAG-06": [
+  "Vista de procesos: secuencia de solicitud de derechos del titular",
+  "Ejercicio de derechos desde el módulo «Mis datos»: la solicitud recibe folio y fecha límite de 30 días corridos; el responsable de cumplimiento la resuelve y todo queda trazado en la auditoría.",
+  "DIAG-06_Vista_de_procesos_secuencia_de_solicitud_de_derechos_del_titular"
+ ],
+ "DIAG-07": [
+  "Diagrama de actividades: proceso de reserva con abono",
+  "Proceso completo desde la selección del servicio hasta la confirmación, incluyendo expiración del cupo a los 15 minutos si el abono no se autoriza.",
+  "DIAG-07_Diagrama_de_actividades_proceso_de_reserva_con_abono"
+ ],
+ "DIAG-08": [
+  "Diagrama de actividades: atención presencial",
+  "Atención en el local con carriles por responsable. El administrador de sucursal (cajero/a) confirma el servicio, inicia y registra la atención; el barbero solo presta el servicio. Ambos caminos (reserva y orden de llegada) terminan en el registro digital que reemplaza la planilla Excel.",
+  "DIAG-08_Diagrama_de_actividades_atencion_presencial"
+ ],
+ "DIAG-09": [
+  "Diagrama de actividades: cancelación y devolución",
+  "Reglas de tratamiento del abono ante cancelación: saldo a favor con 24 horas o más, pérdida con menos de 24 horas y devolución total si cancela el local.",
+  "DIAG-09_Diagrama_de_actividades_cancelacion_y_devolucion"
+ ],
+ "DIAG-10": [
+  "Diagrama de actividades: flujo del invitado",
+  "El invitado puede reservar sin cuenta; el pop-up promocional incentiva el registro y el consentimiento promocional es opcional y desmarcado por defecto.",
+  "DIAG-10_Diagrama_de_actividades_flujo_del_invitado"
+ ],
+ "DIAG-11": [
+  "Diagrama de actividades: solicitud de eliminación de datos (supresión)",
+  "Ejercicio del derecho de supresión: se verifica la identidad, se resuelven citas pendientes, se anonimizan los datos personales y se conservan solo los registros exigidos por ley sin vínculo identificable.",
+  "DIAG-11_Diagrama_de_actividades_solicitud_de_eliminacion_de_datos_supresion"
+ ],
+ "DIAG-12": [
+  "Vista de desarrollo: componentes y módulos",
+  "Componentes de software y sus interfaces: frontend web, app móvil, API backend con sus módulos (incluido el módulo de privacidad «Mis datos»), base de datos y servicios externos de pago y notificaciones.",
+  "DIAG-12_Vista_de_desarrollo_componentes_y_modulos"
+ ],
+ "DIAG-13": [
+  "Vista física: despliegue actual (3 sucursales)",
+  "Arquitectura de puesta en marcha: un servidor virtual en Santiago de Chile aloja la API y PostgreSQL en contenedores, con respaldos diarios cifrados. Las tres sucursales y los clientes acceden por HTTPS.",
+  "DIAG-13_Vista_fisica_despliegue_actual_3_sucursales"
+ ],
+ "DIAG-14": [
+  "Vista física: despliegue futuro escalado en cloud",
+  "Arquitectura objetivo para crecimiento: servicios administrados en una región ubicada en Chile (Azure Chile Central o Google Cloud Santiago), balanceo de carga, réplica de base de datos en alta disponibilidad y almacenamiento de respaldos, evitando la transferencia internacional de datos personales.",
+  "DIAG-14_Vista_fisica_despliegue_futuro_escalado_en_cloud"
+ ],
+ "DIAG-15": [
+  "Vista de escenarios: diagrama general de casos de uso",
+  "Visión completa de los 40 casos de uso agrupados en siete módulos y su relación con los siete actores (cada flecha indica que el actor participa en casos de ese módulo). El Dueño hereda los casos del Administrador de sucursal. El detalle de cada relación actor–caso se muestra en los diagramas por módulo.",
+  "DIAG-15_Vista_de_escenarios_diagrama_general_de_casos_de_uso"
+ ],
+ "DIAG-16": [
+  "Casos de uso: cuenta y acceso",
+  "Casos de uso del módulo Cuenta, con sus actores y relaciones de inclusión o generalización. La especificación textual de cada caso se encuentra en el documento de Especificación de Casos de Uso.",
+  "DIAG-16_Casos_de_uso_cuenta_y_acceso"
+ ],
+ "DIAG-17": [
+  "Casos de uso: privacidad y derechos del titular («Mis datos»)",
+  "Casos de uso del módulo Privacidad, con sus actores y relaciones de inclusión o generalización. La especificación textual de cada caso se encuentra en el documento de Especificación de Casos de Uso.",
+  "DIAG-17_Casos_de_uso_privacidad_y_derechos_del_titular_Mis_datos"
+ ],
+ "DIAG-18": [
+  "Casos de uso: catálogo, agendamiento y pagos",
+  "Casos de uso del módulo Agendamiento, con sus actores y relaciones de inclusión o generalización. La especificación textual de cada caso se encuentra en el documento de Especificación de Casos de Uso.",
+  "DIAG-18_Casos_de_uso_catalogo_agendamiento_y_pagos"
+ ],
+ "DIAG-19": [
+  "Casos de uso: atención en sucursal y orden de llegada",
+  "Casos de uso del módulo Sucursal, con sus actores y relaciones de inclusión o generalización. La especificación textual de cada caso se encuentra en el documento de Especificación de Casos de Uso.",
+  "DIAG-19_Casos_de_uso_atencion_en_sucursal_y_orden_de_llegada"
+ ],
+ "DIAG-20": [
+  "Casos de uso: administración del negocio",
+  "Casos de uso del módulo Administración, con sus actores y relaciones de inclusión o generalización. La especificación textual de cada caso se encuentra en el documento de Especificación de Casos de Uso.",
+  "DIAG-20_Casos_de_uso_administracion_del_negocio"
+ ],
+ "DIAG-21": [
+  "Casos de uso: cumplimiento y auditoría",
+  "Casos de uso del módulo Cumplimiento, con sus actores y relaciones de inclusión o generalización. La especificación textual de cada caso se encuentra en el documento de Especificación de Casos de Uso.",
+  "DIAG-21_Casos_de_uso_cumplimiento_y_auditoria"
+ ],
+ "DIAG-22": [
+  "Casos de uso: KPIs y reportes",
+  "Casos de uso del módulo Gestión, con sus actores y relaciones de inclusión o generalización. La especificación textual de cada caso se encuentra en el documento de Especificación de Casos de Uso.",
+  "DIAG-22_Casos_de_uso_KPIs_y_reportes"
+ ],
+ "DIAG-23": [
+  "Diagrama de estados: Reserva",
+  "Ciclo de vida de la reserva. Solo una reserva con abono autorizado pasa a CONFIRMADA; la reprogramación mantiene el estado y consume uno de los dos reagendamientos permitidos.",
+  "DIAG-23_Diagrama_de_estados_Reserva"
+ ],
+ "DIAG-24": [
+  "Diagrama de estados: Pago (abono)",
+  "Estados del abono de $3.000. El abono autorizado se aplica al valor del servicio al atender, se retiene ante no-show o cancelación tardía, o se reembolsa si cancela el local.",
+  "DIAG-24_Diagrama_de_estados_Pago_abono"
+ ],
+ "DIAG-25": [
+  "Diagrama de estados: Turno de orden de llegada",
+  "Estados del turno presencial. El estado ABANDONO permite medir con datos reales la tasa de clientes que se van sin atención.",
+  "DIAG-25_Diagrama_de_estados_Turno_de_orden_de_llegada"
+ ],
+ "DIAG-26": [
+  "Diagrama de estados: Solicitud de derechos del titular",
+  "Ciclo de una solicitud de acceso, rectificación, supresión, oposición, portabilidad o bloqueo, con el plazo legal de 30 días corridos y una prórroga única.",
+  "DIAG-26_Diagrama_de_estados_Solicitud_de_derechos_del_titular"
+ ],
+ "DIAG-27": [
+  "Modelo Entidad-Relación conceptual",
+  "Entidades del negocio y sus relaciones con cardinalidad (notación de pata de gallo). Incluye las entidades mínimas solicitadas: Sucursal, Usuario, Cliente, Barbero, Servicio, Horario, Reserva, Pago, Atención, Fila por orden de llegada, Promoción, Configuración, Notificación, Consentimiento, Solicitud de derechos y Registro de auditoría.",
+  "DIAG-27_Modelo_Entidad_Relacion_conceptual"
+ ],
+ "DIAG-28": [
+  "Modelo relacional (lógico) de la base de datos",
+  "Tablas de PostgreSQL con claves primarias (PK), foráneas (FK), unicidad (UQ), tipos de datos y obligatoriedad (*). Se genera desde la misma definición que el script DDL y el diccionario de datos.",
+  "DIAG-28_Modelo_relacional_logico_de_la_base_de_datos"
+ ],
+ "DIAG-29": [
+  "Gobierno de datos: ciclo de vida del dato personal",
+  "Etapas del ciclo de vida (captura, uso, conservación y eliminación) con los controles aplicados en cada una, según el marco DAMA-DMBOK y la Ley N° 21.719.",
+  "DIAG-29_Gobierno_de_datos_ciclo_de_vida_del_dato_personal"
+ ],
+ "DIAG-30": [
+  "Estructura de Desglose del Trabajo (EDT)",
+  "Descomposición jerárquica del proyecto en seis fases de nivel 2 y 25 paquetes de trabajo de nivel 3. El detalle de cada paquete está en el Diccionario de la EDT.",
+  "DIAG-30_Estructura_de_Desglose_del_Trabajo_EDT"
+ ],
+ "DIAG-31": [
+  "Carta Gantt del proyecto",
+  "Programación semanal de los paquetes de trabajo y los ocho hitos. La ruta crítica pasa por el modelo relacional, la API con PostgreSQL, la integración de la pasarela y el módulo «Mis datos», las pruebas, la UAT y la entrega final.",
+  "DIAG-31_Carta_Gantt_del_proyecto"
+ ],
+ "DIAG-32": [
+  "Pantalla: registro con consentimiento informado",
+  "Formulario de registro con datos mínimos (sin RUT), aceptación obligatoria de la Política de Privacidad vigente y consentimiento promocional separado, opcional y desmarcado por defecto.",
+  "DIAG-32_Pantalla_registro_con_consentimiento_informado"
+ ],
+ "DIAG-33": [
+  "Pantalla: pop-up promocional para invitados",
+  "Pop-up que se muestra una vez por sesión al invitado: incentiva crear perfil sin condicionar la reserva; el consentimiento promocional es opcional.",
+  "DIAG-33_Pantalla_pop_up_promocional_para_invitados"
+ ],
+ "DIAG-34": [
+  "Pantalla: módulo «Mis datos» (derechos del titular)",
+  "Módulo disponible en web y app para ejercer los derechos de acceso, rectificación, supresión, oposición, portabilidad y bloqueo, con seguimiento de solicitudes, folio y plazo legal.",
+  "DIAG-34_Pantalla_modulo_Mis_datos_derechos_del_titular"
+ ],
+ "DIAG-35": [
+  "Vista de procesos: secuencia de consulta de atenciones y ganancias del barbero",
+  "El barbero solo consulta información: cuántas atenciones lleva, el monto de cada una y el total acumulado a la hora de la consulta. No puede crear ni modificar atenciones, citas ni turnos, y no ve datos de contacto de los clientes.",
+  "DIAG-35_Vista_de_procesos_secuencia_de_consulta_de_atenciones_y_ganancias_del_barbero"
+ ]
+}

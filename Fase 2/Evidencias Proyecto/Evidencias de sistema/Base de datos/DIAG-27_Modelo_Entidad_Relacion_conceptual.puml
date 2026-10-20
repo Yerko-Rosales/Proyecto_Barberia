@@ -1,0 +1,249 @@
+@startuml DIAG-27_Modelo_Entidad_Relacion_conceptual
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam titleFontSize 16
+skinparam titleFontStyle bold
+skinparam titleFontColor #1F3864
+skinparam ArrowColor #1F3864
+skinparam BorderColor #1F3864
+skinparam BackgroundColor #FFFFFF
+skinparam class {
+  BackgroundColor #F3F6FB
+  HeaderBackgroundColor #DCE6F2
+  BorderColor #1F3864
+}
+skinparam usecase {
+  BackgroundColor #F3F6FB
+  BorderColor #1F3864
+}
+skinparam actorBorderColor #1F3864
+skinparam packageBorderColor #1F3864
+skinparam componentBackgroundColor #F3F6FB
+skinparam nodeBackgroundColor #F7F7F7
+skinparam databaseBackgroundColor #FFF4D6
+skinparam activityBackgroundColor #F3F6FB
+skinparam activityBorderColor #1F3864
+skinparam stateBackgroundColor #F3F6FB
+skinparam stateBorderColor #1F3864
+skinparam sequenceParticipantBackgroundColor #F3F6FB
+skinparam sequenceLifeLineBorderColor #8899AA
+skinparam noteBackgroundColor #FFF9E6
+skinparam noteBorderColor #C9A227
+
+title DIAG-27 — Modelo Entidad-Relación conceptual
+hide circle
+skinparam linetype polyline
+skinparam nodesep 35
+skinparam ranksep 55
+top to bottom direction
+entity "SUCURSAL" as SUCURSAL {
+  <u>id_sucursal</u>
+  --
+  codigo
+  nombre
+  direccion
+}
+entity "ROL" as ROL {
+  <u>id_rol</u>
+  --
+  codigo
+  descripcion
+}
+entity "USUARIO" as USUARIO {
+  <u>id_usuario</u>
+  --
+  email
+  password_hash
+  nombre
+}
+entity "USUARIO_ROL" as USUARIO_ROL {
+  <u>id_usuario_rol</u>
+  --
+}
+entity "CLIENTE" as CLIENTE {
+  <u>id_cliente</u>
+  --
+  es_invitado
+  nombre_contacto
+  telefono_contacto
+}
+entity "BARBERO" as BARBERO {
+  <u>id_barbero</u>
+  --
+  nombre_publico
+  especialidad
+  activo
+}
+entity "SERVICIO" as SERVICIO {
+  <u>id_servicio</u>
+  --
+  nombre
+  categoria
+  reservable_individual
+}
+entity "SERVICIO_SUCURSAL" as SERVICIO_SUCURSAL {
+  <u>id_servicio</u>
+  <u>id_sucursal</u>
+  --
+  precio
+  activo
+}
+entity "HORARIO_BARBERO" as HORARIO_BARBERO {
+  <u>id_horario</u>
+  --
+  dia_semana
+  hora_inicio
+  hora_fin
+}
+entity "BLOQUEO_HORARIO" as BLOQUEO_HORARIO {
+  <u>id_bloqueo</u>
+  --
+  inicio
+  fin
+  motivo
+}
+entity "CONFIGURACION" as CONFIGURACION {
+  <u>id_config</u>
+  --
+  clave
+  ambito
+  tipo_valor
+}
+entity "RESERVA" as RESERVA {
+  <u>id_reserva</u>
+  --
+  codigo
+  inicio
+  fin
+}
+entity "REAGENDAMIENTO" as REAGENDAMIENTO {
+  <u>id_reagendamiento</u>
+  --
+  inicio_anterior
+  inicio_nuevo
+  horas_anticipacion
+}
+entity "PAGO" as PAGO {
+  <u>id_pago</u>
+  --
+  proveedor
+  id_transaccion
+  codigo_autorizacion
+}
+entity "TURNO_FILA" as TURNO_FILA {
+  <u>id_turno</u>
+  --
+  fecha
+  numero
+  nombre_llamado
+}
+entity "ATENCION" as ATENCION {
+  <u>id_atencion</u>
+  --
+  inicio
+  fin
+  monto_cobrado
+}
+entity "PROMOCION" as PROMOCION {
+  <u>id_promocion</u>
+  --
+  codigo
+  nombre
+  tipo
+}
+entity "CUPON_CLIENTE" as CUPON_CLIENTE {
+  <u>id_cupon</u>
+  --
+  pin
+  estado
+  asignado_en
+}
+entity "MOVIMIENTO_PUNTOS" as MOVIMIENTO_PUNTOS {
+  <u>id_movimiento</u>
+  --
+  tipo
+  puntos
+}
+entity "NOTIFICACION" as NOTIFICACION {
+  <u>id_notificacion</u>
+  --
+  canal
+  tipo
+  asunto
+}
+entity "POLITICA" as POLITICA {
+  <u>id_politica</u>
+  --
+  tipo
+  version
+  publicada_en
+}
+entity "CONSENTIMIENTO" as CONSENTIMIENTO {
+  <u>id_consentimiento</u>
+  --
+  finalidad
+  otorgado
+  canal
+}
+entity "SOLICITUD_DERECHO" as SOLICITUD_DERECHO {
+  <u>id_solicitud</u>
+  --
+  codigo
+  tipo
+  estado
+}
+entity "REGISTRO_AUDITORIA" as REGISTRO_AUDITORIA {
+  <u>id_log</u>
+  --
+  ocurrido_en
+  rol
+  accion
+}
+entity "INCIDENTE_SEGURIDAD" as INCIDENTE_SEGURIDAD {
+  <u>id_incidente</u>
+  --
+  detectado_en
+  descripcion
+  categorias_datos
+}
+entity "ACTIVIDAD_TRATAMIENTO" as ACTIVIDAD_TRATAMIENTO {
+  <u>id_actividad</u>
+  --
+  nombre
+  finalidad
+  base_licitud
+}
+SUCURSAL ||--o{ BARBERO : emplea
+SUCURSAL ||--o{ SERVICIO_SUCURSAL : ofrece
+SERVICIO ||--o{ SERVICIO_SUCURSAL : se ofrece en
+USUARIO ||--|{ USUARIO_ROL : tiene
+ROL ||--o{ USUARIO_ROL : asignado
+USUARIO ||--o| CLIENTE : es
+USUARIO ||--o| BARBERO : es
+BARBERO ||--o{ HORARIO_BARBERO : trabaja en
+BARBERO ||--o{ BLOQUEO_HORARIO : bloquea
+CLIENTE ||--o{ RESERVA : agenda
+BARBERO ||--o{ RESERVA : atiende
+SERVICIO ||--o{ RESERVA : reservado en
+SUCURSAL ||--o{ RESERVA : recibe
+RESERVA ||--|{ PAGO : garantizada por
+RESERVA ||--o{ REAGENDAMIENTO : historial
+RESERVA ||--o| ATENCION : se concreta en
+SUCURSAL ||--o{ TURNO_FILA : registra
+TURNO_FILA ||--o| ATENCION : se concreta en
+PROMOCION ||--o{ CUPON_CLIENTE : genera
+CLIENTE ||--o{ CUPON_CLIENTE : recibe
+CLIENTE ||--o{ MOVIMIENTO_PUNTOS : acumula
+CLIENTE ||--o{ NOTIFICACION : recibe
+CLIENTE ||--|{ CONSENTIMIENTO : otorga
+POLITICA ||--o{ CONSENTIMIENTO : versión aceptada
+CLIENTE ||--o{ SOLICITUD_DERECHO : ejerce
+USUARIO |o--o{ REGISTRO_AUDITORIA : genera
+SUCURSAL |o--o{ CONFIGURACION : parametriza
+SERVICIO |o--o{ CONFIGURACION : parametriza
+note "INCIDENTE_SEGURIDAD y ACTIVIDAD_TRATAMIENTO\nson entidades de gobierno de datos\nsin relaciones obligatorias" as N1
+
+footer Proyecto Barbería Big-Boys · DIAG-27 — Modelo Entidad-Relación conceptual
+@enduml
