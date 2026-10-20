@@ -4,7 +4,8 @@ Sistema de gestión y agendamiento para **Barbería Big-Boys** (plataforma web +
 
 **Estudiantes:** Yerko Rosales (Jefe de Proyecto, Analista y UX/UI) · Jonathan Ojeda (Backend y Base de Datos)
 **Asignatura / Docente:** PTY4614 Capstone / Fernando Herrera
-**Período:** 14-08-2026 al 13-11-2026 · Defensa probable: 27-11-2026
+**Período:** 14-08-2026 al 13-11-2026 (semana 1 = 10 al 16-08-2026; entrega final en S14) · Defensa probable: 27-11-2026 (S16)
+**Fases:** F1 14-08 al 04-09 · F2 07-09 al 18-10 · F3 19-10 al 13-11
 
 ---
 
@@ -43,38 +44,41 @@ En días de mayor demanda se atienden ~130 clientes y **26 se van sin atención 
 - **Cumplimiento anticipado de la Ley N° 21.719**: consentimientos, módulo «Mis datos» (acceso, rectificación, supresión, oposición, portabilidad, bloqueo), auditoría, retención y políticas.
 - Arquitectura: web (React) + app Android (Kotlin/MVVM) → API REST → **PostgreSQL** (base de datos relacional).
 
-## Documentación (raíz de la carpeta del semestre)
+## Documentación (`Fase 2/Evidencias Proyecto/Evidencias de documentación/`)
 
 | Documento | Descripción |
 | --- | --- |
 | 00 Inventario y Resumen de Cambios | Qué se actualizó el 06-10-2026 y supuestos por validar |
 | 02 a 15 | Planes de gestión (interesados, dirección, requerimientos, alcance, EDT, Gantt, costos, calidad, recursos, cambios, avance, cierre, riesgos) |
 | 16 Diseño de Base de Datos | MER, modelo relacional, diccionario y DDL |
-| 17 Especificación de Casos de Uso | 40 casos de uso |
+| 17 Especificación de Casos de Uso | 41 casos de uso (CU-01 a CU-41) |
+| 18 Plan y Casos de Prueba | 77 casos funcionales, 22 pruebas automatizadas de BD, 11 no funcionales y 6 escenarios de aceptación |
 | Anexo A | Cumplimiento normativo y gobierno de datos |
-| Acta, Kick-Off, ERS rev. 04, DAS v3.0, RACI | Documentos base del proyecto |
-| Diagramas/ | 34 diagramas (PNG, SVG y código PlantUML) |
-| Base_de_Datos/ | Script `bigboys_ddl.sql` validado |
+| Acta, Kick-Off, ERS rev. 04 (63 RF / 11 RNF), DAS v3.0, RACI | Documentos base del proyecto |
+| KPIs y Costos (xlsx), Política de Privacidad y T&C | Indicadores, costos y textos legales |
+| Diagramas/ | 35 diagramas (PNG, SVG, PlantUML y StarUML `.mdj`) |
+| `Evidencias de sistema/Base de datos/` | Script `bigboys_ddl.sql` (26 tablas) validado: 22/22 pruebas |
 
 ## Estructura del repositorio
 
 ```
 ├── Fase 1/ (Evidencias individuales y grupales)
 ├── Fase 2/
-│   ├── Evidencias Grupales/      # Guías 2.4 y 2.6 (pendientes)
-│   ├── Evidencias Individuales/  # Diarios de reflexión (pendientes)
+│   ├── Evidencias Grupales/      # Guías 2.4 y 2.6
+│   ├── Evidencias Individuales/  # Diarios de reflexión 2.1
 │   ├── Evidencias Proyecto/
-│   │   ├── Avance_Proyecto_Barberia.pptx
+│   │   ├── Avance_Proyecto_Barberia*.pptx (original, v2 y v3) y Seguimiento/Roadmap 09-10
 │   │   ├── Evidencias de documentación/  # Documentos del proyecto
 │   │   └── Evidencias de sistema/
 │   │       ├── Aplicación/               # Código (pendiente de subir sin secretos)
 │   │       └── Base de datos/            # Script DDL y diagramas de BD
 │   └── Seguimiento semanal/
-└── Fase 3/ (Presentación final y diarios, pendientes)
+└── Fase 3/ (Presentación final y diarios 3.1)
 ```
 
-## Estado del proyecto (06-10-2026, semana 8 de 13)
+## Estado del proyecto (20-10-2026, semana 11 de 16)
 
-- Documentación de diseño completa (4+1, modelo relacional, cumplimiento Ley N° 21.719, KPIs y costos).
-- Prototipos web y app funcionales; el código está en pausa y se retoma el 13-10-2026 con la migración a PostgreSQL.
-- Temas abiertos: validar supuestos con el/la dueño/a, nombre del patrocinador y aprobación formal de los cambios SC-02, SC-03, SC-05 y SC-06.
+- **Fase 2 cerrada (H4, 18-10-2026):** documentación de diseño completa (4+1, modelo relacional, cumplimiento Ley N° 21.719, KPIs y costos, plan y casos de prueba).
+- **Fase 3 en curso:** próximo hito H5, presentación de avance (viernes 23-10-2026); luego H6 sistema integrado, H7 UAT, H8 entrega final (13-11) y H9 defensa (27-11).
+- **Desarrollo:** prototipos web y app en pausa desde el 06-10; el 20-10-2026 se creó la organización Supabase «Bigboys» para la migración a PostgreSQL. El código aún no está en el repositorio (se subirá sin secretos).
+- **Temas abiertos:** validar supuestos con el/la dueño/a, nombre del patrocinador, aprobación formal de los cambios SC-02, SC-03, SC-05 y SC-06, y solicitud de cambio para la fase de Despliegue.
