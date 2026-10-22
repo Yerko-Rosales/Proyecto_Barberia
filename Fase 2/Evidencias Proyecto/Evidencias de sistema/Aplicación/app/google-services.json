@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "908481000614",
+    "firebase_url": "https://bigboys-adbe6-default-rtdb.firebaseio.com",
+    "project_id": "bigboys-adbe6",
+    "storage_bucket": "bigboys-adbe6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:908481000614:android:8984e5652969fdbcf27067",
+        "android_client_info": {
+          "package_name": "com.aistudio.bigboys.yqwnsb"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsHlMBf476Tm2oHk8qB5KpAioLxyri2-0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

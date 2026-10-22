@@ -1,0 +1,22 @@
+{
+  "name": "barberia-bigboys-web",
+  "version": "1.0.0",
+  "description": "Aplicación Web Oficial de Big Boys Barberías Chile - Agendamiento, Webpay Plus y Panel de Administración",
+  "scripts": {
+    "dev": "npx serve . -l 3000",
+    "start": "npx serve . -l 3000",
+    "mail": "node --env-file=.env mail_server.js"
+  },
+  "keywords": [
+    "barberia",
+    "bigboys",
+    "chile",
+    "talagante",
+    "penaflor",
+    "webpay",
+    "transbank",
+    "agendamiento"
+  ],
+  "author": "Big Boys Barberías Chile",
+  "license": "MIT"
+}
