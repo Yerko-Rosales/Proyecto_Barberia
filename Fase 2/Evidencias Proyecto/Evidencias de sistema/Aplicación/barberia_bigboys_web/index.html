@@ -283,8 +283,8 @@
     // CONFIGURACIÓN OFICIAL SUPABASE (POSTGRESQL RELACIONAL)
     // ==========================================
     const DEFAULT_SUPABASE_CONFIG = {
-      url: 'https://vymhsgbexyosvzkqffcr.supabase.co',
-      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5bWhzZ2JleHlvc3Z6a3FmZmNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg4MDAwMDAsImV4cCI6MjA1NDM3NjAwMH0.placeholder'
+      url: 'https://dgrflhgotxljjiejckoj.supabase.co',
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRncmZsaGdvdHhsamppZWpja29qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyOTMxMjEsImV4cCI6MjEwNjg2OTEyMX0.jGudvOPU3tafkt5vHvoSgW0jkSbnBhUsGFy4OuF5fpg'
     };
 
     function getSupabaseConfig() {
@@ -469,187 +469,62 @@
     // ==========================================
     // 2. DATOS SEMILLA & STORE CENTRAL
     // ==========================================
+    // Sucursales reales (ids y datos iguales a la tabla sucursal de Supabase)
     const SEED_LOCATIONS = [
       {
         id: 1,
-        name: 'Big Boys - Talagante',
-        address: 'Boulevard del centro, local 3, Talagante',
-        phone: '+56 2 2489 1234',
-        schedule: 'Lun a Sáb: 09:00 - 20:00 | Dom: 10:00 - 16:00',
-        lat: -33.6631,
-        lng: -70.9286,
-        description: 'Nuestra sucursal insignia en Boulevard del centro, local 3, Talagante. Equipamiento premium, bar de cortesía y sillones hidráulicos de cuero.',
+        name: 'Peñaflor – Sucursal 21 de Mayo',
+        address: '21 de Mayo 4566, Peñaflor',
+        phone: '',
+        schedule: 'Lun a Sáb: 09:00 - 20:00',
+        lat: -33.605234,
+        lng: -70.890280,
+        description: 'Casa matriz de Big Boys en 21 de Mayo 4566, Peñaflor.',
         totalChairs: 4,
         isPrimary: true
       },
       {
         id: 2,
-        name: 'Big Boys - Peñaflor (21 de Mayo)',
-        address: '21 de mayo 4566, Peñaflor',
-        phone: '+56 2 2631 5678',
-        schedule: 'Lun a Sáb: 09:00 - 20:00 | Dom: Cerrado',
-        lat: -33.6080,
-        lng: -70.8993,
-        description: 'Ubicada en 21 de mayo 4566, Peñaflor. Especialistas en afeitado tradicional a navaja libre y perfilado de barba.',
-        totalChairs: 4,
-        isPrimary: false
-      },
-      {
-        id: 3,
-        name: 'Big Boys - Peñaflor (Alcalde Luis Araya Cereceda)',
+        name: 'Peñaflor – Sucursal Alcalde Luis Araya Cereceda',
         address: 'Alcalde Luis Araya Cereceda 4387, Peñaflor',
-        phone: '+56 2 2912 3456',
-        schedule: 'Lun a Sáb: 10:00 - 20:30 | Dom: 10:00 - 15:00',
-        lat: -33.6077,
-        lng: -70.9001,
-        description: 'Sucursal ubicada en Alcalde Luis Araya Cereceda 4387, Peñaflor. Ambiente moderno con estacionamiento propio, zona lounge climatizada y servicios VIP.',
+        phone: '',
+        schedule: 'Lun a Sáb: 09:00 - 20:00',
+        lat: -33.607670,
+        lng: -70.900144,
+        description: 'Sucursal de Big Boys en Alcalde Luis Araya Cereceda 4387, Peñaflor.',
+        totalChairs: 4,
+        isPrimary: false
+      },
+      {
+        id: 3,
+        name: 'Talagante',
+        address: 'Boulevard del Centro, local 3, Talagante',
+        phone: '',
+        schedule: 'Lun a Sáb: 09:00 - 20:00',
+        lat: -33.663229,
+        lng: -70.928852,
+        description: 'Sucursal de Big Boys en Boulevard del Centro, local 3, Talagante.',
         totalChairs: 4,
         isPrimary: false
       }
     ];
 
+    // Barberos de prueba (demo) cargados en la tabla barbero hasta tener la nómina real
     const SEED_BARBERS = [
-      {
-        id: 1,
-        locationId: 1,
-        name: 'Mateo Silva',
-        specialty: 'Corte Moderno & Fade',
-        rating: 4.9,
-        avatarUrl: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&auto=format&fit=crop&q=80',
-        availableHours: '09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00',
-        bio: 'Especialista en degradados milimétricos y texturizados urbanos. Mateo cuenta con 6 años de experiencia y es reconocido por su precisión quirúrgica con la patillera.',
-        active: true
-      },
-      {
-        id: 2,
-        locationId: 1,
-        name: 'Carlos Mendoza',
-        specialty: 'Perfilado de Barba Premium',
-        rating: 4.8,
-        avatarUrl: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=400&auto=format&fit=crop&q=80',
-        availableHours: '09:00,10:00,11:00,13:00,14:00,15:00,16:00,17:00,18:00',
-        bio: 'Maestro barbero enfocado en la restauración facial masculina. Ofrece un perfilado con vaporización y aceites esenciales que limpian y revitalizan cada poro.',
-        active: true
-      },
-      {
-        id: 3,
-        locationId: 1,
-        name: 'Lucas Parra',
-        specialty: 'Estilo Clásico & Navaja',
-        rating: 4.7,
-        avatarUrl: 'https://images.unsplash.com/photo-1517832606299-7ae9b720a186?w=400&auto=format&fit=crop&q=80',
-        availableHours: '10:00,11:00,12:00,13:00,15:00,16:00,17:00,18:00,19:00',
-        bio: 'Devoto del afeitado tradicional de toalla caliente. Lucas mantiene vivas las técnicas clásicas europeas de navaja libre y pompadours de vieja escuela.',
-        active: true
-      },
-      {
-        id: 4,
-        locationId: 1,
-        name: 'Diego Alarcón',
-        specialty: 'Color Metálico & Diseño',
-        rating: 4.9,
-        avatarUrl: 'https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=400&auto=format&fit=crop&q=80',
-        availableHours: '09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00',
-        bio: 'Infiltrado de la cultura urbana y las pasarelas. Diego domina coloraciones extremas (platinados, grises metálicos) y grecas tribales personalizadas.',
-        active: true
-      },
-      {
-        id: 5,
-        locationId: 2,
-        name: 'Sebastián Reyes',
-        specialty: 'Corte Clásico Militar',
-        rating: 4.8,
-        avatarUrl: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&auto=format&fit=crop&q=80',
-        availableHours: '09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00',
-        bio: 'Ex-estilista de academias navales. Sebastián diseña cortes militares, buzzcuts y flat-tops ultra simétricos ideales para ejecutivos y profesionales.',
-        active: true
-      },
-      {
-        id: 6,
-        locationId: 2,
-        name: 'Felipe Soto',
-        specialty: 'Afeitado con Toalla Caliente',
-        rating: 4.9,
-        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80',
-        availableHours: '10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00',
-        bio: 'Especialista en masajes capilares relajantes y afeitado de cabeza completo a navaja. Brinda una experiencia de relajación zen absoluta.',
-        active: true
-      },
-      {
-        id: 7,
-        locationId: 2,
-        name: 'Matías Rojas',
-        specialty: 'Fade Urbano & Diseños',
-        rating: 4.6,
-        avatarUrl: 'https://images.unsplash.com/photo-1605462863863-10d9e47e15ee?w=400&auto=format&fit=crop&q=80',
-        availableHours: '09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00',
-        bio: 'Inspirado por el trap y los deportes americanos. Especialista en high-fades, drop-fades y líneas de diseño geométrico de alta complejidad técnica.',
-        active: true
-      },
-      {
-        id: 8,
-        locationId: 2,
-        name: 'Misael Castro',
-        specialty: 'Estilo Ejecutivo',
-        rating: 4.8,
-        avatarUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400&auto=format&fit=crop&q=80',
-        availableHours: '09:00,10:00,11:00,12:00,13:00,15:00,16:00,17:00,18:00',
-        bio: 'Su enfoque es la elegancia sobria. Especialista en cortes con tijera para cabellos largos y medios, manteniendo un estilo formal pero con personalidad.',
-        active: true
-      },
-      {
-        id: 9,
-        locationId: 3,
-        name: 'Joaquín Guzmán',
-        specialty: 'Corte & Barba VIP',
-        rating: 5.0,
-        avatarUrl: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=400&auto=format&fit=crop&q=80',
-        availableHours: '09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00',
-        bio: 'Condecorado como barbero del año en certámenes nacionales. Su servicio VIP incluye diagnóstico de visagismo capilar y asesoramiento estético completo.',
-        active: true
-      },
-      {
-        id: 10,
-        locationId: 3,
-        name: 'Andrés Muñoz',
-        specialty: 'Arreglo de Barba Royale',
-        rating: 4.9,
-        avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80',
-        availableHours: '09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00',
-        bio: 'Especialista en barbas vikingas y barbas de candado. Experto en alaciado de vello facial, hidratación profunda y moldeado con bálsamos finos.',
-        active: true
-      },
-      {
-        id: 11,
-        locationId: 3,
-        name: 'Mauricio Ortiz',
-        specialty: 'Visagismo & Estilismo',
-        rating: 4.8,
-        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80',
-        availableHours: '10:00,11:00,12:00,13:00,14:00,16:00,17:00,18:00',
-        bio: 'Creativo apasionado del modelado y la estructura ósea craneal. Diseña tu peinado en base a la geometría de tu rostro para resaltar tus mejores rasgos.',
-        active: true
-      },
-      {
-        id: 12,
-        locationId: 3,
-        name: 'Tomás Lagos',
-        specialty: 'Corte Joven & Tendencia',
-        rating: 4.7,
-        avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&auto=format&fit=crop&q=80',
-        availableHours: '09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00',
-        bio: 'Experto en las corrientes internacionales de K-Pop y Mullets modernos. Tomás es el favorito del público joven por su carisma y asesoramiento fresco.',
-        active: true
-      }
+      { id: 1, locationId: 1, name: 'Mateo "Fade Master" Silva', specialty: 'Degradados de precisión, low y mid fade', rating: 5.0, avatarUrl: '', availableHours: '09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00', bio: '', active: true },
+      { id: 2, locationId: 1, name: 'Esteban "El Maestro" Rojas', specialty: 'Corte clásico, barba spa y toalla caliente', rating: 5.0, avatarUrl: '', availableHours: '10:00,11:00,12:00,13:00,15:00,16:00,17:00,18:00,19:00', bio: '', active: true },
+      { id: 3, locationId: 2, name: 'Cristian "Black Gold" Castro', specialty: 'Freestyle, tintura y perfilado con cera', rating: 5.0, avatarUrl: '', availableHours: '09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00', bio: '', active: true },
+      { id: 4, locationId: 3, name: 'Diego "La Navaja" Morales', specialty: 'Afeitado tradicional y barboterapia', rating: 5.0, avatarUrl: '', availableHours: '10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00', bio: '', active: true }
     ];
 
+    // Servicios reservables (tabla servicio; los complementos se agregan en el local)
     const SERVICES_LIST = [
-      { id: 'deg', name: 'Corte de Pelo Degrado', price: 15000, duration: '45 min' },
-      { id: 'barb', name: 'Arreglo de Barba Royale', price: 10000, duration: '30 min' },
-      { id: 'combo', name: 'Combo Big Boys (Pelo + Barba)', price: 22000, duration: '60 min' },
-      { id: 'vip', name: 'Servicio Completo VIP', price: 28000, duration: '80 min' },
-      { id: 'mil', name: 'Corte Clásico Militar', price: 13500, duration: '40 min' },
-      { id: 'rit', name: 'Ritual de Barba & Barbería', price: 22000, duration: '50 min' }
+      { id: 1, name: 'Corte', price: 11900, duration: '40 min' },
+      { id: 2, name: 'Corte + Cejas', price: 15470, duration: '45 min' },
+      { id: 3, name: 'Corte + Barba', price: 20230, duration: '50 min' },
+      { id: 4, name: 'S. Completo', price: 23800, duration: '60 min' },
+      { id: 5, name: 'Corte + Cejas + Lavado', price: 17850, duration: '55 min' },
+      { id: 7, name: 'Barba', price: 8330, duration: '30 min' }
     ];
 
     const SEED_REVIEWS = [
@@ -836,8 +711,11 @@
         try {
           locs = JSON.parse(localStorage.getItem('bigboys_locations') || '[]');
         } catch (e) {}
-        if (!locs.length || locs.some(l => !l.address || l.address.includes('Miraflores') || l.address.includes('1282') || l.address.includes('Libertador') || (l.id === 1 && (!l.address.includes('Boulevard del centro') || l.lat !== -33.6631)) || (l.id === 2 && (!l.address.includes('21 de mayo 4566') || l.lng !== -70.8993)) || (l.id === 3 && (!l.address.includes('Alcalde Luis Araya Cereceda 4387') || l.lng !== -70.9001)))) {
+        const CATALOG_VERSION = '2026-10-22';
+        if (!locs.length || localStorage.getItem('bigboys_catalog_version') !== CATALOG_VERSION) {
           localStorage.setItem('bigboys_locations', JSON.stringify(SEED_LOCATIONS));
+          localStorage.setItem('bigboys_barbers', JSON.stringify(SEED_BARBERS));
+          localStorage.setItem('bigboys_catalog_version', CATALOG_VERSION);
         }
         if (!localStorage.getItem('bigboys_barbers')) {
           localStorage.setItem('bigboys_barbers', JSON.stringify(SEED_BARBERS));
@@ -852,7 +730,6 @@
         try {
           usersList = JSON.parse(localStorage.getItem('bigboys_users') || '[]');
         } catch (e) {}
-        usersList = usersList.filter(u => u && u.email && u.email.toLowerCase() !== 'j.ojedalefio@gmail.com');
         if (!usersList.some(u => u && u.email && u.email.toLowerCase() === 'test@bigboys.cl')) {
           usersList.push({
             id: 9999,
@@ -865,16 +742,6 @@
           });
         }
         localStorage.setItem('bigboys_users', JSON.stringify(usersList));
-
-        try {
-          const logged = JSON.parse(localStorage.getItem('bigboys_logged_user') || 'null');
-          if (logged && logged.email && logged.email.toLowerCase() === 'j.ojedalefio@gmail.com') {
-            localStorage.removeItem('bigboys_logged_user');
-            if (typeof sessionStorage !== 'undefined') {
-              sessionStorage.removeItem('bigboys_session_active');
-            }
-          }
-        } catch (e) {}
         let couponsList = [];
         try {
           couponsList = JSON.parse(localStorage.getItem('bigboys_coupons') || '[]');
@@ -973,78 +840,108 @@
       getEmailDatabase() { return JSON.parse(localStorage.getItem('bigboys_email_database') || '[]'); }
       getSentEmailsLog() { return JSON.parse(localStorage.getItem('bigboys_sent_emails_log') || '[]'); }
 
+      getCloudClient() {
+        return (typeof supabaseClient !== 'undefined' && supabaseClient) ? supabaseClient : (typeof window !== 'undefined' && window.supabaseClient ? window.supabaseClient : null);
+      }
+
       isCloudActive() {
-        const sb = (typeof supabaseClient !== 'undefined' && supabaseClient) ? supabaseClient : (typeof window !== 'undefined' && window.supabaseClient ? window.supabaseClient : null);
-        return Boolean(this.cloudSyncActive && sb);
+        return Boolean(this.cloudSyncActive && this.getCloudClient());
+      }
+
+      // Credenciales de la sesión para las funciones api_* (la contraseña viaja como SHA-256)
+      getCloudCredentials() {
+        const user = this.getLoggedInUser();
+        return user && user.email && user.passwordHash
+          ? { p_email: user.email, p_password_sha256: user.passwordHash }
+          : {};
+      }
+
+      mapCloudAppointment(d) {
+        return {
+          id: Number(d.id),
+          codigo: d.codigo || '',
+          locationId: Number(d.location_id) || 1,
+          barberId: Number(d.barber_id) || 1,
+          customerName: d.customer_name || 'Cliente',
+          customerPhone: d.customer_phone || '',
+          customerEmail: d.customer_email || '',
+          dateTime: d.date_time || '',
+          serviceName: d.service_name || 'Corte',
+          servicePrice: Number(d.service_price) || 0,
+          prepayAmount: Number(d.prepay_amount) || 0,
+          rescheduleCount: Number(d.reschedule_count) || 0,
+          prepayForfeited: Boolean(d.prepay_forfeited),
+          cancelledBy: d.cancelled_by || null,
+          cancellationReason: d.cancellation_reason || null,
+          status: d.status || 'Confirmada',
+          isGuest: Boolean(d.is_guest),
+          userId: d.user_id || null,
+          createdAt: d.created_at || AppFormatters.currentDateTimeString()
+        };
+      }
+
+      // Sucursales y barberos desde las tablas sucursal y barbero
+      async refreshCatalogFromCloud() {
+        const sb = this.getCloudClient();
+        if (!sb) return;
+        try {
+          const [{ data: sucursales }, { data: barberos }] = await Promise.all([
+            sb.rpc('api_sucursales'),
+            sb.rpc('api_barberos')
+          ]);
+          if (Array.isArray(sucursales) && sucursales.length) {
+            const current = this.getLocations();
+            const locations = sucursales.map(s => {
+              const prev = current.find(l => l.id === s.id) || SEED_LOCATIONS.find(l => l.id === s.id) || {};
+              return { ...prev, id: s.id, name: s.name, address: s.address, phone: s.phone || '', lat: Number(s.lat) || prev.lat, lng: Number(s.lng) || prev.lng, isPrimary: Boolean(s.is_primary) };
+            });
+            localStorage.setItem('bigboys_locations', JSON.stringify(locations));
+          }
+          if (Array.isArray(barberos) && barberos.length) {
+            const barbers = barberos.map(b => ({
+              id: b.id,
+              locationId: b.location_id,
+              name: b.name,
+              specialty: b.specialty || '',
+              rating: Number(b.rating) || 5,
+              avatarUrl: b.avatar_url || '',
+              availableHours: b.available_hours || '',
+              bio: b.bio || '',
+              active: Boolean(b.active)
+            }));
+            localStorage.setItem('bigboys_barbers', JSON.stringify(barbers));
+          }
+          this.notify();
+        } catch (err) {
+          console.warn('Aviso al cargar sucursales y barberos desde Supabase:', err);
+        }
+      }
+
+      async refreshAppointmentsFromCloud() {
+        const sb = this.getCloudClient();
+        if (!sb) return;
+        try {
+          const { data, error } = await sb.rpc('api_listar_reservas', { p_formato: 'WEB', ...this.getCloudCredentials() });
+          if (!error && Array.isArray(data)) {
+            this.syncAppointmentsFromCloud(data.map(d => this.mapCloudAppointment(d)));
+          }
+        } catch (err) {
+          console.warn('Aviso al consultar reservas en Supabase:', err);
+        }
       }
 
       initCloudSync() {
-        const sb = (typeof supabaseClient !== 'undefined' && supabaseClient) ? supabaseClient : (typeof window !== 'undefined' && window.supabaseClient ? window.supabaseClient : null);
-        if (!sb) {
+        if (!this.getCloudClient()) {
           console.log('ℹ️ Supabase no está conectado todavía. Modo local activo.');
           return;
         }
-
-        try {
-          this.cloudSyncActive = true;
-          // Cargar citas iniciales de la tabla relacional appointments
-          sb.from('appointments').select('*').order('created_at', { ascending: false }).limit(200)
-            .then(({ data, error }) => {
-              if (!error && Array.isArray(data)) {
-                const mapped = data.map(d => ({
-                  id: Number(d.id),
-                  locationId: Number(d.location_id) || 1,
-                  barberId: Number(d.barber_id) || 1,
-                  customerName: d.customer_name || 'Cliente',
-                  customerPhone: d.customer_phone || '',
-                  customerEmail: d.customer_email || '',
-                  dateTime: d.date_time || '',
-                  serviceName: d.service_name || 'Servicio Barbería',
-                  servicePrice: Number(d.service_price) || 0,
-                  prepayAmount: Number(d.prepay_amount) || 3000,
-                  rescheduleCount: Number(d.reschedule_count) || 0,
-                  prepayForfeited: Boolean(d.prepay_forfeited),
-                  status: d.status || 'Confirmada',
-                  isGuest: Boolean(d.is_guest),
-                  userId: d.user_id || null,
-                  createdAt: d.created_at || AppFormatters.currentDateTimeString()
-                }));
-                this.syncAppointmentsFromCloud(mapped);
-                console.log('✓ Citas sincronizadas desde Supabase PostgreSQL:', mapped.length);
-              }
-            });
-
-          // Suscripción en tiempo real a la tabla relacional appointments
-          this.unsubscribeCloud = sb.channel('public:appointments')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, (payload) => {
-              console.log('⚡ Cambio en tiempo real detectado en PostgreSQL Supabase:', payload.eventType);
-              const d = payload.new;
-              if (d && (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE')) {
-                const appt = {
-                  id: Number(d.id),
-                  locationId: Number(d.location_id) || 1,
-                  barberId: Number(d.barber_id) || 1,
-                  customerName: d.customer_name || 'Cliente',
-                  customerPhone: d.customer_phone || '',
-                  customerEmail: d.customer_email || '',
-                  dateTime: d.date_time || '',
-                  serviceName: d.service_name || 'Servicio Barbería',
-                  servicePrice: Number(d.service_price) || 0,
-                  prepayAmount: Number(d.prepay_amount) || 3000,
-                  rescheduleCount: Number(d.reschedule_count) || 0,
-                  prepayForfeited: Boolean(d.prepay_forfeited),
-                  status: d.status || 'Confirmada',
-                  isGuest: Boolean(d.is_guest),
-                  userId: d.user_id || null,
-                  createdAt: d.created_at || AppFormatters.currentDateTimeString()
-                };
-                this.syncAppointmentsFromCloud([appt]);
-              }
-            })
-            .subscribe();
-        } catch (err) {
-          console.warn('Error al conectar con Supabase Realtime:', err);
-        }
+        this.cloudSyncActive = true;
+        this.refreshCatalogFromCloud();
+        this.refreshAppointmentsFromCloud();
+        // Las tablas están cerradas (RLS): en vez de Realtime se consultan las reservas cada 8 segundos
+        if (this.unsubscribeCloud) this.unsubscribeCloud();
+        const timer = setInterval(() => this.refreshAppointmentsFromCloud(), 8000);
+        this.unsubscribeCloud = () => clearInterval(timer);
       }
 
       syncAppointmentsFromCloud(cloudList) {
@@ -1075,33 +972,30 @@
       }
 
       async publishAppointmentToCloud(appointment) {
-        const sb = (typeof supabaseClient !== 'undefined' && supabaseClient) ? supabaseClient : (typeof window !== 'undefined' && window.supabaseClient ? window.supabaseClient : null);
+        const sb = this.getCloudClient();
         if (!sb) return false;
         try {
-          const row = {
-            id: Number(appointment.id) || Date.now(),
-            user_id: appointment.userId ? Number(appointment.userId) : null,
-            barber_id: Number(appointment.barberId) || 1,
-            location_id: Number(appointment.locationId) || 1,
-            service_name: appointment.serviceName || 'Servicio Barbería',
-            service_price: Number(appointment.servicePrice) || 0,
-            prepay_amount: Number(appointment.prepayAmount) || 3000,
-            reschedule_count: Number(appointment.rescheduleCount) || 0,
-            prepay_forfeited: Boolean(appointment.prepayForfeited),
-            date_time: appointment.dateTime || '',
-            status: appointment.status || 'Confirmada',
-            customer_name: appointment.customerName || '',
-            customer_phone: appointment.customerPhone || '',
-            customer_email: appointment.customerEmail || '',
-            is_guest: Boolean(appointment.isGuest)
-          };
-
-          const { error } = await sb.from('appointments').upsert(row, { onConflict: 'id' });
+          // Una atención presencial sin abono se registra con canal LOCAL
+          const isWalkIn = Number(appointment.prepayAmount) === 0 && appointment.status === 'Completada';
+          const { data, error } = await sb.rpc('api_crear_reserva', {
+            p: {
+              id: Number(appointment.id) || Date.now(),
+              canal: isWalkIn ? 'LOCAL' : 'WEB',
+              barber_id: Number(appointment.barberId) || 1,
+              location_id: Number(appointment.locationId) || 1,
+              service_name: appointment.serviceName || 'Corte',
+              date_time: appointment.dateTime || '',
+              status: appointment.status || 'Confirmada',
+              customer_name: appointment.customerName || '',
+              customer_phone: appointment.customerPhone || '',
+              customer_email: appointment.customerEmail || ''
+            }
+          });
           if (error) {
-            console.warn('Aviso publicando en Supabase:', error);
+            console.warn('Aviso publicando en Supabase:', error.message);
             return false;
           }
-          console.log('✓ Cita guardada en Supabase PostgreSQL (appointments):', row.id);
+          console.log('✓ Reserva guardada en Supabase (tabla reserva):', data && data.codigo);
           return true;
         } catch (e) {
           console.warn('Error publicando en Supabase:', e);
@@ -1110,21 +1004,53 @@
       }
 
       async updateAppointmentStatusInCloud(appointment, newStatus) {
-        const sb = (typeof supabaseClient !== 'undefined' && supabaseClient) ? supabaseClient : (typeof window !== 'undefined' && window.supabaseClient ? window.supabaseClient : null);
+        const sb = this.getCloudClient();
         if (!sb || !appointment) return false;
         try {
-          const { error } = await sb.from('appointments').update({
-            status: newStatus,
-            updated_at: new Date().toISOString()
-          }).eq('id', Number(appointment.id));
-
+          const { error } = await sb.rpc('api_actualizar_reserva', {
+            p: {
+              id: Number(appointment.id),
+              canal: 'WEB',
+              barber_id: Number(appointment.barberId),
+              date_time: appointment.dateTime,
+              status: newStatus,
+              cancelled_by: appointment.cancelledBy || appointment.canceledBy || null,
+              cancellation_reason: appointment.cancellationReason || null
+            }
+          });
           if (!error) {
             console.log(`✓ Estado actualizado a '${newStatus}' en Supabase:`, appointment.id);
             return true;
           }
+          console.warn('Aviso actualizando estado en Supabase:', error.message);
           return false;
         } catch (e) {
           console.warn('Error actualizando estado en Supabase:', e);
+          return false;
+        }
+      }
+
+      // La base de datos valida la regla (>= 24 h y máximo 2 reagendamientos) y deja el registro en reagendamiento
+      async rescheduleAppointmentInCloud(appointment, oldDateTime) {
+        const sb = this.getCloudClient();
+        if (!sb || !appointment) return false;
+        try {
+          const { error } = await sb.rpc('api_actualizar_reserva', {
+            p: {
+              id: Number(appointment.id),
+              canal: 'WEB',
+              barber_id: Number(appointment.barberId),
+              date_time: oldDateTime,
+              new_date_time: appointment.dateTime
+            }
+          });
+          if (error) {
+            console.warn('Aviso reagendando en Supabase:', error.message);
+            return false;
+          }
+          return true;
+        } catch (e) {
+          console.warn('Error reagendando en Supabase:', e);
           return false;
         }
       }
@@ -1191,23 +1117,8 @@
           // Si el servidor local no está activo en esta sesión, continuar a la cola de Supabase
         }
 
-        // 3. Encolar en Supabase PostgreSQL (tabla 'mail') para despacho en segundo plano
-        const sb = (typeof supabaseClient !== 'undefined' && supabaseClient) ? supabaseClient : (typeof window !== 'undefined' && window.supabaseClient ? window.supabaseClient : null);
-        if (sb) {
-          try {
-            await sb.from('mail').insert({
-              recipient: cleanTo,
-              sender: 'bigboysbarberia.chile@gmail.com',
-              subject,
-              body,
-              status: 'pending'
-            });
-            console.log('✓ Correo encolado con éxito en Supabase PostgreSQL (mail):', cleanTo);
-            return true;
-          } catch (cloudErr) {
-            console.warn('Aviso al encolar correo en Supabase:', cloudErr);
-          }
-        }
+        // 3. La confirmación y la cancelación quedan registradas en la tabla notificacion
+        //    (las crean api_crear_reserva y api_actualizar_reserva)
         return false;
       }
 
@@ -1524,66 +1435,41 @@
         let users = this.getUsers();
         let user = users.find(u => u.email.toLowerCase() === cleanEmail);
 
-        // --- VERIFICACIÓN DE IDENTIDAD EN SUPABASE POSTGRESQL ---
-        const sb = (typeof supabaseClient !== 'undefined' && supabaseClient) ? supabaseClient : (typeof window !== 'undefined' && window.supabaseClient ? window.supabaseClient : null);
+        const expectedHash = await ValidationUtils.hashPassword(cleanPass);
+
+        // --- VERIFICACIÓN EN SUPABASE (api_login): la contraseña se valida en la base de datos ---
+        const sb = this.getCloudClient();
         if (sb) {
           try {
-            const { data: cloudUser, error } = await sb.from('users').select('*').eq('email', cleanEmail).maybeSingle();
-            if (cloudUser) {
-              if (!user) {
-                user = {
-                  id: cloudUser.id,
-                  fullName: cloudUser.full_name || cleanEmail.split('@')[0],
-                  email: cleanEmail,
-                  phone: cloudUser.phone || '',
-                  rut: cloudUser.rut || '',
-                  passwordHash: cloudUser.password_hash || '',
-                  createdAt: cloudUser.created_at || AppFormatters.currentDateTimeString()
-                };
-                users.push(user);
-                localStorage.setItem('bigboys_users', JSON.stringify(users));
-              } else {
-                user.fullName = cloudUser.full_name || user.fullName;
-                user.phone = cloudUser.phone || user.phone;
-                user.rut = cloudUser.rut || user.rut;
-                if (cloudUser.password_hash) user.passwordHash = cloudUser.password_hash;
-                localStorage.setItem('bigboys_users', JSON.stringify(users));
+            const { data: cloudUser, error } = await sb.rpc('api_login', { p_email: cleanEmail, p_password_sha256: expectedHash });
+            if (!error && cloudUser) {
+              const merged = {
+                ...(user || {}),
+                id: cloudUser.id,
+                fullName: cloudUser.full_name || cleanEmail.split('@')[0],
+                email: cleanEmail,
+                phone: cloudUser.phone || (user && user.phone) || '',
+                passwordHash: expectedHash,
+                role: cloudUser.role,
+                createdAt: (user && user.createdAt) || AppFormatters.currentDateTimeString()
+              };
+              users = users.filter(u => u.email.toLowerCase() !== cleanEmail);
+              users.push(merged);
+              localStorage.setItem('bigboys_users', JSON.stringify(users));
+              user = merged;
+            } else if (!error) {
+              const { data: exists } = await sb.rpc('api_usuario_existe', { p_email: cleanEmail });
+              if (!exists) {
+                if (user) {
+                  users = users.filter(u => u.email.toLowerCase() !== cleanEmail);
+                  localStorage.setItem('bigboys_users', JSON.stringify(users));
+                }
+                return { success: false, message: `El correo '${cleanEmail}' no se encuentra registrado en Big Boys.` };
               }
-            } else if (cleanEmail === 'test@bigboys.cl') {
-              if (!user) {
-                user = {
-                  id: 9999,
-                  fullName: 'Usuario de Prueba Big Boys',
-                  email: 'test@bigboys.cl',
-                  phone: '+56 9 8765 4321',
-                  rut: '19.342.110-3',
-                  password: '123',
-                  createdAt: '01-09-2026 10:00'
-                };
-                users.push(user);
-                localStorage.setItem('bigboys_users', JSON.stringify(users));
-              }
-              try {
-                await sb.from('users').upsert({
-                  id: 1,
-                  full_name: user.fullName,
-                  email: cleanEmail,
-                  phone: user.phone,
-                  rut: user.rut,
-                  password_hash: '123'
-                }, { onConflict: 'email' });
-              } catch (e) {}
-            } else {
-              // El usuario NO existe en Supabase (fue eliminado o no está registrado)
-              if (user) {
-                users = users.filter(u => u.email.toLowerCase() !== cleanEmail);
-                localStorage.setItem('bigboys_users', JSON.stringify(users));
-                user = null;
-              }
-              return { success: false, message: `El correo '${cleanEmail}' no se encuentra registrado en Big Boys.` };
+              return { success: false, message: 'Contraseña incorrecta. Por favor verifica e intenta nuevamente.' };
             }
           } catch (sbLoginErr) {
-            console.warn('Aviso al consultar usuario en Supabase:', sbLoginErr);
+            console.warn('Aviso al validar usuario en Supabase:', sbLoginErr);
           }
         }
 
@@ -1605,20 +1491,10 @@
           }
         }
 
-        const expectedHash = await ValidationUtils.hashPassword(cleanPass);
         const isTestPass = cleanEmail === 'test@bigboys.cl' && (cleanPass === '123' || cleanPass === '123456');
         const isValid = isTestPass || !user.passwordHash || user.passwordHash === expectedHash;
 
         if (isValid) {
-          // Si el usuario en Supabase no tenía contraseña web asociada (ej: registrado desde app), vincularla
-          if (!user.passwordHash && sb) {
-            user.passwordHash = expectedHash;
-            localStorage.setItem('bigboys_users', JSON.stringify(users));
-            try {
-              await sb.from('users').update({ password_hash: expectedHash }).eq('email', cleanEmail);
-            } catch (e) {}
-          }
-
           localStorage.setItem('bigboys_logged_user', JSON.stringify(user));
           localStorage.setItem('bigboys_is_admin', 'false');
           if (typeof sessionStorage !== 'undefined') {
@@ -1670,13 +1546,12 @@
         const formattedRut = ValidationUtils.formatChileanRut(cleanRut);
         let users = this.getUsers();
 
-        // --- VERIFICACIÓN PREVIA EN SUPABASE POSTGRESQL (Tabla 'users') ---
-        const sb = (typeof supabaseClient !== 'undefined' && supabaseClient) ? supabaseClient : (typeof window !== 'undefined' && window.supabaseClient ? window.supabaseClient : null);
+        // --- VERIFICACIÓN PREVIA EN SUPABASE (tabla usuario; el RUT no se almacena por minimización) ---
+        const sb = this.getCloudClient();
         if (sb) {
           try {
-            // 1. Verificar por email en Supabase
-            const { data: existingUser } = await sb.from('users').select('id, email').eq('email', cleanEmail).maybeSingle();
-            if (existingUser) {
+            const { data: exists } = await sb.rpc('api_usuario_existe', { p_email: cleanEmail });
+            if (exists) {
               alert("Este correo ya está registrado en la app de Big Boys. Por favor inicia sesión.");
               return {
                 success: false,
@@ -1684,19 +1559,9 @@
               };
             }
 
-            // 2. Query por RUT en Supabase
-            const { data: existingRut } = await sb.from('users').select('id, rut').or(`rut.eq.${cleanRut},rut.eq.${formattedRut}`).maybeSingle();
-            if (existingRut) {
-              alert("Este RUT ya está registrado en la app de Big Boys. Por favor inicia sesión.");
-              return {
-                success: false,
-                message: "Este RUT ya está registrado en la app de Big Boys. Por favor inicia sesión."
-              };
-            }
-
             // Si el usuario no existe en Supabase, purgar cualquier residuo huérfano local para sincronización exacta
-            if (users.some(u => u.email.toLowerCase() === cleanEmail || ValidationUtils.cleanChileanRut(u.rut) === cleanRut)) {
-              users = users.filter(u => u.email.toLowerCase() !== cleanEmail && ValidationUtils.cleanChileanRut(u.rut) !== cleanRut);
+            if (users.some(u => u.email.toLowerCase() === cleanEmail)) {
+              users = users.filter(u => u.email.toLowerCase() !== cleanEmail);
               localStorage.setItem('bigboys_users', JSON.stringify(users));
             }
           } catch (sbErr) {
@@ -1731,17 +1596,18 @@
         localStorage.setItem('bigboys_logged_user', JSON.stringify(newUser));
         localStorage.setItem('bigboys_is_admin', 'false');
 
-        // Guardar el usuario en la tabla relacional 'users' de Supabase PostgreSQL:
+        // Registrar la cuenta en Supabase (usuario, rol CLIENTE, cliente y consentimiento)
         if (sb) {
           try {
-            await sb.from('users').upsert({
-              full_name: cleanName,
-              email: cleanEmail,
-              phone: cleanPhone,
-              rut: formattedRut,
-              password_hash: passwordHash
-            }, { onConflict: 'email' });
-            console.log("✓ Usuario registrado y guardado en Supabase PostgreSQL (users):", cleanEmail);
+            const { error } = await sb.rpc('api_registrar_cliente', {
+              p_email: cleanEmail,
+              p_nombre_completo: cleanName,
+              p_telefono: cleanPhone,
+              p_password_sha256: passwordHash,
+              p_canal: 'WEB'
+            });
+            if (error) console.warn('Aviso al registrar usuario en Supabase:', error.message);
+            else console.log("✓ Usuario registrado en Supabase (usuario + cliente):", cleanEmail);
           } catch (cloudErr) {
             console.warn("Aviso al guardar usuario en Supabase:", cloudErr);
           }
@@ -1831,21 +1697,10 @@
 
         appt.status = 'Cancelada';
         appt.cancellationReason = emergencyReason;
-        appt.canceledBy = 'Barbero (Emergencia)';
+        appt.cancelledBy = 'Barbero (Emergencia)';
         appt.canceledAt = AppFormatters.currentDateTimeString ? AppFormatters.currentDateTimeString() : new Date().toISOString();
         localStorage.setItem('bigboys_appointments', JSON.stringify(appts));
-
-        const sb = (typeof supabaseClient !== 'undefined' && supabaseClient) ? supabaseClient : (typeof window !== 'undefined' && window.supabaseClient ? window.supabaseClient : null);
-        if (sb) {
-          try {
-            sb.from('appointments').update({
-              status: 'Cancelada',
-              cancellation_reason: emergencyReason,
-              canceled_by: 'Barbero (Emergencia)',
-              updated_at: new Date().toISOString()
-            }).eq('id', Number(appt.id)).then(() => {}).catch(() => {});
-          } catch (err) {}
-        }
+        this.updateAppointmentStatusInCloud(appt, 'Cancelada');
 
         const bName = (this.getBarbers().find(b => b.id === appt.barberId)?.name) || 'Barbero Big Boys';
         const locName = (this.getLocations().find(l => l.id === appt.locationId)?.name) || 'Sucursal Big Boys';
@@ -1867,16 +1722,7 @@
         appt.status = 'Completada';
         appt.completedAt = AppFormatters.currentDateTimeString ? AppFormatters.currentDateTimeString() : new Date().toISOString();
         localStorage.setItem('bigboys_appointments', JSON.stringify(appts));
-
-        const sb = (typeof supabaseClient !== 'undefined' && supabaseClient) ? supabaseClient : (typeof window !== 'undefined' && window.supabaseClient ? window.supabaseClient : null);
-        if (sb) {
-          try {
-            sb.from('appointments').update({
-              status: 'Completada',
-              updated_at: new Date().toISOString()
-            }).eq('id', Number(appt.id)).then(() => {}).catch(() => {});
-          } catch (err) {}
-        }
+        this.updateAppointmentStatusInCloud(appt, 'Completada');
 
         this.addNotification('Corte Completado ✓', `Se completó la atención para ${appt.customerName}.`);
         this.notify();
@@ -1885,22 +1731,24 @@
 
       async deleteUser(email) {
         const cleanEmail = (email || '').trim().toLowerCase();
-        let users = this.getUsers().filter(u => u.email.toLowerCase() !== cleanEmail);
-        localStorage.setItem('bigboys_users', JSON.stringify(users));
-
         const logged = this.getLoggedInUser();
-        if (logged && logged.email.toLowerCase() === cleanEmail) {
-          this.logout();
+        const isOwner = Boolean(logged && logged.email && logged.email.toLowerCase() === cleanEmail);
+
+        // Supresión (Ley N° 21.719): en la nube solo la puede pedir el titular con su contraseña
+        const sb = this.getCloudClient();
+        if (sb && isOwner && logged.passwordHash) {
+          try {
+            const { data: done, error } = await sb.rpc('api_suprimir_cuenta', { p_email: cleanEmail, p_password_sha256: logged.passwordHash });
+            if (!error && done) console.log('✓ Cuenta suprimida y anonimizada en Supabase:', cleanEmail);
+          } catch (e) {
+            console.warn('Aviso al suprimir la cuenta en Supabase:', e);
+          }
         }
 
-        const sb = (typeof supabaseClient !== 'undefined' && supabaseClient) ? supabaseClient : (typeof window !== 'undefined' && window.supabaseClient ? window.supabaseClient : null);
-        if (sb) {
-          try {
-            await sb.from('users').delete().eq('email', cleanEmail);
-            console.log('✓ Usuario eliminado de Supabase PostgreSQL:', cleanEmail);
-          } catch (e) {
-            console.warn('Aviso al eliminar usuario de Supabase:', e);
-          }
+        let users = this.getUsers().filter(u => u.email.toLowerCase() !== cleanEmail);
+        localStorage.setItem('bigboys_users', JSON.stringify(users));
+        if (isOwner) {
+          this.logout();
         }
 
         this.addNotification('Usuario Eliminado 🗑️', `El usuario '${cleanEmail}' ha sido eliminado exitosamente.`);
@@ -1983,8 +1831,8 @@
 
         localStorage.setItem('bigboys_appointments', JSON.stringify(appointments));
 
-        // Sincronizar en Supabase PostgreSQL
-        this.publishAppointmentToCloud(appt);
+        // Sincronizar en Supabase (reserva + reagendamiento)
+        this.rescheduleAppointmentInCloud(appt, oldDateTime);
 
         const locName = this.getLocations().find(l => l.id === appt.locationId)?.name || 'Big Boys';
         const bName = this.getBarbers().find(b => b.id === appt.barberId)?.name || 'Barbero';
@@ -2143,6 +1991,7 @@
           }
 
           appt.status = newStatus;
+          if (newStatus.startsWith('Cancelada')) appt.cancelledBy = 'Administración';
           appt.updatedAt = Date.now();
           localStorage.setItem('bigboys_appointments', JSON.stringify(appointments));
           this.addNotification('Estado de Cita Actualizado', `Cita #${appointmentId} marcada como '${newStatus}'`);
@@ -2166,6 +2015,7 @@
         const appt = appointments.find(a => a.id === appointmentId || a.docId === appointmentId);
         if (appt) {
           appt.status = 'Cancelada';
+          appt.cancelledBy = 'Administración';
           appt.updatedAt = Date.now();
           localStorage.setItem('bigboys_appointments', JSON.stringify(appointments));
 
@@ -5231,18 +5081,18 @@
           
           if (!testClient) throw new Error('Cliente Supabase JS no disponible.');
           
-          const { data, error } = await testClient.from('locations').select('id, name').limit(1);
+          const { data, error } = await testClient.rpc('api_sucursales');
           if (error) throw error;
           
           setSbTestStatus({
             success: true,
-            msg: `✓ ¡Conexión Relacional Exitosa! La tabla 'locations' de PostgreSQL respondió correctamente.`
+            msg: `✓ ¡Conexión exitosa! La función api_sucursales respondió con ${Array.isArray(data) ? data.length : 0} sucursales.`
           });
           store.addNotification('Conexión Exitosa 🐘', 'Supabase PostgreSQL respondió correctamente.');
         } catch (err) {
           setSbTestStatus({
             success: false,
-            msg: `Error de conexión: ${err.message || 'Verifica la URL, Anon Key o ejecuta el script supabase_schema.sql en tu proyecto.'}`
+            msg: `Error de conexión: ${err.message || 'Verifica la URL y la Anon Key del proyecto Big Boys en Supabase.'}`
           });
         } finally {
           setSbTesting(false);

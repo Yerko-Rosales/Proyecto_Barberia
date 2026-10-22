@@ -1,0 +1,29 @@
+Proyecto Barbería Big-Boys — Pruebas de la capa de acceso (funciones api_*) en Supabase
+Proyecto «Big Boys Project» (PostgreSQL 17, us-west-2). Fecha: 22-10-2026.
+Las llamadas se hicieron con la clave pública (anon), igual que la web y la app. Los datos de prueba se borraron al terminar.
+
+OK | api_sucursales devuelve las 3 sucursales reales con coordenadas
+OK | api_barberos devuelve los 4 barberos (demo) con horario y calificación
+OK | api_login con credenciales válidas devuelve el perfil (sin hash de contraseña)
+OK | api_login con contraseña incorrecta devuelve null y suma un intento fallido
+OK | api_registrar_cliente crea usuario, rol CLIENTE, cliente y consentimiento
+OK | api_registrar_cliente con correo existente es rechazado -> CORREO_YA_REGISTRADO
+OK | api_crear_reserva de invitado (web) crea cliente invitado, reserva y notificación
+OK | api_crear_reserva en un horario ocupado es rechazada -> HORARIO_OCUPADO
+OK | api_listar_reservas sin credenciales enmascara los datos de contacto («Pedro I.»)
+OK | api_listar_reservas del titular muestra sus propios datos completos
+OK | api_actualizar_reserva encuentra la reserva por barbero y fecha (copia local de la app) y la anula
+OK | api_actualizar_reserva reagenda con más de 24 h: deja registro en reagendamiento y cuenta 1 de 2
+OK | Anulación del cliente con más de 24 h no retiene el abono
+OK | api_crear_resena y api_listar_resenas (autor mostrado como «Cliente Q.»)
+OK | api_suprimir_cuenta anonimiza la cuenta y registra la solicitud de supresión
+OK | Lectura directa de la tabla usuario con la clave pública es rechazada (permission denied)
+OK | Función interna _bb_b36 no es ejecutable con la clave pública (permission denied)
+INFO | Resultado: 17 / 17 OK
+
+Prueba de punta a punta de la web (Chrome sin interfaz, index.html contra Supabase):
+OK | Carga las 3 sucursales y los 4 barberos desde la base de datos
+OK | Inicio de sesión de test@bigboys.cl y rechazo de una contraseña incorrecta
+OK | Reserva «Corte + Barba», reagendamiento al día siguiente y anulación del cliente quedan en la tabla reserva
+
+App Android: compila sin errores (Gradle 9.3.1, :app:compileDebugKotlin, BUILD SUCCESSFUL). No se ejecutó en un dispositivo.

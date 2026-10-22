@@ -143,8 +143,8 @@ fun ApiMonitorSheet(
                     onClick = {
                         scope.launch {
                             apiService.dispatchBookingEmail(
-                                to = "j.ojedalefio@gmail.com",
-                                clientName = "Juan Ojeda",
+                                to = "cliente.test@bigboys.cl",
+                                clientName = "Juan Pérez",
                                 barber = "Carlos 'El Patrón'",
                                 service = "Corte Big Boys Signature",
                                 date = "2026-10-01",

@@ -4,10 +4,8 @@ import android.content.Context
 import android.util.Log
 import com.example.data.model.Appointment
 import com.example.data.supabase.model.*
-import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.realtime.PostgresAction
-import io.github.jan.supabase.realtime.channel
-import io.github.jan.supabase.realtime.postgresChangeFlow
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.rpc
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -17,77 +15,70 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 /**
- * Supabase PostgreSQL & Realtime Manager for Big Boys Barbershop Chile.
- * Replaces Firebase Cloud Firestore with relational tables and WebSockets.
+ * Supabase Manager for Big Boys Barbershop Chile.
+ * The app never reads the tables directly: the 27 relational tables keep RLS closed and
+ * every operation goes through the api_* functions (same layer used by the web).
  */
 object SupabaseManager {
 
     private const val TAG = "SupabaseManager"
-    private const val TABLE_APPOINTMENTS = "appointments"
-    private const val TABLE_USERS = "users"
-    private const val TABLE_LOCATIONS = "locations"
-    private const val TABLE_BARBERS = "barbers"
-    private const val TABLE_COUPONS = "coupons"
-    private const val TABLE_REVIEWS = "reviews"
+    private const val FORMAT = "APP"
+    private const val CHANNEL = "APP"
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val client by lazy { SupabaseClientProvider.client }
     private val _manualRefreshSignal = kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
+    // Session credentials used by api_listar_reservas to show the owner's contact data
+    @Volatile private var sessionEmail: String? = null
+    @Volatile private var sessionPasswordHash: String? = null
+
     fun init(context: Context) {
         Log.d(TAG, "Supabase Client initialized with Project URL: ${SupabaseClientProvider.SUPABASE_URL}")
     }
 
+    fun setSession(email: String?, passwordHash: String?) {
+        sessionEmail = email?.trim()?.lowercase()
+        sessionPasswordHash = passwordHash
+        triggerCloudRefresh()
+    }
+
     /**
-     * Triggers an immediate refresh of appointments from Supabase PostgREST
+     * Triggers an immediate refresh of appointments from Supabase
      */
     fun triggerCloudRefresh() {
         _manualRefreshSignal.tryEmit(Unit)
     }
 
+    private suspend fun callRpc(function: String, params: JsonObject = buildJsonObject { }) =
+        client.postgrest.rpc(function, params)
+
+    /** "dd-MM-yyyy HH:mm hrs" or "yyyy-MM-dd HH:mm" -> "yyyy-MM-dd HH:mm" */
+    private fun toIsoDateTime(dateTime: String): String {
+        val datePart = dateTime.substringBefore(" ").trim()
+        val timePart = dateTime.substringAfter(" ").trim()
+        val isoDate = com.example.ui.util.AppFormatters.toIsoDate(datePart)
+        val isoHour = com.example.ui.util.AppFormatters.extractHourSlot(timePart)
+        return "$isoDate $isoHour"
+    }
+
     /**
-     * Listens in real-time to all appointments from Supabase PostgreSQL via Realtime WebSocket,
-     * combined with automatic background polling and manual refresh triggers.
-     * Whenever an appointment is booked on the Web, this flow emits the updated list
-     * to immediately block hours in the app.
+     * Appointments from Supabase, refreshed by polling (every 8 seconds) and on demand.
+     * The tables are closed (RLS), so Realtime on the old prototype table is no longer used.
      */
     fun observeAppointmentsRealtime(): Flow<List<Appointment>> = callbackFlow {
-        // 1. Initial query from PostgREST
         try {
-            val initialList = fetchAppointmentsFromCloud()
-            trySend(initialList)
+            trySend(fetchAppointmentsFromCloud())
         } catch (e: Exception) {
             Log.w(TAG, "Initial appointments fetch fallback: ${e.message}")
             trySend(emptyList())
         }
 
-        // 2. Realtime Channel Subscription
-        val channel = client.channel("public-appointments-channel")
-        val realtimeJob = scope.launch {
-            try {
-                val changeFlow = channel.postgresChangeFlow<PostgresAction>(schema = "public") {
-                    table = TABLE_APPOINTMENTS
-                }
-                channel.subscribe()
-
-                changeFlow.collect { action ->
-                    Log.d(TAG, "Supabase Realtime event on $TABLE_APPOINTMENTS: $action")
-                    try {
-                        val updated = fetchAppointmentsFromCloud()
-                        trySend(updated)
-                    } catch (ex: Exception) {
-                        Log.e(TAG, "Error fetching updated appointments after realtime action", ex)
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Supabase Realtime subscription error: ${e.message}", e)
-            }
-        }
-
-        // 3. Periodic Auto-poll fallback (every 8 seconds) to guarantee Web sync
-        // even if Realtime publication is not enabled in the Supabase Dashboard
         val pollJob = scope.launch {
             while (isActive) {
                 delay(8000)
@@ -102,12 +93,10 @@ object SupabaseManager {
             }
         }
 
-        // 4. Manual on-demand refresh signal
         val manualJob = scope.launch {
             _manualRefreshSignal.collect {
                 try {
-                    val latest = fetchAppointmentsFromCloud()
-                    trySend(latest)
+                    trySend(fetchAppointmentsFromCloud())
                 } catch (e: Exception) {
                     Log.w(TAG, "Error in manual appointments refresh: ${e.message}")
                 }
@@ -115,174 +104,122 @@ object SupabaseManager {
         }
 
         awaitClose {
-            realtimeJob.cancel()
             pollJob.cancel()
             manualJob.cancel()
-            scope.launch {
-                try {
-                    channel.unsubscribe()
-                } catch (e: Exception) {
-                    Log.w(TAG, "Error unsubscribing channel", e)
-                }
-            }
         }
     }
 
     /**
-     * Queries all appointments using Supabase PostgREST.
+     * Lists reservations (table reserva). Other customers' contact data comes masked.
      */
     suspend fun fetchAppointmentsFromCloud(): List<Appointment> {
         return try {
-            val dtos = client.from(TABLE_APPOINTMENTS)
-                .select()
-                .decodeList<AppointmentDto>()
-            Log.d(TAG, "Fetched ${dtos.size} appointments from Supabase PostgREST")
+            val dtos = callRpc("api_listar_reservas", buildJsonObject {
+                put("p_formato", FORMAT)
+                sessionEmail?.let { put("p_email", it) }
+                sessionPasswordHash?.let { put("p_password_sha256", it) }
+            }).decodeList<AppointmentDto>()
+            Log.d(TAG, "Fetched ${dtos.size} reservations from Supabase")
             dtos.map { it.toAppointment() }
         } catch (e: Exception) {
-            Log.e(TAG, "Error fetching appointments from Supabase PostgREST", e)
+            Log.e(TAG, "Error fetching reservations from Supabase", e)
             emptyList()
         }
     }
 
     /**
-     * Inserts a newly booked appointment into Supabase PostgreSQL.
-     * Uses strict ISO format "yyyy-MM-dd HH:mm" for 100% compatibility with the Web platform.
+     * Creates a reservation (cliente, reserva and notificacion are written by api_crear_reserva).
+     * Returns false if the slot is already taken (HORARIO_OCUPADO) or the call fails.
      */
     suspend fun publishAppointmentToCloud(appointment: Appointment): Boolean {
         return try {
-            val datePart = appointment.dateTime.substringBefore(" ").trim()
-            val timePart = appointment.dateTime.substringAfter(" ").trim()
-            val isoDate = com.example.ui.util.AppFormatters.toIsoDate(datePart)
-            val isoHour = com.example.ui.util.AppFormatters.extractHourSlot(timePart)
-            val isoDateTime = "$isoDate $isoHour"
-
-            val cloudUser = if (appointment.customerEmail.isNotBlank()) {
-                fetchCloudUser(appointment.customerEmail)
-            } else null
-            val validUserId = cloudUser?.id
-
-            // Ensure barberId and locationId are valid in Supabase
-            val validBarberId = if (appointment.barberId in 1..4) appointment.barberId else 1
-            val validLocationId = if (appointment.locationId in 1..3) appointment.locationId else 1
-
-            val safePhone = when {
-                appointment.customerPhone.isNotBlank() -> appointment.customerPhone
-                !cloudUser?.phone.isNullOrBlank() -> cloudUser!!.phone
-                else -> "+56912345678"
-            }
-            val safeName = when {
-                appointment.customerName.isNotBlank() -> appointment.customerName
-                !cloudUser?.fullName.isNullOrBlank() -> cloudUser!!.fullName
-                else -> "Cliente"
-            }
-            val safeEmail = when {
-                appointment.customerEmail.isNotBlank() -> appointment.customerEmail
-                !cloudUser?.email.isNullOrBlank() -> cloudUser!!.email
-                else -> "cliente@bigboys.cl"
-            }
-
-            val dto = AppointmentDto(
-                id = System.currentTimeMillis(),
-                userId = validUserId,
-                barberId = validBarberId,
-                locationId = validLocationId,
-                serviceName = appointment.serviceName.ifBlank { "Corte de Cabello" },
-                servicePrice = appointment.servicePrice.toInt(),
-                prepayAmount = appointment.prepayAmount.toInt(),
-                dateTime = isoDateTime,
-                status = appointment.status.ifBlank { "Confirmada" },
-                customerName = safeName,
-                customerPhone = safePhone,
-                customerEmail = safeEmail,
-                isGuest = appointment.isGuest
-            )
-            client.from(TABLE_APPOINTMENTS).insert(dto)
-            Log.d(TAG, "Appointment successfully inserted into Supabase with ISO date: $isoDateTime, barberId: $validBarberId")
+            val isoDateTime = toIsoDateTime(appointment.dateTime)
+            callRpc("api_crear_reserva", buildJsonObject {
+                put("p", buildJsonObject {
+                    put("id", System.currentTimeMillis())
+                    put("canal", CHANNEL)
+                    put("barber_id", appointment.barberId)
+                    put("location_id", appointment.locationId)
+                    put("service_name", appointment.serviceName.ifBlank { "Corte" })
+                    put("date_time", isoDateTime)
+                    put("status", appointment.status.ifBlank { "Confirmada" })
+                    put("customer_name", appointment.customerName.ifBlank { "Cliente" })
+                    put("customer_phone", appointment.customerPhone)
+                    put("customer_email", appointment.customerEmail)
+                })
+            })
+            Log.d(TAG, "Reservation inserted into Supabase: $isoDateTime, barberId: ${appointment.barberId}")
             triggerCloudRefresh()
             true
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to insert appointment into Supabase: ${e.message}", e)
+            Log.e(TAG, "Failed to insert reservation into Supabase: ${e.message}", e)
             false
         }
     }
 
     /**
-     * Updates appointment status (e.g. "Cancelada", "Completada") in Supabase.
+     * Updates a reservation status (e.g. "Cancelada", "Completada", "No-Show").
+     * The reservation is found by id or, for local copies, by barber and date/time.
+     * cancelledBy distinguishes customer cancellations (deposit rule) from staff ones.
      */
-    suspend fun updateAppointmentStatusInCloud(appointment: Appointment, newStatus: String): Boolean {
+    suspend fun updateAppointmentStatusInCloud(appointment: Appointment, newStatus: String, cancelledBy: String? = null): Boolean {
         return try {
-            val datePart = appointment.dateTime.substringBefore(" ").trim()
-            val timePart = appointment.dateTime.substringAfter(" ").trim()
-            val isoDate = com.example.ui.util.AppFormatters.toIsoDate(datePart)
-            val isoHour = com.example.ui.util.AppFormatters.extractHourSlot(timePart)
-            val isoDateTime = "$isoDate $isoHour"
-
-            if (appointment.id > 1000) {
-                val apptId = appointment.id.toLong()
-                client.from(TABLE_APPOINTMENTS).update({
-                    set("status", newStatus)
-                }) {
-                    filter {
-                        eq("id", apptId)
-                    }
-                }
-            } else {
-                client.from(TABLE_APPOINTMENTS).update({
-                    set("status", newStatus)
-                }) {
-                    filter {
-                        or {
-                            eq("date_time", isoDateTime)
-                            eq("date_time", appointment.dateTime)
-                        }
-                        eq("barber_id", appointment.barberId)
-                    }
-                }
-            }
-            Log.d(TAG, "Appointment status updated in Supabase: $newStatus")
+            callRpc("api_actualizar_reserva", buildJsonObject {
+                put("p", buildJsonObject {
+                    put("id", appointment.id)
+                    put("canal", CHANNEL)
+                    put("barber_id", appointment.barberId)
+                    put("date_time", toIsoDateTime(appointment.dateTime))
+                    put("status", newStatus)
+                    cancelledBy?.let { put("cancelled_by", it) }
+                })
+            })
+            Log.d(TAG, "Reservation status updated in Supabase: $newStatus")
             triggerCloudRefresh()
             true
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to update appointment status in Supabase: ${e.message}", e)
+            Log.e(TAG, "Failed to update reservation status in Supabase: ${e.message}", e)
             false
         }
     }
 
     /**
-     * Checks if a user already exists in Supabase by email or RUT.
-     * Prevents duplicate registration across both Web and Android app.
+     * Reschedules a reservation; the database enforces >= 24 h notice and at most 2 changes
+     * and records the change in reagendamiento.
      */
-    suspend fun checkCloudUserExists(email: String, rut: String = ""): Pair<Boolean, String?> {
+    suspend fun rescheduleAppointmentInCloud(appointment: Appointment, oldDateTime: String): Boolean {
+        return try {
+            callRpc("api_actualizar_reserva", buildJsonObject {
+                put("p", buildJsonObject {
+                    put("id", appointment.id)
+                    put("canal", CHANNEL)
+                    put("barber_id", appointment.barberId)
+                    put("date_time", toIsoDateTime(oldDateTime))
+                    put("new_date_time", toIsoDateTime(appointment.dateTime))
+                })
+            })
+            triggerCloudRefresh()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to reschedule reservation in Supabase: ${e.message}", e)
+            false
+        }
+    }
+
+    /**
+     * Checks if an account already exists (table usuario). RUT is not stored (data minimization).
+     */
+    suspend fun checkCloudUserExists(email: String): Pair<Boolean, String?> {
         return try {
             val cleanEmail = email.trim().lowercase()
-            val usersByEmail = client.from(TABLE_USERS).select {
-                filter {
-                    eq("email", cleanEmail)
-                }
-            }.decodeList<UserDto>()
-
-            if (usersByEmail.isNotEmpty()) {
-                val user = usersByEmail.first()
-                val name = if (user.fullName.isNotBlank()) " (${user.fullName})" else ""
-                return Pair(true, "El correo '$cleanEmail' ya se encuentra registrado$name. Inicia sesión con tus credenciales.")
+            val exists = callRpc("api_usuario_existe", buildJsonObject {
+                put("p_email", cleanEmail)
+            }).decodeAs<Boolean>()
+            if (exists) {
+                Pair(true, "El correo '$cleanEmail' ya se encuentra registrado. Inicia sesión con tus credenciales.")
+            } else {
+                Pair(false, null)
             }
-
-            if (rut.isNotBlank()) {
-                val cleanRut = rut.trim()
-                val rutCleanDigits = cleanRut.replace(".", "").replace("-", "").lowercase()
-                val allUsers = client.from(TABLE_USERS).select().decodeList<UserDto>()
-                val existingByRut = allUsers.find { u ->
-                    val uDigits = u.rut.replace(".", "").replace("-", "").lowercase()
-                    uDigits.isNotEmpty() && uDigits == rutCleanDigits
-                }
-
-                if (existingByRut != null) {
-                    val name = if (existingByRut.fullName.isNotBlank()) " (${existingByRut.fullName})" else ""
-                    return Pair(true, "El RUT '$cleanRut' ya se encuentra registrado con otra cuenta$name. Inicia sesión con tus credenciales.")
-                }
-            }
-
-            Pair(false, null)
         } catch (e: Exception) {
             Log.e(TAG, "Error checking user existence in Supabase: ${e.message}", e)
             Pair(false, null)
@@ -290,86 +227,70 @@ object SupabaseManager {
     }
 
     /**
-     * Retrieves user profile from Supabase PostgreSQL by email.
+     * Validates the credentials in the database (api_login). The stored password never leaves Supabase;
+     * the returned profile carries the same SHA-256 hash the app already computed.
      */
-    suspend fun fetchCloudUser(email: String): UserDto? {
+    suspend fun fetchCloudUser(email: String, passwordHash: String): UserDto? {
         return try {
             val cleanEmail = email.trim().lowercase()
-            val list = client.from(TABLE_USERS).select {
-                filter {
-                    eq("email", cleanEmail)
-                }
-            }.decodeList<UserDto>()
-            list.firstOrNull()
+            val result = callRpc("api_login", buildJsonObject {
+                put("p_email", cleanEmail)
+                put("p_password_sha256", passwordHash)
+            })
+            if (result.data.isBlank() || result.data.trim() == "null") {
+                null
+            } else {
+                result.decodeAs<UserDto>().copy(passwordHash = passwordHash)
+            }
         } catch (e: Exception) {
-            Log.e(TAG, "Error fetching user from Supabase: ${e.message}", e)
+            Log.e(TAG, "Error validating user in Supabase: ${e.message}", e)
             null
         }
     }
 
     /**
-     * Syncs / Registers user profile into Supabase PostgreSQL with password hash.
+     * Registers a customer account (usuario, rol CLIENTE, cliente and consentimiento).
      */
     suspend fun syncUserToCloud(
         email: String,
         fullName: String,
         phone: String,
-        rut: String,
-        passwordHash: String = ""
+        passwordHash: String
     ): Boolean {
         return try {
-            val cleanEmail = email.trim().lowercase()
-            val existing = fetchCloudUser(cleanEmail)
-            if (existing == null) {
-                val newUser = UserDto(
-                    fullName = fullName,
-                    email = cleanEmail,
-                    phone = phone,
-                    rut = rut,
-                    passwordHash = passwordHash
-                )
-                client.from(TABLE_USERS).insert(newUser)
-                Log.d(TAG, "User registered in Supabase users table: $cleanEmail")
-            } else {
-                client.from(TABLE_USERS).update({
-                    set("full_name", fullName)
-                    set("phone", phone)
-                    set("rut", rut)
-                    if (passwordHash.isNotEmpty()) {
-                        set("password_hash", passwordHash)
-                    }
-                }) {
-                    filter {
-                        eq("email", cleanEmail)
-                    }
-                }
-                Log.d(TAG, "User profile updated in Supabase users table: $cleanEmail")
-            }
+            callRpc("api_registrar_cliente", buildJsonObject {
+                put("p_email", email.trim().lowercase())
+                put("p_nombre_completo", fullName)
+                put("p_telefono", phone)
+                put("p_password_sha256", passwordHash)
+                put("p_canal", CHANNEL)
+            })
+            Log.d(TAG, "Customer registered in Supabase: $email")
             true
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to sync user to Supabase: ${e.message}", e)
+            Log.e(TAG, "Failed to register customer in Supabase: ${e.message}", e)
             false
         }
     }
 
     /**
-     * Fetches locations from Supabase PostgreSQL.
+     * Fetches branches (table sucursal).
      */
     suspend fun fetchLocations(): List<LocationDto> {
         return try {
-            client.from(TABLE_LOCATIONS).select().decodeList<LocationDto>()
+            callRpc("api_sucursales").decodeList<LocationDto>()
         } catch (e: Exception) {
-            Log.e(TAG, "Error fetching locations from Supabase", e)
+            Log.e(TAG, "Error fetching branches from Supabase", e)
             emptyList()
         }
     }
 
     /**
-     * Fetches barbers from Supabase PostgreSQL.
+     * Fetches barbers (tables barbero, horario_barbero and resena for the rating).
      */
     suspend fun fetchBarbers(): List<BarberDto> {
         return try {
-            client.from(TABLE_BARBERS).select().decodeList<BarberDto>()
+            callRpc("api_barberos").decodeList<BarberDto>()
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching barbers from Supabase", e)
             emptyList()

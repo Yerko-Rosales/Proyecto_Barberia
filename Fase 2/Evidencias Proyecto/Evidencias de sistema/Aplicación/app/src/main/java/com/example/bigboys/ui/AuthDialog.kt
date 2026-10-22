@@ -58,7 +58,7 @@ fun AuthDialog(
                 ) {
                     TextButton(onClick = {
                         // Quick fill client
-                        email = "j.ojedalefio@gmail.com"
+                        email = "cliente.test@bigboys.cl"
                         isRegisterMode = false
                     }) {
                         Text("👤 Cliente Demo", fontSize = 11.sp, color = GoldLight)

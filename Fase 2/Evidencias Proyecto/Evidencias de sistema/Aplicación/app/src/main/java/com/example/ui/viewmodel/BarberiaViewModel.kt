@@ -308,8 +308,8 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             var user = repository.getUserByEmail(cleanEmail)
 
-            // Always check Supabase PostgreSQL so users registered on the Web can log in immediately
-            val cloudUserDto = SupabaseManager.fetchCloudUser(cleanEmail)
+            // Credentials are validated in Supabase (api_login) so users registered on the Web can log in
+            val cloudUserDto = SupabaseManager.fetchCloudUser(cleanEmail, hashPassword(cleanPass))
             if (cloudUserDto != null) {
                 val cloudUser = cloudUserDto.toUser()
                 if (user == null) {
@@ -321,7 +321,6 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
                         val updatedUser = user.copy(
                             fullName = if (cloudUser.fullName.isNotBlank()) cloudUser.fullName else user.fullName,
                             phone = if (cloudUser.phone.isNotBlank()) cloudUser.phone else user.phone,
-                            rut = if (cloudUser.rut.isNotBlank()) cloudUser.rut else user.rut,
                             passwordHash = cloudUser.passwordHash
                         )
                         repository.updateUser(updatedUser)
@@ -341,6 +340,7 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
                 _loggedInUser.value = user
                 _isAdmin.value = false
                 _loggedInBarber.value = null
+                SupabaseManager.setSession(cleanEmail, hashPassword(cleanPass))
                 setRememberMeCredentials(rememberMe, cleanEmail, cleanPass)
                 addNotification(
                     title = "¡Bienvenido ${user.fullName}!",
@@ -488,9 +488,9 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
             }
 
             // Check also in Supabase to ensure cloud uniqueness across platforms
-            val cloudCheck = SupabaseManager.checkCloudUserExists(cleanEmail, cleanRut)
+            val cloudCheck = SupabaseManager.checkCloudUserExists(cleanEmail)
             if (cloudCheck.first) {
-                callback(false, cloudCheck.second ?: "El correo o RUT ya está registrado en el sistema.")
+                callback(false, cloudCheck.second ?: "El correo ya está registrado en el sistema.")
                 return@launch
             }
 
@@ -508,15 +508,15 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
             _loggedInUser.value = newUser.copy(id = generatedId)
             _isAdmin.value = false
 
-            // Sync user profile to Supabase PostgreSQL in background with password hash
+            // Register the account in Supabase (usuario + cliente + consentimiento); RUT is not stored
             viewModelScope.launch {
                 SupabaseManager.syncUserToCloud(
                     email = cleanEmail,
                     fullName = cleanName,
                     phone = cleanPhone,
-                    rut = formattedRut,
                     passwordHash = pHash
                 )
+                SupabaseManager.setSession(cleanEmail, pHash)
             }
 
             // Generate 4-digit PIN coupon if within limit of 100 coupons
@@ -597,6 +597,7 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
         _loggedInUser.value = null
         _isAdmin.value = false
         _loggedInBarber.value = null
+        SupabaseManager.setSession(null, null)
     }
 
     fun logoutBarber() {
@@ -616,7 +617,7 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
 
             // Update in Supabase in background so slot is released immediately
             viewModelScope.launch {
-                SupabaseManager.updateAppointmentStatusInCloud(updated, "Cancelada")
+                SupabaseManager.updateAppointmentStatusInCloud(updated, "Cancelada", cancelledBy = "Barbero (Emergencia)")
             }
 
             val clientEmail = if (appointment.customerEmail.isBlank()) "contacto@caballero.cl" else appointment.customerEmail
@@ -806,7 +807,7 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
             )
             repository.updateAppointment(updated)
             viewModelScope.launch {
-                SupabaseManager.updateAppointmentStatusInCloud(updated, updated.status)
+                SupabaseManager.rescheduleAppointmentInCloud(updated, appointment.dateTime)
             }
 
             addNotification(
@@ -837,7 +838,7 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
             )
             repository.updateAppointment(updated)
             viewModelScope.launch {
-                SupabaseManager.updateAppointmentStatusInCloud(updated, newStatus)
+                SupabaseManager.updateAppointmentStatusInCloud(updated, newStatus, cancelledBy = "Cliente")
             }
 
             val message = if (isWithin24h) {
@@ -1150,7 +1151,7 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
 
             // Update in Supabase in background so the slot is released on the web immediately
             viewModelScope.launch {
-                SupabaseManager.updateAppointmentStatusInCloud(updated, "Cancelada")
+                SupabaseManager.updateAppointmentStatusInCloud(updated, "Cancelada", cancelledBy = "Administración")
             }
 
             val clientEmail = if (appointment.customerEmail.isBlank()) "contacto@caballero.cl" else appointment.customerEmail

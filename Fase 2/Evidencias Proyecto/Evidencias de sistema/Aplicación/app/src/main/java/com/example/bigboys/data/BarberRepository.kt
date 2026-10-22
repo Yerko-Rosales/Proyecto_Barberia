@@ -36,10 +36,10 @@ class BarberRepository {
     // Registered users (Email as unique key)
     private val _users = MutableStateFlow<Map<String, User>>(
         mapOf(
-            "j.ojedalefio@gmail.com" to User(
-                email = "j.ojedalefio@gmail.com",
+            "cliente.test@bigboys.cl" to User(
+                email = "cliente.test@bigboys.cl",
                 rut = "18.345.678-2",
-                fullName = "Juan Ojeda",
+                fullName = "Juan Pérez",
                 phone = "+56 9 8765 4321",
                 role = UserRole.CLIENT
             ),
@@ -78,8 +78,8 @@ class BarberRepository {
         listOf(
             Appointment(
                 id = "apt-1",
-                customerName = "Juan Ojeda",
-                customerEmail = "j.ojedalefio@gmail.com",
+                customerName = "Juan Pérez",
+                customerEmail = "cliente.test@bigboys.cl",
                 customerPhone = "+56 9 8765 4321",
                 customerRut = "18.345.678-2",
                 barberName = "Carlos 'El Patrón'",

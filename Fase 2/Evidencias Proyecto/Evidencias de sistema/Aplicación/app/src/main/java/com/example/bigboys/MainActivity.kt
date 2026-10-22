@@ -73,7 +73,7 @@ fun AppNavigator(repository: BarberRepository) {
                     },
                     onContinueAsGuest = {
                         // Quick continue as default guest client
-                        repository.login("j.ojedalefio@gmail.com")
+                        repository.login("cliente.test@bigboys.cl")
                     }
                 )
             }

@@ -168,7 +168,7 @@ fun LoginScreen(
                     ) {
                         Button(
                             onClick = {
-                                email = "j.ojedalefio@gmail.com"
+                                email = "cliente.test@bigboys.cl"
                                 isRegisterMode = false
                                 val res = repository.login(email)
                                 res.onSuccess { onLoginSuccess(it) }

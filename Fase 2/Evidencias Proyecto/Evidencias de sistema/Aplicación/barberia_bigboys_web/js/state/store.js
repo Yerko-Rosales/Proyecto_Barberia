@@ -407,21 +407,10 @@ class BarberiaStore {
     try {
       usersList = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
     } catch (e) {}
-    usersList = usersList.filter(u => u && u.email && u.email.toLowerCase() !== 'j.ojedalefio@gmail.com');
     if (!usersList.some(u => u && u.email && u.email.toLowerCase() === 'test@bigboys.cl')) {
       usersList.push(SEED_TEST_USER);
     }
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(usersList));
-
-    try {
-      const logged = JSON.parse(localStorage.getItem(STORAGE_KEYS.LOGGED_USER) || 'null');
-      if (logged && logged.email && logged.email.toLowerCase() === 'j.ojedalefio@gmail.com') {
-        localStorage.removeItem(STORAGE_KEYS.LOGGED_USER);
-        if (typeof sessionStorage !== 'undefined') {
-          sessionStorage.removeItem('bigboys_session_active');
-        }
-      }
-    } catch (e) {}
     let couponsList = [];
     try {
       couponsList = JSON.parse(localStorage.getItem(STORAGE_KEYS.COUPONS) || '[]');
@@ -1460,7 +1449,7 @@ class BarberiaStore {
         sb.from('appointments').update({
           status: 'Cancelada',
           cancellation_reason: emergencyReason,
-          canceled_by: 'Barbero (Emergencia)',
+          cancelled_by: 'Barbero (Emergencia)',
           updated_at: new Date().toISOString()
         }).eq('id', Number(appt.id)).then(() => {}).catch(() => {});
       } catch (err) {}

@@ -61,7 +61,7 @@
  ],
  "DIAG-13": [
   "Vista física: despliegue actual (3 sucursales)",
-  "Arquitectura de puesta en marcha: la base de datos PostgreSQL 17 opera en Supabase (región us-west-2, Oregón, EE. UU.; transferencia internacional declarada, SC-18), con RLS activo y respaldo diario cifrado; la API y el servidor web se alojan en un servidor de aplicaciones cuyo proveedor está por definir (propuesta: VPS en Santiago; SC-20). Las tres sucursales y los clientes acceden por HTTPS.",
+  "Arquitectura de puesta en marcha: la base de datos PostgreSQL 17 opera en Supabase (región us-west-2, Oregón, EE. UU.; transferencia internacional declarada, SC-18), con 27 tablas, RLS cerrado y respaldo diario cifrado. La API REST la publica Supabase (PostgREST) mediante las funciones api_* (SC-20); el sitio web se aloja como archivos estáticos en un proveedor por definir. Las tres sucursales, la web y la app acceden por HTTPS.",
   "DIAG-13_Vista_fisica_despliegue_actual_3_sucursales"
  ],
  "DIAG-14": [
@@ -131,7 +131,7 @@
  ],
  "DIAG-27": [
   "Modelo Entidad-Relación conceptual",
-  "Entidades del negocio y sus relaciones con cardinalidad (notación de pata de gallo). Incluye las entidades mínimas solicitadas: Sucursal, Usuario, Cliente, Barbero, Servicio, Horario, Reserva, Pago, Atención, Fila por orden de llegada, Promoción, Configuración, Notificación, Consentimiento, Solicitud de derechos y Registro de auditoría.",
+  "Entidades del negocio y sus relaciones con cardinalidad (notación de pata de gallo). Incluye las entidades mínimas solicitadas: Sucursal, Usuario, Cliente, Barbero, Servicio, Horario, Reserva, Pago, Atención, Fila por orden de llegada, Promoción, Configuración, Notificación, Consentimiento, Solicitud de derechos y Registro de auditoría, además de Reseña (calificación de barberos, SC-21).",
   "DIAG-27_Modelo_Entidad_Relacion_conceptual"
  ],
  "DIAG-28": [

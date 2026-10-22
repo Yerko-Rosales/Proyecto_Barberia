@@ -39,6 +39,8 @@ const tests = [
   ['Cliente se autorregistra con rol CLIENTE', `INSERT INTO usuario_rol (id_usuario,id_rol) VALUES (2,1)`, true],
   ['Servicio de más de 60 minutos es rechazado (máximo confirmado)', `INSERT INTO servicio (nombre,categoria,duracion_min,precio_base) VALUES ('Prueba larga','COMBO',75,30000)`, false],
   ['Configuración GLOBAL con sucursal es rechazada', `INSERT INTO configuracion (clave,ambito,id_sucursal,tipo_valor,valor) VALUES ('X','GLOBAL',1,'ENTERO','1')`, false],
+  ['Reseña válida de un cliente a un barbero', `INSERT INTO resena (id_cliente,id_sucursal,id_barbero,calificacion,comentario) VALUES (1,1,1,5,'Excelente')`, true],
+  ['Reseña con calificación fuera de 1 a 5 es rechazada', `INSERT INTO resena (id_cliente,id_sucursal,id_barbero,calificacion) VALUES (1,1,1,6)`, false],
 ];
 for (const [name, sql, expectOk] of tests) {
   try { await db.exec(sql); expectOk ? ok(name) : fail(name, 'se esperaba rechazo y fue aceptado'); }

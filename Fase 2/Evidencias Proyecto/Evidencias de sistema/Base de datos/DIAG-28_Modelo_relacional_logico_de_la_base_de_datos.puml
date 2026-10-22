@@ -49,6 +49,8 @@ entity "sucursal" as sucursal {
   * es_casa_matriz : BOOLEAN
   * activa : BOOLEAN
   * creado_en : TIMESTAMPTZ
+    latitud : NUMERIC(9,6)
+    longitud : NUMERIC(9,6)
 }
 entity "rol" as rol {
   * <b>id_rol</b> : SMALLINT <<PK>>
@@ -225,6 +227,18 @@ entity "atencion" as atencion {
   * registrada_por : BIGINT <<FK>>
   * creado_en : TIMESTAMPTZ
 }
+entity "resena" as resena {
+  * <b>id_resena</b> : BIGSERIAL <<PK>>
+  --
+  * id_cliente : BIGINT <<FK>>
+  * id_sucursal : SMALLINT <<FK>>
+    id_barbero : INTEGER <<FK>>
+    id_atencion : BIGINT <<FK, UQ>>
+  * calificacion : SMALLINT
+    comentario : VARCHAR(500)
+  * visible : BOOLEAN
+  * creado_en : TIMESTAMPTZ
+}
 entity "promocion" as promocion {
   * <b>id_promocion</b> : SERIAL <<PK>>
   --
@@ -390,6 +404,10 @@ politica ||--o{ consentimiento
 cliente ||--o{ solicitud_derecho
 usuario |o--o{ solicitud_derecho
 usuario |o--o{ registro_auditoria
+cliente ||--o{ resena
+sucursal ||--o{ resena
+barbero |o--o{ resena
+atencion |o--o| resena
 
 footer Proyecto Barbería Big-Boys · DIAG-28 — Modelo relacional (lógico) de la base de datos
 @enduml

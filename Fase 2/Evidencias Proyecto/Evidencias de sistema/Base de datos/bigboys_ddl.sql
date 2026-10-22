@@ -1,6 +1,7 @@
 -- =====================================================================
 -- Proyecto Barbería Big-Boys — Script DDL de referencia (PostgreSQL 15+)
--- Modelo relacional v1.1 — 08-10-2026 (RAT actualizado el 20-10-2026: alojamiento en Supabase, EE. UU.)
+-- Modelo relacional v1.2 — 22-10-2026 (27 tablas: se agrega resena y las coordenadas de sucursal; SC-21)
+-- v1.1 — 08-10-2026 (RAT actualizado el 20-10-2026: alojamiento en Supabase, EE. UU.)
 -- Generado desde la definición única del modelo (diccionario de datos).
 -- No almacena datos de tarjetas: el pago se delega a la pasarela (solo ID y estado).
 -- =====================================================================
@@ -19,7 +20,9 @@ CREATE TABLE sucursal (
     telefono VARCHAR(20),
     es_casa_matriz BOOLEAN NOT NULL DEFAULT false,
     activa BOOLEAN NOT NULL DEFAULT true,
-    creado_en TIMESTAMPTZ NOT NULL DEFAULT now()
+    creado_en TIMESTAMPTZ NOT NULL DEFAULT now(),
+    latitud NUMERIC(9,6),
+    longitud NUMERIC(9,6)
 );
 
 -- Catálogo de roles del control de acceso (RBAC).
@@ -219,6 +222,20 @@ CREATE TABLE atencion (
     creado_en TIMESTAMPTZ NOT NULL DEFAULT now(),
     CHECK (id_reserva IS NOT NULL OR id_turno IS NOT NULL)
 );
+
+-- Calificación (1 a 5) que un cliente registrado deja a un barbero o a una sucursal (RF-09).
+CREATE TABLE resena (
+    id_resena BIGSERIAL PRIMARY KEY,
+    id_cliente BIGINT NOT NULL REFERENCES cliente(id_cliente),
+    id_sucursal SMALLINT NOT NULL REFERENCES sucursal(id_sucursal),
+    id_barbero INTEGER REFERENCES barbero(id_barbero),
+    id_atencion BIGINT UNIQUE REFERENCES atencion(id_atencion),
+    calificacion SMALLINT NOT NULL CHECK (calificacion BETWEEN 1 AND 5),
+    comentario VARCHAR(500),
+    visible BOOLEAN NOT NULL DEFAULT true,
+    creado_en TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX ix_resena_barbero ON resena (id_barbero) WHERE visible;
 
 -- Promociones (bienvenida, ruleta, códigos). Las comunicaciones promocionales requieren consentimiento.
 CREATE TABLE promocion (
@@ -438,10 +455,11 @@ INSERT INTO rol (id_rol, codigo, descripcion) VALUES
   (3, 'ADMIN_SUCURSAL', 'Administrador de sucursal'),
   (4, 'DUENO', 'Dueño / administrador general');
 
-INSERT INTO sucursal (codigo, nombre, direccion, comuna, es_casa_matriz) VALUES
-  ('SUC-01', 'Peñaflor – Sucursal 21 de Mayo', '21 de Mayo 4566', 'Peñaflor', true),
-  ('SUC-02', 'Peñaflor – Sucursal Alcalde Luis Araya Cereceda', 'Alcalde Luis Araya Cereceda 4387', 'Peñaflor', false),
-  ('SUC-03', 'Talagante', 'Boulevard del Centro, local 3', 'Talagante', false);
+-- Coordenadas aproximadas a nivel de calle (OpenStreetMap), para el mapa de la web y la app
+INSERT INTO sucursal (codigo, nombre, direccion, comuna, es_casa_matriz, latitud, longitud) VALUES
+  ('SUC-01', 'Peñaflor – Sucursal 21 de Mayo', '21 de Mayo 4566', 'Peñaflor', true, -33.605234, -70.890280),
+  ('SUC-02', 'Peñaflor – Sucursal Alcalde Luis Araya Cereceda', 'Alcalde Luis Araya Cereceda 4387', 'Peñaflor', false, -33.607670, -70.900144),
+  ('SUC-03', 'Talagante', 'Boulevard del Centro, local 3', 'Talagante', false, -33.663229, -70.928852);
 
 -- Catálogo real de servicios (precios entregados por el negocio el 06-10-2026; S. Completo 60 min es el máximo confirmado; el resto son estimaciones menores (S-21))
 INSERT INTO servicio (nombre, categoria, duracion_min, precio_base, reservable_individual) VALUES
