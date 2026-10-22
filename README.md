@@ -76,9 +76,11 @@ En días de mayor demanda se atienden ~130 clientes y **26 se van sin atención 
 └── Fase 3/ (Presentación final y diarios 3.1)
 ```
 
-## Estado del proyecto (20-10-2026, semana 11 de 16)
+## Estado del proyecto (22-10-2026, semana 11 de 16)
 
 - **Fase 2 cerrada (H4, 18-10-2026):** documentación de diseño completa (4+1, modelo relacional, cumplimiento Ley N° 21.719, KPIs y costos, plan y casos de prueba).
 - **Fase 3 en curso:** próximo hito H5, presentación de avance (viernes 23-10-2026); luego H6 sistema integrado, H7 UAT, H8 entrega final (13-11) y H9 defensa (27-11).
-- **Desarrollo:** prototipos web y app en pausa desde el 06-10; el 20-10-2026 se creó la organización Supabase «Bigboys» para la migración a PostgreSQL. El código aún no está en el repositorio (se subirá sin secretos).
-- **Temas abiertos:** validar supuestos con el/la dueño/a, nombre del patrocinador, aprobación formal de los cambios SC-02, SC-03, SC-05 y SC-06, y solicitud de cambio para la fase de Despliegue.
+- **Base de datos:** el 20-10-2026 se implementó el modelo relacional en Supabase (PostgreSQL 17, región us-west-2, EE. UU.): 26 tablas, RLS activo y 22/22 pruebas. La transferencia internacional quedó declarada (SC-18).
+- **Desarrollo:** según la copia del 21-10-2026, la web y la app ya se conectan a Supabase, pero todavía sobre las tablas del prototipo. Falta migrarlas al modelo relacional. El código aún no está en el repositorio (se subirá sin secretos).
+- **Documentación:** el 22-10-2026 se alinearon todos los documentos con este estado (detalle en la sección 8 del documento 00): DAS 3.1, ERS rev. 04.1, DIAG-13 y DIAG-31 actualizados, 14 riesgos y 20 solicitudes de cambio.
+- **Temas abiertos:** validar supuestos con el/la dueño/a; nombre del patrocinador; aprobación formal de SC-02, SC-03, SC-05 y SC-06; SC-19 (fase de Despliegue) y SC-20 (alojamiento de la API); revocar la clave de correo expuesta (R-03); cerrar las tablas del prototipo (R-14).
