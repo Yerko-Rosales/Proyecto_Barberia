@@ -42,7 +42,7 @@ En días de mayor demanda se atienden ~130 clientes y **26 se van sin atención 
 - Fila digital por orden de llegada y registro digital de atenciones (reemplazo del Excel).
 - KPIs por sucursal, subtotal Peñaflor y consolidado.
 - **Cumplimiento anticipado de la Ley N° 21.719**: consentimientos, módulo «Mis datos» (acceso, rectificación, supresión, oposición, portabilidad, bloqueo), auditoría, retención y políticas.
-- Arquitectura: web (React) + app Android (Kotlin/MVVM) → API REST → **PostgreSQL** (base de datos relacional).
+- Arquitectura: web (React) + app Android (Kotlin/MVVM) → API REST → **PostgreSQL** (base de datos relacional). La API la publica Supabase mediante funciones `api_*` (SC-20).
 
 ## Documentación (`Fase 2/Evidencias Proyecto/Evidencias de documentación/`)
 
@@ -52,12 +52,12 @@ En días de mayor demanda se atienden ~130 clientes y **26 se van sin atención 
 | 02 a 15 | Planes de gestión (interesados, dirección, requerimientos, alcance, EDT, Gantt, costos, calidad, recursos, cambios, avance, cierre, riesgos) |
 | 16 Diseño de Base de Datos | MER, modelo relacional, diccionario y DDL |
 | 17 Especificación de Casos de Uso | 41 casos de uso (CU-01 a CU-41) |
-| 18 Plan y Casos de Prueba | 77 casos funcionales, 22 pruebas automatizadas de BD, 11 no funcionales y 6 escenarios de aceptación |
+| 18 Plan y Casos de Prueba | 77 casos funcionales, 24 pruebas automatizadas de BD, 11 no funcionales y 6 escenarios de aceptación |
 | Anexo A | Cumplimiento normativo y gobierno de datos |
-| Acta, Kick-Off, ERS rev. 04 (63 RF / 11 RNF), DAS v3.0, RACI | Documentos base del proyecto |
+| Acta, Kick-Off, ERS rev. 04.1 (63 RF / 11 RNF), DAS v3.2, RACI | Documentos base del proyecto |
 | KPIs y Costos (xlsx), Política de Privacidad y T&C | Indicadores, costos y textos legales |
 | Diagramas/ | 35 diagramas (PNG, SVG, PlantUML y StarUML `.mdj`) |
-| `Evidencias de sistema/Base de datos/` | Script `bigboys_ddl.sql` (26 tablas) validado: 22/22 pruebas |
+| `Evidencias de sistema/Base de datos/` | Script `bigboys_ddl.sql` (27 tablas) validado: 24/24 pruebas; migraciones de Supabase y pruebas de la API en `supabase_2026-10-22/` |
 
 ## Estructura del repositorio
 
@@ -80,7 +80,7 @@ En días de mayor demanda se atienden ~130 clientes y **26 se van sin atención 
 
 - **Fase 2 cerrada (H4, 18-10-2026):** documentación de diseño completa (4+1, modelo relacional, cumplimiento Ley N° 21.719, KPIs y costos, plan y casos de prueba).
 - **Fase 3 en curso:** próximo hito H5, presentación de avance (viernes 23-10-2026); luego H6 sistema integrado, H7 UAT, H8 entrega final (13-11) y H9 defensa (27-11).
-- **Base de datos:** el 20-10-2026 se implementó el modelo relacional en Supabase (PostgreSQL 17, región us-west-2, EE. UU.): 26 tablas, RLS activo y 22/22 pruebas. La transferencia internacional quedó declarada (SC-18).
-- **Desarrollo:** según la copia del 21-10-2026, la web y la app ya se conectan a Supabase, pero todavía sobre las tablas del prototipo. Falta migrarlas al modelo relacional. El código se subió al repositorio el 22-10-2026 sin secretos: la clave de correo se lee desde archivos `.env` locales excluidos de git (ver `.env.example`).
-- **Documentación:** el 22-10-2026 se alinearon todos los documentos con este estado (detalle en la sección 8 del documento 00): DAS 3.1, ERS rev. 04.1, DIAG-13 y DIAG-31 actualizados, 14 riesgos y 20 solicitudes de cambio.
-- **Temas abiertos:** validar supuestos con el/la dueño/a; nombre del patrocinador; aprobación formal de SC-02, SC-03, SC-05 y SC-06; SC-19 (fase de Despliegue) y SC-20 (alojamiento de la API); trasladar el envío de correos al servidor para que la clave no quede en la app compilada (R-03); cerrar las tablas del prototipo (R-14).
+- **Base de datos:** el 20-10-2026 se implementó el modelo relacional en Supabase (PostgreSQL 17, región us-west-2, EE. UU.), con RLS activo. La transferencia internacional quedó declarada (SC-18). El 22-10-2026 se agregó la tabla `resena` (modelo v1.2, SC-21): 27 tablas y 24/24 pruebas.
+- **Desarrollo:** desde el 22-10-2026 la web y la app usan el modelo relacional a través de 13 funciones `api_*` que Supabase publica como API REST (SC-20). Las tablas siguen cerradas a la clave pública y las tablas del prototipo se eliminaron. Se probaron la API (17/17), la web de punta a punta y la compilación de la app. El código está en el repositorio sin secretos: la clave de correo se lee desde archivos `.env` locales excluidos de git (ver `.env.example`). Cuenta de prueba: `test@bigboys.cl` / `123`.
+- **Documentación:** el 22-10-2026 se alinearon todos los documentos con este estado (detalle en la sección 8 del documento 00): DAS 3.2, ERS rev. 04.1, DIAG-13, DIAG-27, DIAG-28 y DIAG-31 actualizados, 14 riesgos (R-14 cerrado) y 21 solicitudes de cambio.
+- **Temas abiertos:** validar supuestos con el/la dueño/a; nombre del patrocinador; aprobación formal de SC-02, SC-03, SC-05 y SC-06; SC-19 (fase de Despliegue); cuentas para el personal, «Mis datos» y pago real (1.4.3); alojamiento del sitio web estático; trasladar el envío de correos al servidor para que la clave no quede en la app compilada (R-03).

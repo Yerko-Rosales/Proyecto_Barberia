@@ -24,7 +24,7 @@ object DirectGmailSender {
     private const val KEY_DISPLAY_NAME = "key_display_name"
 
     // Default Gmail credentials; the app password comes from .env (Secrets Gradle Plugin → BuildConfig)
-    var senderGmail: String = "j.ojedalefio@gmail.com"
+    var senderGmail: String = "bigboysbarberia.chile@gmail.com"
     var senderAppPassword: String = BuildConfig.GMAIL_APP_PASSWORD
     var senderDisplayName: String = "Big boys Barbershop Chile 💈"
 
@@ -35,7 +35,7 @@ object DirectGmailSender {
             val savedPass = prefs.getString(KEY_APP_PASSWORD, null)
             val savedName = prefs.getString(KEY_DISPLAY_NAME, null)
 
-            senderGmail = if (!savedEmail.isNullOrBlank() && savedEmail != "bigboysbarberia.chile@gmail.com") savedEmail.trim() else "j.ojedalefio@gmail.com"
+            senderGmail = if (!savedEmail.isNullOrBlank()) savedEmail.trim() else "bigboysbarberia.chile@gmail.com"
             senderAppPassword = if (!savedPass.isNullOrBlank() && savedPass.length >= 10) savedPass.trim() else BuildConfig.GMAIL_APP_PASSWORD
             senderDisplayName = if (!savedName.isNullOrBlank()) savedName.trim() else "Big boys Barbershop Chile 💈"
             Log.d(TAG, "Loaded credentials from persistent storage: email=$senderGmail, hasPassword=${senderAppPassword.isNotBlank()}")

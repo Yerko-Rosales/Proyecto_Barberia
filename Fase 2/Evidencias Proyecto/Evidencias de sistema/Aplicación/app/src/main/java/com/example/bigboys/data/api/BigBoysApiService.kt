@@ -39,7 +39,7 @@ class BigBoysApiService {
     private val _sentEmails = MutableStateFlow<List<EmailNotification>>(
         listOf(
             EmailNotification(
-                recipient = "j.ojedalefio@gmail.com",
+                recipient = "cliente.test@bigboys.cl",
                 subject = "Confirmación de Cita - Big Boys Barbería",
                 preview = "Tu reserva para Combo Full VIP con Carlos ha sido confirmada.",
                 sentAt = "10:00 hrs"

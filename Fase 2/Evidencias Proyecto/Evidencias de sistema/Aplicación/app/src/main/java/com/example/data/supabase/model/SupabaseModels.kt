@@ -10,7 +10,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * Supabase PostgreSQL DTOs mapped with exact snake_case columns.
+ * DTOs for the JSON returned by the Supabase api_* functions (tables sucursal, barbero, usuario, reserva).
  */
 
 @Serializable
@@ -40,6 +40,7 @@ data class BarberDto(
     @SerialName("bio") val bio: String = "",
     @SerialName("avatar_url") val avatarUrl: String = "",
     @SerialName("available_hours") val availableHours: String = "",
+    @SerialName("rating") val rating: Float = 5.0f,
     @SerialName("active") val active: Boolean = true
 ) {
     fun toBarber(): Barber = Barber(
@@ -47,7 +48,7 @@ data class BarberDto(
         locationId = locationId,
         name = name,
         specialty = specialty,
-        rating = 5.0f,
+        rating = rating,
         avatarUrl = avatarUrl,
         availableHours = availableHours,
         bio = bio,
@@ -90,7 +91,11 @@ data class AppointmentDto(
     @SerialName("customer_name") @EncodeDefault val customerName: String? = "Cliente",
     @SerialName("customer_phone") @EncodeDefault val customerPhone: String? = "",
     @SerialName("customer_email") @EncodeDefault val customerEmail: String? = "",
-    @SerialName("is_guest") @EncodeDefault val isGuest: Boolean? = false
+    @SerialName("is_guest") @EncodeDefault val isGuest: Boolean? = false,
+    @SerialName("codigo") val codigo: String? = null,
+    @SerialName("reschedule_count") val rescheduleCount: Int? = 0,
+    @SerialName("prepay_forfeited") val prepayForfeited: Boolean? = false,
+    @SerialName("cancelled_by") val cancelledBy: String? = null
 ) {
     fun toAppointment(): Appointment = Appointment(
         id = (id ?: System.currentTimeMillis()).toInt(),
@@ -106,8 +111,8 @@ data class AppointmentDto(
         status = status ?: "Confirmada",
         isGuest = isGuest ?: false,
         userId = userId,
-        rescheduleCount = 0,
-        depositRetained = (status ?: "") == "No-Show" || (status ?: "").contains("Retenido")
+        rescheduleCount = rescheduleCount ?: 0,
+        depositRetained = prepayForfeited ?: false
     )
 }
 

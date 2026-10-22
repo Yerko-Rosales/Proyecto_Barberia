@@ -44,6 +44,7 @@ entity "SUCURSAL" as SUCURSAL {
   codigo
   nombre
   direccion
+  latitud, longitud
 }
 entity "ROL" as ROL {
   <u>id_rol</u>
@@ -146,6 +147,13 @@ entity "ATENCION" as ATENCION {
   fin
   monto_cobrado
 }
+entity "RESENA" as RESENA {
+  <u>id_resena</u>
+  --
+  calificacion
+  comentario
+  visible
+}
 entity "PROMOCION" as PROMOCION {
   <u>id_promocion</u>
   --
@@ -242,6 +250,10 @@ POLITICA ||--o{ CONSENTIMIENTO : versión aceptada
 CLIENTE ||--o{ SOLICITUD_DERECHO : ejerce
 USUARIO |o--o{ REGISTRO_AUDITORIA : genera
 SUCURSAL |o--o{ CONFIGURACION : parametriza
+CLIENTE ||--o{ RESENA : escribe
+BARBERO |o--o{ RESENA : es calificado
+SUCURSAL ||--o{ RESENA : recibe
+ATENCION |o--o| RESENA : origina
 SERVICIO |o--o{ CONFIGURACION : parametriza
 note "INCIDENTE_SEGURIDAD y ACTIVIDAD_TRATAMIENTO\nson entidades de gobierno de datos\nsin relaciones obligatorias" as N1
 

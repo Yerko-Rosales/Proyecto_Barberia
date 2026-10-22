@@ -80,166 +80,59 @@ class AppRepository(private val appDao: AppDao) {
     suspend fun markAppointmentReviewed(appointmentId: Int) = appDao.markAppointmentReviewed(appointmentId)
 
     companion object {
+        // Sucursales reales (mismos ids que la tabla sucursal de Supabase)
         val OFFICIAL_LOCATIONS = listOf(
-            Location(1, "Big Boys - Talagante", "Boulevard del centro, local 3, Talagante", "+56 2 2489 1234"),
-            Location(2, "Big Boys - Peñaflor (21 de Mayo)", "21 de mayo 4566, Peñaflor", "+56 2 2631 5678"),
-            Location(3, "Big Boys - Peñaflor (Alcalde Luis Araya Cereceda)", "Alcalde Luis Araya Cereceda 4387, Peñaflor", "+56 2 2912 3456")
+            Location(1, "Peñaflor – Sucursal 21 de Mayo", "21 de Mayo 4566, Peñaflor", ""),
+            Location(2, "Peñaflor – Sucursal Alcalde Luis Araya Cereceda", "Alcalde Luis Araya Cereceda 4387, Peñaflor", ""),
+            Location(3, "Talagante", "Boulevard del Centro, local 3, Talagante", "")
         )
 
+        // Barberos de prueba (demo) de la tabla barbero, hasta tener la nómina real
         val OFFICIAL_BARBERS = listOf(
-            // Sucursal 1: Big Boys - Talagante (Boulevard del centro, local 3)
-            Barber(
-                id = 1,
-                locationId = 1,
-                name = "Mateo Silva",
-                specialty = "Corte Moderno & Fade",
-                rating = 4.9f,
-                avatarUrl = "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&auto=format&fit=crop&q=80",
-                availableHours = "09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00",
-                bio = "Especialista en degradados milimétricos y texturizados urbanos. Mateo cuenta con 6 años de experiencia y es reconocido por su precisión quirúrgica con la patillera."
-            ),
-            Barber(
-                id = 2,
-                locationId = 1,
-                name = "Carlos Mendoza",
-                specialty = "Perfilado de Barba Premium",
-                rating = 4.8f,
-                avatarUrl = "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=400&auto=format&fit=crop&q=80",
-                availableHours = "09:00,10:00,11:00,13:00,14:00,15:00,16:00,17:00,18:00",
-                bio = "Maestro barbero enfocado en la restauración facial masculina. Ofrece un perfilado con vaporización y aceites esenciales que limpian y revitalizan cada poro."
-            ),
-            Barber(
-                id = 3,
-                locationId = 1,
-                name = "Lucas Parra",
-                specialty = "Estilo Clásico & Navaja",
-                rating = 4.7f,
-                avatarUrl = "https://images.unsplash.com/photo-1517832606299-7ae9b720a186?w=400&auto=format&fit=crop&q=80",
-                availableHours = "10:00,11:00,12:00,13:00,15:00,16:00,17:00,18:00,19:00",
-                bio = "Devoto del afeitado tradicional de toalla caliente. Lucas mantiene vivas las técnicas clásicas europeas de navaja libre y pompadours de vieja escuela."
-            ),
-            Barber(
-                id = 4,
-                locationId = 1,
-                name = "Diego Alarcón",
-                specialty = "Color Metálico & Diseño",
-                rating = 4.9f,
-                avatarUrl = "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=400&auto=format&fit=crop&q=80",
-                availableHours = "09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00",
-                bio = "Infiltrado de la cultura urbana y las pasarelas. Diego domina coloraciones extremas (platinados, grises metálicos) y grecas tribales personalizadas."
-            ),
-
-            // Sucursal 2: Big Boys - Peñaflor (21 de Mayo) (21 de mayo 4566)
-            Barber(
-                id = 5,
-                locationId = 2,
-                name = "Sebastián Reyes",
-                specialty = "Corte Clásico Militar",
-                rating = 4.8f,
-                avatarUrl = "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&auto=format&fit=crop&q=80",
-                availableHours = "09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00",
-                bio = "Ex-estilista de academias navales. Sebastián diseña cortes militares, buzzcuts, y flat-tops ultra simétricos ideales para ejecutivos y profesionales."
-            ),
-            Barber(
-                id = 6,
-                locationId = 2,
-                name = "Felipe Soto",
-                specialty = "Afeitado con Toalla Caliente",
-                rating = 4.9f,
-                avatarUrl = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80",
-                availableHours = "10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00",
-                bio = "Especialista en masajes capilares relajantes y afeitado de cabeza completo a navaja. Brinda una experiencia de relajación zen absoluta."
-            ),
-            Barber(
-                id = 7,
-                locationId = 2,
-                name = "Matías Rojas",
-                specialty = "Fade Urbano & Diseños",
-                rating = 4.6f,
-                avatarUrl = "https://images.unsplash.com/photo-1605462863863-10d9e47e15ee?w=400&auto=format&fit=crop&q=80",
-                availableHours = "09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00",
-                bio = "Inspirado por el trap y los deportes americanos. Especialista en high-fades, drop-fades y líneas de diseño geométrico de alta complejidad técnica."
-            ),
-            Barber(
-                id = 8,
-                locationId = 2,
-                name = "Misael Castro",
-                specialty = "Estilo Ejecutivo",
-                rating = 4.8f,
-                avatarUrl = "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400&auto=format&fit=crop&q=80",
-                availableHours = "09:00,10:00,11:00,12:00,13:00,15:00,16:00,17:00,18:00",
-                bio = "Su enfoque es la elegancia sobria. Especialista en cortes con tijera para cabellos largos y medios, manteniendo un estilo formal pero con personalidad."
-            ),
-
-            // Sucursal 3: Big Boys - Peñaflor (Alcalde Luis Araya Cereceda) (Alcalde Luis Araya Cereceda 4387)
-            Barber(
-                id = 9,
-                locationId = 3,
-                name = "Joaquín Guzmán",
-                specialty = "Corte & Barba VIP",
-                rating = 5.0f,
-                avatarUrl = "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=400&auto=format&fit=crop&q=80",
-                availableHours = "09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00",
-                bio = "Condecorado como barbero del año en certámenes nacionales. Su servicio VIP incluye diagnóstico de visagismo capilar y asesoramiento estético completo."
-            ),
-            Barber(
-                id = 10,
-                locationId = 3,
-                name = "Andrés Muñoz",
-                specialty = "Arreglo de Barba Royale",
-                rating = 4.9f,
-                avatarUrl = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80",
-                availableHours = "09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00",
-                bio = "Especialista en barbas vikingas y barbas de candado. Experto en alaciado de vello facial, hidratación profunda y moldeado con bálsamos finos."
-            ),
-            Barber(
-                id = 11,
-                locationId = 3,
-                name = "Mauricio Ortiz",
-                specialty = "Visagismo & Estilismo",
-                rating = 4.8f,
-                avatarUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
-                availableHours = "10:00,11:00,12:00,13:00,14:00,16:00,17:00,18:00",
-                bio = "Creativo apasionado del modelado y la estructura ósea craneal. Diseña tu peinado en base a la geometría de tu rostro para resaltar tus mejores rasgos."
-            ),
-            Barber(
-                id = 12,
-                locationId = 3,
-                name = "Tomás Lagos",
-                specialty = "Corte Joven & Tendencia",
-                rating = 4.7f,
-                avatarUrl = "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&auto=format&fit=crop&q=80",
-                availableHours = "09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00",
-                bio = "Experto en las corrientes internacionales de K-Pop y Mullets modernos. Tomás es el favorito del público joven por su carisma y asesoramiento fresco."
-            )
+            Barber(id = 1, locationId = 1, name = "Mateo \"Fade Master\" Silva", specialty = "Degradados de precisión, low y mid fade",
+                rating = 5.0f, avatarUrl = "", availableHours = "09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00", bio = ""),
+            Barber(id = 2, locationId = 1, name = "Esteban \"El Maestro\" Rojas", specialty = "Corte clásico, barba spa y toalla caliente",
+                rating = 5.0f, avatarUrl = "", availableHours = "10:00,11:00,12:00,13:00,15:00,16:00,17:00,18:00,19:00", bio = ""),
+            Barber(id = 3, locationId = 2, name = "Cristian \"Black Gold\" Castro", specialty = "Freestyle, tintura y perfilado con cera",
+                rating = 5.0f, avatarUrl = "", availableHours = "09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00", bio = ""),
+            Barber(id = 4, locationId = 3, name = "Diego \"La Navaja\" Morales", specialty = "Afeitado tradicional y barboterapia",
+                rating = 5.0f, avatarUrl = "", availableHours = "10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00", bio = "")
         )
     }
 
     /**
-     * Mantiene las sucursales y los 12 barberos oficiales bloqueados como fuente canónica de verdad.
-     * Nunca sobreescribe ni elimina los barberos oficiales con datos remotos de prueba.
+     * Carga sucursales y barberos desde Supabase (api_sucursales / api_barberos).
+     * Sin conexión se mantienen los datos oficiales locales.
      */
     suspend fun syncBarbersAndLocationsFromCloud() {
         try {
-            // Aseguramos que siempre existan los 12 barberos y 3 sucursales oficiales
-            OFFICIAL_LOCATIONS.forEach { appDao.insertLocation(it) }
-            OFFICIAL_BARBERS.forEach { appDao.insertBarber(it) }
+            val cloudLocations = com.example.data.supabase.SupabaseManager.fetchLocations()
+            val cloudBarbers = com.example.data.supabase.SupabaseManager.fetchBarbers()
+            if (cloudLocations.isNotEmpty()) {
+                cloudLocations.forEach { appDao.insertLocation(it.toLocation()) }
+            }
+            if (cloudBarbers.isNotEmpty()) {
+                appDao.getAllBarbers().forEach { local ->
+                    if (cloudBarbers.none { it.id == local.id }) appDao.deleteBarberById(local.id)
+                }
+                cloudBarbers.forEach { appDao.insertBarber(it.toBarber()) }
+            }
         } catch (e: Exception) {
             android.util.Log.e("AppRepository", "Error syncing barbers/locations: ${e.message}")
         }
     }
 
-    // Prepopulación y aseguramiento incondicional de los 12 barberos oficiales
+    // Prepopulación de las sucursales y los barberos oficiales
     suspend fun checkAndPrepopulate() {
         // 1. Enforce official locations
         OFFICIAL_LOCATIONS.forEach { loc ->
             appDao.insertLocation(loc)
         }
 
-        // 2. Enforce official 12 barbers and purge any unauthorized/outdated records
+        // 2. Enforce official barbers and purge any unauthorized/outdated records
         val currentBarbers = appDao.getAllBarbers()
         currentBarbers.forEach { barber ->
-            if (barber.id > 12 || OFFICIAL_BARBERS.none { it.id == barber.id }) {
+            if (OFFICIAL_BARBERS.none { it.id == barber.id }) {
                 appDao.deleteBarberById(barber.id)
             }
         }
@@ -268,15 +161,15 @@ class AppRepository(private val appDao: AppDao) {
             val d1 = sdf.format(cal.time)
             appDao.insertAppointment(Appointment(locationId = 1, barberId = 1, customerName = "Juan Pérez", customerPhone = "+56911223344", dateTime = "$d1 10:00", serviceName = "Corte de Pelo Degrado", servicePrice = 15000.0, prepayAmount = 5000.0, status = "Completada"))
             appDao.insertAppointment(Appointment(locationId = 1, barberId = 2, customerName = "Diego Muñoz", customerPhone = "+56922334455", dateTime = "$d1 11:00", serviceName = "Arreglo de Barba Royale", servicePrice = 12000.0, prepayAmount = 5000.0, status = "Completada"))
-            appDao.insertAppointment(Appointment(locationId = 2, barberId = 5, customerName = "Cristóbal Solís", customerPhone = "+56933445566", dateTime = "$d1 15:30", serviceName = "Corte Clásico Militar", servicePrice = 13500.0, prepayAmount = 5000.0, status = "Completada"))
-            appDao.insertAppointment(Appointment(locationId = 3, barberId = 9, customerName = "Gonzalo Silva", customerPhone = "+56944556677", dateTime = "$d1 16:00", serviceName = "Ritual de Barba & Barbería", servicePrice = 22000.0, prepayAmount = 8000.0, status = "Completada"))
+            appDao.insertAppointment(Appointment(locationId = 2, barberId = 3, customerName = "Cristóbal Solís", customerPhone = "+56933445566", dateTime = "$d1 15:30", serviceName = "Corte Clásico Militar", servicePrice = 13500.0, prepayAmount = 5000.0, status = "Completada"))
+            appDao.insertAppointment(Appointment(locationId = 3, barberId = 4, customerName = "Gonzalo Silva", customerPhone = "+56944556677", dateTime = "$d1 16:00", serviceName = "Ritual de Barba & Barbería", servicePrice = 22000.0, prepayAmount = 8000.0, status = "Completada"))
 
             // Two days ago
             cal.add(Calendar.DAY_OF_YEAR, -1)
             val d2 = sdf.format(cal.time)
-            appDao.insertAppointment(Appointment(locationId = 1, barberId = 3, customerName = "Alexis Varas", customerPhone = "+56955667788", dateTime = "$d2 12:00", serviceName = "Corte Clásico Tradicional", servicePrice = 14000.0, prepayAmount = 5000.0, status = "Completada"))
-            appDao.insertAppointment(Appointment(locationId = 2, barberId = 6, customerName = "Nicolás Ibáñez", customerPhone = "+56966778899", dateTime = "$d2 14:00", serviceName = "Perfilado de Barba", servicePrice = 10000.0, prepayAmount = 4000.0, status = "Completada"))
-            appDao.insertAppointment(Appointment(locationId = 3, barberId = 10, customerName = "Andrés Bello", customerPhone = "+56977889900", dateTime = "$d2 17:00", serviceName = "Corte & Ritual de Afeitado VIP", servicePrice = 30000.0, prepayAmount = 10000.0, status = "Completada"))
+            appDao.insertAppointment(Appointment(locationId = 1, barberId = 1, customerName = "Alexis Varas", customerPhone = "+56955667788", dateTime = "$d2 12:00", serviceName = "Corte Clásico Tradicional", servicePrice = 14000.0, prepayAmount = 5000.0, status = "Completada"))
+            appDao.insertAppointment(Appointment(locationId = 2, barberId = 3, customerName = "Nicolás Ibáñez", customerPhone = "+56966778899", dateTime = "$d2 14:00", serviceName = "Perfilado de Barba", servicePrice = 10000.0, prepayAmount = 4000.0, status = "Completada"))
+            appDao.insertAppointment(Appointment(locationId = 3, barberId = 4, customerName = "Andrés Bello", customerPhone = "+56977889900", dateTime = "$d2 17:00", serviceName = "Corte & Ritual de Afeitado VIP", servicePrice = 30000.0, prepayAmount = 10000.0, status = "Completada"))
         }
 
         // 6. Prepopulate Reviews for Branches and Services if empty

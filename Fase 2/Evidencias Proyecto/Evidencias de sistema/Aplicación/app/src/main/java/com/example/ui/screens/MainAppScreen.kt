@@ -2480,13 +2480,14 @@ fun BookingWizardDialog(
     // Fake Payment Platform screen overlay triggers
     var isSimulatingPaymentWindow by remember { mutableStateOf(false) }
 
+    // Servicios reservables de la tabla servicio (los complementos se agregan en el local)
     val servicesAvailable = listOf(
-        Triple("Corte de Pelo Degrado", 15000.0, "45 min"),
-        Triple("Arreglo de Barba Royale", 10000.0, "30 min"),
-        Triple("Combo Big Boys (Pelo + Barba)", 22000.0, "60 min"),
-        Triple("Servicio Completo VIP", 28000.0, "80 min"),
-        Triple("Corte Clásico Militar", 13500.0, "40 min"),
-        Triple("Ritual de Barba & Barbería", 22000.0, "50 min")
+        Triple("Corte", 11900.0, "40 min"),
+        Triple("Corte + Cejas", 15470.0, "45 min"),
+        Triple("Corte + Barba", 20230.0, "50 min"),
+        Triple("S. Completo", 23800.0, "60 min"),
+        Triple("Corte + Cejas + Lavado", 17850.0, "55 min"),
+        Triple("Barba", 8330.0, "30 min")
     )
 
     Dialog(onDismissRequest = onDismiss) {
@@ -5919,8 +5920,8 @@ fun ManualAppointmentWalkInView(viewModel: BarberiaViewModel) {
     var clientName by remember { mutableStateOf("") }
     var clientPhone by remember { mutableStateOf("") }
     var clientEmail by remember { mutableStateOf("") }
-    var selectedService by remember { mutableStateOf("Corte de Pelo Degrado") }
-    var selectedPrice by remember { mutableStateOf("15000") }
+    var selectedService by remember { mutableStateOf("Corte") }
+    var selectedPrice by remember { mutableStateOf("11900") }
     var selectedHour by remember { mutableStateOf("12:00") }
 
     LaunchedEffect(locations) {
@@ -5930,12 +5931,12 @@ fun ManualAppointmentWalkInView(viewModel: BarberiaViewModel) {
     }
 
     val services = listOf(
-        "Corte de Pelo Degrado" to 15000.0,
-        "Arreglo de Barba Royale" to 10000.0,
-        "Combo Big Boys (Pelo + Barba)" to 22000.0,
-        "Servicio Completo VIP" to 28000.0,
-        "Corte Clásico Militar" to 13500.0,
-        "Ritual de Barba & Barbería" to 22000.0
+        "Corte" to 11900.0,
+        "Corte + Cejas" to 15470.0,
+        "Corte + Barba" to 20230.0,
+        "S. Completo" to 23800.0,
+        "Corte + Cejas + Lavado" to 17850.0,
+        "Barba" to 8330.0
     )
 
     val activeBarbers = remember(barbers, selectedLocId) {

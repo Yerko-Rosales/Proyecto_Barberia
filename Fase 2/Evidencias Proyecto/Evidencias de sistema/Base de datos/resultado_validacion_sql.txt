@@ -20,8 +20,10 @@ OK | Perfil creado por un no-Dueño es rechazado → Solo el Dueño puede crear 
 OK | Cliente se autorregistra con rol CLIENTE
 OK | Servicio de más de 60 minutos es rechazado (máximo confirmado) → new row for relation "servicio" violates check constraint "servicio_duracion_min_check"
 OK | Configuración GLOBAL con sucursal es rechazada → new row for relation "configuracion" violates check constraint "configuracion_check"
+OK | Reseña válida de un cliente a un barbero
+OK | Reseña con calificación fuera de 1 a 5 es rechazada → new row for relation "resena" violates check constraint "resena_calificacion_check"
 INFO | Días de plazo calculados | 30
 INFO | Abono vigente por sucursal | [{"id_sucursal":1,"tipo_valor":"MONTO","valor":"3000"},{"id_sucursal":2,"tipo_valor":"MONTO","valor":"3000"},{"id_sucursal":3,"tipo_valor":"PORCENTAJE","valor":"20"}]
-INFO | Tablas creadas | 26
+INFO | Tablas creadas | 27
 INFO | Vista del barbero (atenciones, total acumulado) | {"atenciones_acumuladas":1,"total_acumulado":"11900"}
 INFO | Servicios cargados (n, mínimo, máximo) | {"n":9,"minimo":"2380","maximo":"23800"}
