@@ -70,7 +70,7 @@ En días de mayor demanda se atienden ~130 clientes y **26 se van sin atención 
 │   │   ├── Avance_Proyecto_Barberia*.pptx (original, v2 y v3) y Seguimiento/Roadmap 09-10
 │   │   ├── Evidencias de documentación/  # Documentos del proyecto
 │   │   └── Evidencias de sistema/
-│   │       ├── Aplicación/               # Código (pendiente de subir sin secretos)
+│   │       ├── Aplicación/               # Código de la web y la app (sin secretos; ver .env.example)
 │   │       └── Base de datos/            # Script DDL y diagramas de BD
 │   └── Seguimiento semanal/
 └── Fase 3/ (Presentación final y diarios 3.1)
@@ -81,6 +81,6 @@ En días de mayor demanda se atienden ~130 clientes y **26 se van sin atención 
 - **Fase 2 cerrada (H4, 18-10-2026):** documentación de diseño completa (4+1, modelo relacional, cumplimiento Ley N° 21.719, KPIs y costos, plan y casos de prueba).
 - **Fase 3 en curso:** próximo hito H5, presentación de avance (viernes 23-10-2026); luego H6 sistema integrado, H7 UAT, H8 entrega final (13-11) y H9 defensa (27-11).
 - **Base de datos:** el 20-10-2026 se implementó el modelo relacional en Supabase (PostgreSQL 17, región us-west-2, EE. UU.): 26 tablas, RLS activo y 22/22 pruebas. La transferencia internacional quedó declarada (SC-18).
-- **Desarrollo:** según la copia del 21-10-2026, la web y la app ya se conectan a Supabase, pero todavía sobre las tablas del prototipo. Falta migrarlas al modelo relacional. El código aún no está en el repositorio (se subirá sin secretos).
+- **Desarrollo:** según la copia del 21-10-2026, la web y la app ya se conectan a Supabase, pero todavía sobre las tablas del prototipo. Falta migrarlas al modelo relacional. El código se subió al repositorio el 22-10-2026 sin secretos: la clave de correo se lee desde archivos `.env` locales excluidos de git (ver `.env.example`).
 - **Documentación:** el 22-10-2026 se alinearon todos los documentos con este estado (detalle en la sección 8 del documento 00): DAS 3.1, ERS rev. 04.1, DIAG-13 y DIAG-31 actualizados, 14 riesgos y 20 solicitudes de cambio.
-- **Temas abiertos:** validar supuestos con el/la dueño/a; nombre del patrocinador; aprobación formal de SC-02, SC-03, SC-05 y SC-06; SC-19 (fase de Despliegue) y SC-20 (alojamiento de la API); revocar la clave de correo expuesta (R-03); cerrar las tablas del prototipo (R-14).
+- **Temas abiertos:** validar supuestos con el/la dueño/a; nombre del patrocinador; aprobación formal de SC-02, SC-03, SC-05 y SC-06; SC-19 (fase de Despliegue) y SC-20 (alojamiento de la API); trasladar el envío de correos al servidor para que la clave no quede en la app compilada (R-03); cerrar las tablas del prototipo (R-14).
