@@ -10047,7 +10047,7 @@
        "left": 54,
        "top": 518,
        "width": 229,
-       "height": 176
+       "height": 212
       },
       {
        "_type": "ERDEntityView",
@@ -10397,6 +10397,20 @@
        "left": 29,
        "top": 78,
        "width": 281,
+       "height": 176
+      },
+      {
+       "_type": "ERDEntityView",
+       "_id": "AAAAAAGBB00001282",
+       "_parent": {
+        "$ref": "AAAAAAGBB00000805"
+       },
+       "model": {
+        "$ref": "AAAAAAGBB00001272"
+       },
+       "left": 1357,
+       "top": 1000,
+       "width": 230,
        "height": 176
       },
       {
@@ -11226,6 +11240,78 @@
        },
        "points": "169:1626;499:1780",
        "lineStyle": 1
+      },
+      {
+       "_type": "ERDRelationshipView",
+       "_id": "AAAAAAGBB00001286",
+       "_parent": {
+        "$ref": "AAAAAAGBB00000805"
+       },
+       "model": {
+        "$ref": "AAAAAAGBB00001283"
+       },
+       "tail": {
+        "$ref": "AAAAAAGBB00000855"
+       },
+       "head": {
+        "$ref": "AAAAAAGBB00001282"
+       },
+       "points": "498:2000;1472:1088",
+       "lineStyle": 1
+      },
+      {
+       "_type": "ERDRelationshipView",
+       "_id": "AAAAAAGBB00001290",
+       "_parent": {
+        "$ref": "AAAAAAGBB00000805"
+       },
+       "model": {
+        "$ref": "AAAAAAGBB00001287"
+       },
+       "tail": {
+        "$ref": "AAAAAAGBB00000816"
+       },
+       "head": {
+        "$ref": "AAAAAAGBB00001282"
+       },
+       "points": "168:624;1472:1088",
+       "lineStyle": 1
+      },
+      {
+       "_type": "ERDRelationshipView",
+       "_id": "AAAAAAGBB00001294",
+       "_parent": {
+        "$ref": "AAAAAAGBB00000805"
+       },
+       "model": {
+        "$ref": "AAAAAAGBB00001291"
+       },
+       "tail": {
+        "$ref": "AAAAAAGBB00000864"
+       },
+       "head": {
+        "$ref": "AAAAAAGBB00001282"
+       },
+       "points": "498:734;1472:1088",
+       "lineStyle": 1
+      },
+      {
+       "_type": "ERDRelationshipView",
+       "_id": "AAAAAAGBB00001298",
+       "_parent": {
+        "$ref": "AAAAAAGBB00000805"
+       },
+       "model": {
+        "$ref": "AAAAAAGBB00001295"
+       },
+       "tail": {
+        "$ref": "AAAAAAGBB00000976"
+       },
+       "head": {
+        "$ref": "AAAAAAGBB00001282"
+       },
+       "points": "1142:1418;1472:1088",
+       "lineStyle": 1
       }
      ]
     },
@@ -11372,6 +11458,36 @@
        "nullable": false,
        "unique": false,
        "documentation": "Fecha y hora de creación del registro · Clasificación: Interno · Finalidad: Trazabilidad · Conservación: Mientras el registro esté vigente (dato no personal)"
+      },
+      {
+       "_type": "ERDColumn",
+       "_id": "AAAAAAGBB00001270",
+       "_parent": {
+        "$ref": "AAAAAAGBB00000806"
+       },
+       "name": "latitud",
+       "type": "NUMERIC",
+       "length": "9,6",
+       "primaryKey": false,
+       "foreignKey": false,
+       "nullable": true,
+       "unique": false,
+       "documentation": "Latitud aproximada del local, a nivel de calle (mapa) · Clasificación: Público · Finalidad: Información al cliente · Conservación: Mientras el registro esté vigente (dato no personal)"
+      },
+      {
+       "_type": "ERDColumn",
+       "_id": "AAAAAAGBB00001271",
+       "_parent": {
+        "$ref": "AAAAAAGBB00000806"
+       },
+       "name": "longitud",
+       "type": "NUMERIC",
+       "length": "9,6",
+       "primaryKey": false,
+       "foreignKey": false,
+       "nullable": true,
+       "unique": false,
+       "documentation": "Longitud aproximada del local (mapa) · Clasificación: Público · Finalidad: Información al cliente · Conservación: Mientras el registro esté vigente (dato no personal)"
       }
      ]
     },
@@ -15074,6 +15190,164 @@
      ]
     },
     {
+     "_type": "ERDEntity",
+     "_id": "AAAAAAGBB00001272",
+     "_parent": {
+      "$ref": "AAAAAAGBB00000804"
+     },
+     "name": "resena",
+     "documentation": "Calificación (1 a 5) que un cliente registrado deja a un barbero o a una sucursal (RF-09). Agregada el 22-10-2026 (SC-21).",
+     "columns": [
+      {
+       "_type": "ERDColumn",
+       "_id": "AAAAAAGBB00001273",
+       "_parent": {
+        "$ref": "AAAAAAGBB00001272"
+       },
+       "name": "id_resena",
+       "type": "BIGSERIAL",
+       "length": "",
+       "primaryKey": true,
+       "foreignKey": false,
+       "nullable": false,
+       "unique": false,
+       "documentation": "Identificador · Clasificación: Interno · Finalidad: Calidad del servicio · Conservación: Mientras la cuenta esté activa; anonimización a los 24 meses de inactividad o al ejercer supresión"
+      },
+      {
+       "_type": "ERDColumn",
+       "_id": "AAAAAAGBB00001274",
+       "_parent": {
+        "$ref": "AAAAAAGBB00001272"
+       },
+       "name": "id_cliente",
+       "type": "BIGINT",
+       "length": "",
+       "primaryKey": false,
+       "foreignKey": true,
+       "nullable": false,
+       "unique": false,
+       "documentation": "Cliente que califica · Clasificación: Interno · Finalidad: Calidad del servicio · Conservación: Mientras la cuenta esté activa; anonimización a los 24 meses de inactividad o al ejercer supresión",
+       "referenceTo": {
+        "$ref": "AAAAAAGBB00000846"
+       }
+      },
+      {
+       "_type": "ERDColumn",
+       "_id": "AAAAAAGBB00001275",
+       "_parent": {
+        "$ref": "AAAAAAGBB00001272"
+       },
+       "name": "id_sucursal",
+       "type": "SMALLINT",
+       "length": "",
+       "primaryKey": false,
+       "foreignKey": true,
+       "nullable": false,
+       "unique": false,
+       "documentation": "Sucursal calificada · Clasificación: Interno · Finalidad: Calidad del servicio · Conservación: Mientras la cuenta esté activa; anonimización a los 24 meses de inactividad o al ejercer supresión",
+       "referenceTo": {
+        "$ref": "AAAAAAGBB00000807"
+       }
+      },
+      {
+       "_type": "ERDColumn",
+       "_id": "AAAAAAGBB00001276",
+       "_parent": {
+        "$ref": "AAAAAAGBB00001272"
+       },
+       "name": "id_barbero",
+       "type": "INTEGER",
+       "length": "",
+       "primaryKey": false,
+       "foreignKey": true,
+       "nullable": true,
+       "unique": false,
+       "documentation": "Barbero calificado · Clasificación: Interno · Finalidad: Calidad del servicio · Conservación: Mientras la cuenta esté activa; anonimización a los 24 meses de inactividad o al ejercer supresión",
+       "referenceTo": {
+        "$ref": "AAAAAAGBB00000857"
+       }
+      },
+      {
+       "_type": "ERDColumn",
+       "_id": "AAAAAAGBB00001277",
+       "_parent": {
+        "$ref": "AAAAAAGBB00001272"
+       },
+       "name": "id_atencion",
+       "type": "BIGINT",
+       "length": "",
+       "primaryKey": false,
+       "foreignKey": true,
+       "nullable": true,
+       "unique": true,
+       "documentation": "Atención que origina la reseña (una por atención) · Clasificación: Interno · Finalidad: Calidad del servicio · Conservación: Mientras la cuenta esté activa; anonimización a los 24 meses de inactividad o al ejercer supresión",
+       "referenceTo": {
+        "$ref": "AAAAAAGBB00000961"
+       }
+      },
+      {
+       "_type": "ERDColumn",
+       "_id": "AAAAAAGBB00001278",
+       "_parent": {
+        "$ref": "AAAAAAGBB00001272"
+       },
+       "name": "calificacion",
+       "type": "SMALLINT",
+       "length": "",
+       "primaryKey": false,
+       "foreignKey": false,
+       "nullable": false,
+       "unique": false,
+       "documentation": "Nota de 1 a 5 · CHECK (calificacion BETWEEN 1 AND 5) · Clasificación: Interno · Finalidad: Calidad del servicio · Conservación: Mientras la cuenta esté activa; anonimización a los 24 meses de inactividad o al ejercer supresión"
+      },
+      {
+       "_type": "ERDColumn",
+       "_id": "AAAAAAGBB00001279",
+       "_parent": {
+        "$ref": "AAAAAAGBB00001272"
+       },
+       "name": "comentario",
+       "type": "VARCHAR",
+       "length": "500",
+       "primaryKey": false,
+       "foreignKey": false,
+       "nullable": true,
+       "unique": false,
+       "documentation": "Opinión escrita del cliente (se publica solo con su nombre de pila e inicial) · Clasificación: Dato personal · Finalidad: Calidad del servicio · Conservación: Mientras la cuenta esté activa; anonimización a los 24 meses de inactividad o al ejercer supresión"
+      },
+      {
+       "_type": "ERDColumn",
+       "_id": "AAAAAAGBB00001280",
+       "_parent": {
+        "$ref": "AAAAAAGBB00001272"
+       },
+       "name": "visible",
+       "type": "BOOLEAN",
+       "length": "",
+       "primaryKey": false,
+       "foreignKey": false,
+       "nullable": false,
+       "unique": false,
+       "documentation": "Permite ocultar una reseña improcedente · DEFAULT true · Clasificación: Interno · Finalidad: Moderación · Conservación: Mientras la cuenta esté activa; anonimización a los 24 meses de inactividad o al ejercer supresión"
+      },
+      {
+       "_type": "ERDColumn",
+       "_id": "AAAAAAGBB00001281",
+       "_parent": {
+        "$ref": "AAAAAAGBB00001272"
+       },
+       "name": "creado_en",
+       "type": "TIMESTAMPTZ",
+       "length": "",
+       "primaryKey": false,
+       "foreignKey": false,
+       "nullable": false,
+       "unique": false,
+       "documentation": "Fecha y hora de creación del registro · DEFAULT now() · Clasificación: Interno · Finalidad: Trazabilidad · Conservación: Mientras la cuenta esté activa; anonimización a los 24 meses de inactividad o al ejercer supresión"
+      }
+     ]
+    },
+    {
      "_type": "ERDRelationship",
      "_id": "AAAAAAGBB00001086",
      "_parent": {
@@ -16497,6 +16771,130 @@
        "$ref": "AAAAAAGBB00001053"
       },
       "cardinality": "0..*"
+     }
+    },
+    {
+     "_type": "ERDRelationship",
+     "_id": "AAAAAAGBB00001283",
+     "_parent": {
+      "$ref": "AAAAAAGBB00000804"
+     },
+     "name": "id_cliente",
+     "identifying": false,
+     "end1": {
+      "_type": "ERDRelationshipEnd",
+      "_id": "AAAAAAGBB00001284",
+      "_parent": {
+       "$ref": "AAAAAAGBB00001283"
+      },
+      "reference": {
+       "$ref": "AAAAAAGBB00000845"
+      },
+      "cardinality": "1"
+     },
+     "end2": {
+      "_type": "ERDRelationshipEnd",
+      "_id": "AAAAAAGBB00001285",
+      "_parent": {
+       "$ref": "AAAAAAGBB00001283"
+      },
+      "reference": {
+       "$ref": "AAAAAAGBB00001272"
+      },
+      "cardinality": "0..*"
+     }
+    },
+    {
+     "_type": "ERDRelationship",
+     "_id": "AAAAAAGBB00001287",
+     "_parent": {
+      "$ref": "AAAAAAGBB00000804"
+     },
+     "name": "id_sucursal",
+     "identifying": false,
+     "end1": {
+      "_type": "ERDRelationshipEnd",
+      "_id": "AAAAAAGBB00001288",
+      "_parent": {
+       "$ref": "AAAAAAGBB00001287"
+      },
+      "reference": {
+       "$ref": "AAAAAAGBB00000806"
+      },
+      "cardinality": "1"
+     },
+     "end2": {
+      "_type": "ERDRelationshipEnd",
+      "_id": "AAAAAAGBB00001289",
+      "_parent": {
+       "$ref": "AAAAAAGBB00001287"
+      },
+      "reference": {
+       "$ref": "AAAAAAGBB00001272"
+      },
+      "cardinality": "0..*"
+     }
+    },
+    {
+     "_type": "ERDRelationship",
+     "_id": "AAAAAAGBB00001291",
+     "_parent": {
+      "$ref": "AAAAAAGBB00000804"
+     },
+     "name": "id_barbero",
+     "identifying": false,
+     "end1": {
+      "_type": "ERDRelationshipEnd",
+      "_id": "AAAAAAGBB00001292",
+      "_parent": {
+       "$ref": "AAAAAAGBB00001291"
+      },
+      "reference": {
+       "$ref": "AAAAAAGBB00000856"
+      },
+      "cardinality": "0..1"
+     },
+     "end2": {
+      "_type": "ERDRelationshipEnd",
+      "_id": "AAAAAAGBB00001293",
+      "_parent": {
+       "$ref": "AAAAAAGBB00001291"
+      },
+      "reference": {
+       "$ref": "AAAAAAGBB00001272"
+      },
+      "cardinality": "0..*"
+     }
+    },
+    {
+     "_type": "ERDRelationship",
+     "_id": "AAAAAAGBB00001295",
+     "_parent": {
+      "$ref": "AAAAAAGBB00000804"
+     },
+     "name": "id_atencion",
+     "identifying": false,
+     "end1": {
+      "_type": "ERDRelationshipEnd",
+      "_id": "AAAAAAGBB00001296",
+      "_parent": {
+       "$ref": "AAAAAAGBB00001295"
+      },
+      "reference": {
+       "$ref": "AAAAAAGBB00000960"
+      },
+      "cardinality": "0..1"
+     },
+     "end2": {
+      "_type": "ERDRelationshipEnd",
+      "_id": "AAAAAAGBB00001297",
+      "_parent": {
+       "$ref": "AAAAAAGBB00001295"
+      },
+      "reference": {
+       "$ref": "AAAAAAGBB00001272"
+      },
+      "cardinality": "0..1"
      }
     }
    ]
