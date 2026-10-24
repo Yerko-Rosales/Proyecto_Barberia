@@ -1,6 +1,0 @@
-{
-  "name": "Big Boys Barbería",
-  "description": "App oficial de Big Boys Barbería para agendamiento de citas, dashboard diario de barberos y cancelaciones de emergencia",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
