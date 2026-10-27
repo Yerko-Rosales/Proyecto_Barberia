@@ -107,7 +107,8 @@ class AppRepository(private val appDao: AppDao) {
     suspend fun syncBarbersAndLocationsFromCloud() {
         try {
             val cloudLocations = com.example.data.supabase.SupabaseManager.fetchLocations()
-            val cloudBarbers = com.example.data.supabase.SupabaseManager.fetchBarbers()
+            // Solo barberos activos: el Dueño puede bloquear una cuenta desde «Cuentas del personal»
+            val cloudBarbers = com.example.data.supabase.SupabaseManager.fetchBarbers().filter { it.active }
             if (cloudLocations.isNotEmpty()) {
                 cloudLocations.forEach { appDao.insertLocation(it.toLocation()) }
             }

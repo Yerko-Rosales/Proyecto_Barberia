@@ -126,55 +126,63 @@ const server = http.createServer(async (req, res) => {
   res.end(JSON.stringify({ error: 'Not Found' }));
 });
 
-// Listener periódico para la cola de correos de Cloud Firestore (colección 'mail')
-async function checkFirestoreMailQueue() {
-  const url = 'https://firestore.googleapis.com/v1/projects/bigboys-adbe6/databases/(default)/documents/mail';
-  https.get(url, (res) => {
-    let raw = '';
-    res.on('data', c => raw += c);
-    res.on('end', async () => {
-      try {
-        const json = JSON.parse(raw);
-        const docs = json.documents || [];
-        for (const doc of docs) {
-          const f = doc.fields || {};
-          const status = f.status?.stringValue;
-          if (status === 'pending') {
-            const to = f.to?.stringValue;
-            const subject = f.subject?.stringValue;
-            const body = f.body?.stringValue;
-            if (to && subject && body) {
-              console.log(`[Firestore Queue] Despachando correo pendiente para: ${to}`);
-              try {
-                await sendGmailSMTP({ to, subject, body });
-                console.log(`[Firestore Queue] ✓ Correo enviado a: ${to}`);
+// Cola de correos de Supabase (tabla notificacion): confirmación, recordatorio 24 h antes,
+// cancelación y avisos de derechos del titular. La base solo entrega la cola a quien tiene
+// la CLAVE_SERVICIO_CORREO (archivo .env, fuera del repositorio).
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://dgrflhgotxljjiejckoj.supabase.co';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const CLAVE_SERVICIO_CORREO = process.env.CLAVE_SERVICIO_CORREO;
 
-                // Actualizar estado en Firestore a 'delivered'
-                const updateUrl = 'https://firestore.googleapis.com/v1/' + doc.name + '?updateMask.fieldPaths=status&updateMask.fieldPaths=deliveredAt';
-                const patchData = JSON.stringify({
-                  fields: {
-                    status: { stringValue: 'delivered' },
-                    deliveredAt: { integerValue: Date.now() }
-                  }
-                });
-                const patchReq = https.request(updateUrl, {
-                  method: 'PATCH',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(patchData)
-                  }
-                });
-                patchReq.write(patchData);
-                patchReq.end();
-              } catch (sendErr) {
-                console.error(`[Firestore Queue] Error enviando a ${to}:`, sendErr.message);
-              }
-            }
-          }
-        }
-      } catch (e) {}
-    });
-  }).on('error', () => {});
+async function rpc(fn, params) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+    method: 'POST',
+    headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(params)
+  });
+  if (!res.ok) throw new Error(`${fn}: HTTP ${res.status} ${await res.text()}`);
+  return res.json();
+}
+
+function cuerpoCorreo(n) {
+  const saludo = `Hola ${n.nombre || ''},\n\n`;
+  const detalle = n.codigo
+    ? `Código de reserva: ${n.codigo}\nFecha y hora: ${n.fecha}\nServicio: ${n.servicio}\nBarbero: ${n.barbero}\nSucursal: ${n.sucursal} (${n.direccion})\n`
+    : '';
+  const pie = '\nBarbería Big Boys · Talagante y Peñaflor\nEste correo se envió automáticamente; no respondas a esta dirección.';
+  switch (n.tipo) {
+    case 'CONFIRMACION':
+      return saludo + 'Tu reserva quedó confirmada.\n\n' + detalle +
+        `Abono pagado: $${Number(n.abono || 0).toLocaleString('es-CL')} (se descuenta del total en el local).\n` +
+        'Puedes reagendar hasta 24 horas antes (máximo 2 veces). Si anulas con menos de 24 horas o no asistes, el abono se pierde.\n' + pie;
+    case 'RECORDATORIO':
+      return saludo + 'Te recordamos tu reserva de mañana.\n\n' + detalle + pie;
+    case 'CANCELACION':
+      return saludo + 'Tu reserva fue cancelada.\n\n' + detalle + pie;
+    case 'DERECHOS':
+      return saludo + `${n.asunto}.\nPuedes revisar el estado en «Mis datos» de tu perfil. Respondemos dentro de 30 días (Ley N° 21.719).\n` + pie;
+    default:
+      return saludo + n.asunto + '\n' + pie;
+  }
+}
+
+async function procesarColaSupabase() {
+  if (!SUPABASE_ANON_KEY || !CLAVE_SERVICIO_CORREO) return;
+  try {
+    const pendientes = await rpc('api_correo_pendientes', { p_clave: CLAVE_SERVICIO_CORREO });
+    for (const n of pendientes) {
+      try {
+        await sendGmailSMTP({ to: n.to, subject: n.asunto, body: cuerpoCorreo(n) });
+        await rpc('api_correo_marcar', { p_clave: CLAVE_SERVICIO_CORREO, p_id: n.id, p_enviado: true });
+        console.log(`[Cola Supabase] ✓ ${n.tipo} enviado a ${n.to}`);
+      } catch (err) {
+        // Queda PENDIENTE y se reintenta en el siguiente ciclo (p. ej., si Gmail exige iniciar sesión)
+        console.error(`[Cola Supabase] ✗ ${n.tipo} a ${n.to}: ${err.message} (se reintentará)`);
+        break;
+      }
+    }
+  } catch (err) {
+    console.error('[Cola Supabase] No se pudo leer la cola:', err.message);
+  }
 }
 
 // Iniciar servidor
@@ -184,9 +192,10 @@ server.listen(PORT, () => {
   console.log(`====================================================`);
   console.log(`✓ Remitente Oficial: ${GMAIL_USER}`);
   console.log(`✓ Servidor HTTP activo en: http://localhost:${PORT}`);
-  console.log(`✓ Cola de Cloud Firestore 'mail' escuchando activamente.`);
+  console.log(CLAVE_SERVICIO_CORREO ? '✓ Cola de correos de Supabase activa (cada 60 s).' : '⚠ Falta CLAVE_SERVICIO_CORREO en .env: la cola de Supabase no se procesa.');
   console.log(`====================================================\n`);
 
-  // Revisar cola de Firestore cada 6 segundos
-  setInterval(checkFirestoreMailQueue, 6000);
+  // Revisar la cola de correos de Supabase al iniciar y cada 60 segundos
+  procesarColaSupabase();
+  setInterval(procesarColaSupabase, 60000);
 });

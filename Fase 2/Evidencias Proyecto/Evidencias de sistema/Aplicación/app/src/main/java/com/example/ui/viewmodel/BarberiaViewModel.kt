@@ -15,6 +15,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonObject
+import com.example.data.supabase.text
 
 class BarberiaViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -357,78 +359,66 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
         login(email, password, isRememberMeEnabled(), callback)
     }
 
-    fun loginAsAdminWithPin(pin: String, successCallback: (Boolean) -> Unit) {
-        if (pin == _adminPin.value) {
+    /** El panel de administración de la app exige la cuenta del Dueño (ya no hay PIN compartido). */
+    fun loginAsOwner(email: String, password: String, callback: (Boolean, String?) -> Unit) {
+        viewModelScope.launch {
+            val hash = hashPassword(password.trim())
+            val profile = try { SupabaseManager.loginStaff(email, hash) } catch (e: Exception) { null }
+            val role = profile?.get("role")?.toString()?.trim('"')
+            if (profile == null || role != "DUENO") {
+                callback(false, if (profile == null) "Correo o contraseña incorrectos." else "Esta cuenta no es del Dueño.")
+                return@launch
+            }
             _isAdmin.value = true
             _loggedInBarber.value = null
             _loggedInUser.value = User(
                 id = -99,
-                fullName = _adminName.value,
-                email = "admin@bigboys.cl",
-                phone = "+56 9 9999 9999",
+                fullName = profile["full_name"]?.toString()?.trim('"') ?: _adminName.value,
+                email = email.trim().lowercase(),
+                phone = "",
+                passwordHash = hash,
                 avatarUrl = _adminAvatarUrl.value
             )
-            successCallback(true)
-        } else {
-            successCallback(false)
+            callback(true, null)
         }
     }
 
     // --- Barber Authentication ---
-    fun loginAsBarber(barber: Barber, pin: String = "1234", callback: (Boolean, String?) -> Unit) {
-        val cleanPin = pin.trim()
-        if (cleanPin.isNotBlank() && cleanPin != "1234" && cleanPin != "Barbero2026") {
-            callback(false, "PIN de seguridad incorrecto (PIN de staff por defecto: 1234).")
+    fun loginAsBarber(barber: Barber, pin: String = "", callback: (Boolean, String?) -> Unit) {
+        val cleanPass = pin.trim()
+        if (cleanPass.isBlank()) {
+            callback(false, "Ingresa la contraseña de tu cuenta de barbero.")
             return
         }
-        _loggedInBarber.value = barber
-        _loggedInUser.value = null
-        _isAdmin.value = false
-        addNotification(
-            title = "¡Turno de Barbero Activo! 💈",
-            message = "Bienvenido ${barber.name}. Ya puedes revisar tu agenda del día y gestionar citas."
-        )
-        callback(true, null)
+        viewModelScope.launch {
+            val hash = hashPassword(cleanPass)
+            val profile = try { SupabaseManager.loginBarber(barber.id, hash) } catch (e: Exception) { null }
+            if (profile == null) {
+                callback(false, "Contraseña incorrecta (tras 5 intentos la cuenta se bloquea). Pide tu clave a la administración.")
+                return@launch
+            }
+            startBarberSession(barber, profile, hash)
+            callback(true, null)
+        }
     }
 
     fun loginBarberByCredentials(identifier: String, pinOrPass: String, callback: (Boolean, String?) -> Unit) {
         val cleanId = identifier.trim().lowercase()
-        val cleanPass = pinOrPass.trim()
-        if (cleanId.isBlank()) {
-            callback(false, "Por favor ingresa tu correo de barbero o tu nombre.")
+        if (cleanId.isBlank() || pinOrPass.isBlank()) {
+            callback(false, "Ingresa tu correo y tu contraseña de barbero.")
             return
         }
-
         viewModelScope.launch {
+            val hash = hashPassword(pinOrPass.trim())
+            val profile = try { SupabaseManager.loginStaff(cleanId, hash) } catch (e: Exception) { null }
+            val barberId = profile?.get("barber_id")?.toString()?.trim('"')?.toIntOrNull()
             val barbers = allBarbersFlow.value.ifEmpty { repository.getAllBarbers() }
-            val matchedBarber = barbers.firstOrNull { b ->
-                val bEmail = b.name.lowercase()
-                    .replace(" ", ".")
-                    .replace("á","a")
-                    .replace("é","e")
-                    .replace("í","i")
-                    .replace("ó","o")
-                    .replace("ú","u") + "@bigboys.cl"
-                bEmail == cleanId || b.name.lowercase().contains(cleanId) || cleanId == "barbero@bigboys.cl"
-            }
-
-            if (matchedBarber == null) {
-                callback(false, "No se encontró ningún barbero registrado con el dato '$cleanId'.")
+            val matchedBarber = barbers.firstOrNull { it.id == barberId }
+            if (profile == null || matchedBarber == null) {
+                callback(false, "Correo o contraseña incorrectos, o la cuenta no es de barbero.")
                 return@launch
             }
-
-            if (cleanPass.isNotBlank() && cleanPass != "1234" && cleanPass != "Barbero2026") {
-                callback(false, "PIN de barbero incorrecto (PIN estándar: 1234).")
-                return@launch
-            }
-
-            _loggedInBarber.value = matchedBarber
-            _loggedInUser.value = null
-            _isAdmin.value = false
-            addNotification(
-                title = "¡Turno de Barbero Activo! 💈",
-                message = "Bienvenido ${matchedBarber.name}. Ya puedes revisar tu agenda del día y gestionar citas."
-            )
+            startBarberSession(matchedBarber, profile, hash)
             callback(true, null)
         }
     }
@@ -602,6 +592,7 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
 
     fun logoutBarber() {
         _loggedInBarber.value = null
+        _barberAccount.value = null
     }
 
     fun cancelAppointmentByBarber(
@@ -1055,6 +1046,185 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
     }
 
     // --- Notification Helpers ---
+    // ------------------------------------------------------------------
+    // S12: cuenta del barbero, Webpay Plus, fila por orden de llegada y «Mis datos»
+    // ------------------------------------------------------------------
+
+    /** Cuenta del barbero con sesión iniciada (correo, hash y si debe cambiar su clave temporal). */
+    data class BarberAccount(val email: String, val passwordHash: String, val mustChangePassword: Boolean)
+
+    private val _barberAccount = MutableStateFlow<BarberAccount?>(null)
+    val barberAccount: StateFlow<BarberAccount?> = _barberAccount.asStateFlow()
+
+    private fun startBarberSession(barber: Barber, profile: JsonObject, hash: String) {
+        _barberAccount.value = BarberAccount(
+            email = profile.text("email") ?: "",
+            passwordHash = hash,
+            mustChangePassword = profile.text("must_change_password") == "true"
+        )
+        _loggedInBarber.value = barber
+        _loggedInUser.value = null
+        _isAdmin.value = false
+        addNotification(
+            title = "¡Turno de Barbero Activo! 💈",
+            message = "Bienvenido ${barber.name}. Aquí ves tus atenciones del día y lo ganado."
+        )
+    }
+
+    fun changeBarberPassword(newPassword: String, callback: (Boolean, String?) -> Unit) {
+        val account = _barberAccount.value ?: return callback(false, "Inicia sesión nuevamente.")
+        // Mismas reglas que la web: mínimo 6 caracteres, al menos una letra y un número
+        val clean = newPassword.trim()
+        if (clean.length < 6 || !clean.any { it.isLetter() } || !clean.any { it.isDigit() }) {
+            return callback(false, "La contraseña debe tener al menos 6 caracteres, una letra y un número.")
+        }
+        viewModelScope.launch {
+            val newHash = hashPassword(newPassword.trim())
+            try {
+                SupabaseManager.changePassword(account.email, account.passwordHash, newHash)
+                _barberAccount.value = account.copy(passwordHash = newHash, mustChangePassword = false)
+                callback(true, null)
+            } catch (e: Exception) {
+                callback(false, SupabaseManager.friendlyError(e))
+            }
+        }
+    }
+
+    fun loadMyEarnings(date: String, callback: (JsonObject?, String?) -> Unit) {
+        val account = _barberAccount.value ?: return callback(null, "Inicia sesión nuevamente.")
+        viewModelScope.launch {
+            try {
+                callback(SupabaseManager.fetchMyEarnings(account.email, account.passwordHash, date), null)
+            } catch (e: Exception) {
+                callback(null, SupabaseManager.friendlyError(e))
+            }
+        }
+    }
+
+    /** Estado del pago: IDLE → INICIANDO → ESPERANDO (en el navegador) → AUTORIZADO / RECHAZADO / ANULADO / ERROR */
+    data class WebpayUiState(
+        val stage: String = "IDLE",
+        val codigo: String = "",
+        val token: String = "",
+        val paymentUrl: String = "",
+        val authorizationCode: String? = null,
+        val message: String? = null
+    )
+
+    private val _webpay = MutableStateFlow(WebpayUiState())
+    val webpay: StateFlow<WebpayUiState> = _webpay.asStateFlow()
+
+    /** Crea la reserva pendiente y la transacción; entrega la URL de Webpay para abrirla en el navegador. */
+    fun startWebpayPayment(onOpenUrl: (String) -> Unit) {
+        val location = _bookingLocation.value ?: return
+        val barber = _bookingBarber.value ?: return
+        val user = _loggedInUser.value
+        val draft = Appointment(
+            locationId = location.id,
+            barberId = barber.id,
+            customerName = user?.fullName ?: _guestName.value,
+            customerPhone = user?.phone ?: _guestPhone.value,
+            customerEmail = user?.email ?: _guestEmail.value,
+            dateTime = "${_bookingDate.value} ${_bookingHour.value}",
+            serviceName = _bookingService.value,
+            servicePrice = _bookingPrice.value,
+            prepayAmount = _prepaymentAmount.value,
+            status = "Pendiente",
+            isGuest = user == null,
+            userId = user?.id
+        )
+        _webpay.value = WebpayUiState(stage = "INICIANDO")
+        viewModelScope.launch {
+            try {
+                val tx = SupabaseManager.startWebpay(draft) ?: throw IllegalStateException("Sin respuesta")
+                val codigo = tx.text("codigo") ?: ""
+                val token = tx.text("token") ?: ""
+                // Webpay acepta el token por GET, así que se abre directo en el navegador del teléfono
+                val paymentUrl = "${tx.text("url")}?token_ws=$token"
+                _webpay.value = WebpayUiState(stage = "ESPERANDO", codigo = codigo, token = token, paymentUrl = paymentUrl)
+                onOpenUrl(paymentUrl)
+                pollWebpayStatus(codigo)
+            } catch (e: Exception) {
+                _webpay.value = WebpayUiState(stage = "ERROR", message = SupabaseManager.friendlyError(e))
+            }
+        }
+    }
+
+    private fun applyWebpayResult(result: JsonObject?) {
+        val estado = result?.text("estado") ?: return
+        if (estado == "INICIADO") return
+        val current = _webpay.value
+        _webpay.value = current.copy(stage = estado, authorizationCode = result.text("autorizacion"))
+        if (estado == "AUTORIZADO") {
+            SupabaseManager.triggerCloudRefresh()
+            addNotification("Reserva confirmada ✅", "Tu abono fue aprobado por Webpay. Código de reserva ${current.codigo}.")
+        }
+    }
+
+    /** Consulta el estado cada 3 s durante el plazo de pago (15 min). */
+    private fun pollWebpayStatus(codigo: String) {
+        viewModelScope.launch {
+            repeat(300) {
+                delay(3000)
+                if (_webpay.value.codigo != codigo || _webpay.value.stage != "ESPERANDO") return@launch
+                try { applyWebpayResult(SupabaseManager.webpayStatus(codigo)) } catch (e: Exception) { }
+            }
+        }
+    }
+
+    /** Botón «Ya pagué»: confirma con Transbank por si la página de retorno no alcanzó a hacerlo. */
+    fun verifyWebpayNow() {
+        val state = _webpay.value
+        if (state.token.isBlank()) return
+        viewModelScope.launch {
+            try {
+                val status = SupabaseManager.webpayStatus(state.codigo)
+                if (status?.text("estado") == "INICIADO") {
+                    applyWebpayResult(SupabaseManager.confirmWebpay(state.token))
+                } else {
+                    applyWebpayResult(status)
+                }
+            } catch (e: Exception) {
+                _webpay.value = state.copy(message = SupabaseManager.friendlyError(e))
+            }
+        }
+    }
+
+    fun resetWebpay() {
+        _webpay.value = WebpayUiState()
+    }
+
+    fun loadQueue(locationId: Int, callback: (JsonObject?, String?) -> Unit) {
+        viewModelScope.launch {
+            try {
+                callback(SupabaseManager.fetchQueue(locationId), null)
+            } catch (e: Exception) {
+                callback(null, SupabaseManager.friendlyError(e))
+            }
+        }
+    }
+
+    fun loadMyData(type: String, callback: (JsonObject?, String?) -> Unit) {
+        viewModelScope.launch {
+            try {
+                callback(SupabaseManager.fetchMyData(type), null)
+            } catch (e: Exception) {
+                callback(null, SupabaseManager.friendlyError(e))
+            }
+        }
+    }
+
+    fun sendRightsRequest(type: String, detail: String, callback: (String?, String?) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val r = SupabaseManager.requestRight(type, detail)
+                callback("Solicitud ${r?.text("codigo")} recibida. Respuesta a más tardar el ${r?.text("fecha_limite")}.", null)
+            } catch (e: Exception) {
+                callback(null, SupabaseManager.friendlyError(e))
+            }
+        }
+    }
+
     fun addNotification(title: String, message: String) {
         val list = _notifications.value.toMutableList()
         list.add(0, NotificationItem(title = title, message = message))

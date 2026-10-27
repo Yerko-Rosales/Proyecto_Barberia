@@ -1,0 +1,26 @@
+Pruebas de la API S12 · Proyecto Barbería Big-Boys · 27-10-2026
+Base: Supabase «Big Boys Project» (PostgreSQL 17). Script: 06_pruebas_api_s12.sql
+Las pruebas corren en una transacción que se deshace al final (no dejan datos).
+
+1 OK | P-01 Reserva pendiente con vencimiento de 15 min | Pendiente
+2 OK | P-02 Mismo horario rechazado mientras se paga | HORARIO_OCUPADO
+3 OK | P-03 Pendiente vencida se libera | EXPIRADA / nueva Confirmada
+4 OK | P-04 Confirmar token inexistente | PAGO_NO_ENCONTRADO
+5 OK | P-05 return_url inválida | RETURN_URL_INVALIDA
+6 OK | P-06 Barbero no puede crear personal | SIN_PERMISO
+7 OK | P-07 Alta de cajero/a con cambio de clave obligatorio | ADMIN_SUCURSAL
+8 OK | P-08 Cajero/a limitado a su sucursal | SIN_PERMISO
+9 OK | P-09 Números correlativos en la fila | 1 → 2
+10 OK | P-10 Transición inválida de la fila | ACCION_INVALIDA: TERMINAR desde EN_ESPERA
+11 OK | P-11 Atención registrada con monto y medio de pago | 15000 CREDITO
+12 OK | P-12 Fila pública con nombres abreviados | 1 en espera
+13 OK | P-13 Barbero ve sus atenciones y el total | total 15000
+14 OK | P-14 Cliente sin acceso a atenciones del barbero | SIN_PERMISO
+15 OK | P-15 Portabilidad de datos del titular | 4 solicitudes
+16 OK | P-16 Solicitud con plazo de 30 días y correo encolado | SDMVR2OMMD vence 2026-11-26
+17 OK | P-17 Revocar consentimiento promocional | revocado
+18 OK | P-18 Cuenta bloqueada no puede ingresar | login NULL
+19 OK | P-19 Cola de correos protegida | SIN_PERMISO
+20 OK | P-20 Cola de correos con destinatario | 3 pendientes
+
+Resultado: 20/20 OK
