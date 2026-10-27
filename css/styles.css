@@ -1,0 +1,400 @@
+/* =========================================================
+   BIG BOYS BARBERSHOP CHILE - ESTILOS OFICIALES Y TEMAS
+   Colores: Luxury Gold (#FFD700), Dark Matte (#121212), Slate (#1E1E1E)
+   ========================================================= */
+
+:root {
+  --gold-primary: #FFD700;
+  --gold-accent: #E5C100;
+  --gold-amber: #B8860B;
+  --dark-bg: #121212;
+  --card-bg: #1E1E1E;
+  --card-border: rgba(255, 215, 0, 0.2);
+  --surface-variant: #27272A;
+  --text-ivory: #F4F4F5;
+  --text-muted: #9CA3AF;
+  --green-confirm: #2ECC71;
+  --red-cancel: #E74C3C;
+}
+
+body.light-mode {
+  --gold-primary: #B8860B;
+  --gold-accent: #996515;
+  --gold-amber: #8B6508;
+  --dark-bg: #F4F4F6;
+  --card-bg: #FFFFFF;
+  --card-border: #E5E7EB;
+  --surface-variant: #EBECEF;
+  --text-ivory: #18181B;
+  --text-muted: #6B7280;
+  --green-confirm: #10B981;
+  --red-cancel: #EF4444;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--dark-bg);
+  color: var(--text-ivory);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Tipografía de lujo para títulos Big Boys */
+.font-brand {
+  font-family: 'Bebas Neue', 'Oswald', sans-serif;
+  letter-spacing: 1px;
+}
+
+/* Animación del Poste de Barbero (Barber Pole) */
+@keyframes barberPoleStripes {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 50px 50px;
+  }
+}
+
+.barber-pole-border {
+  background: repeating-linear-gradient(
+    45deg,
+    #FFD700,
+    #FFD700 12px,
+    #121212 12px,
+    #121212 24px,
+    #E74C3C 24px,
+    #E74C3C 36px,
+    #FFFFFF 36px,
+    #FFFFFF 48px
+  );
+  background-size: 68px 68px;
+  animation: barberPoleStripes 4s linear infinite;
+}
+
+.gold-gradient-bg {
+  background: linear-gradient(135deg, #FFD700 0%, #D4AF37 50%, #AA7C11 100%);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #FFF099 0%, #FFD700 50%, #B8860B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-glow {
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.25);
+}
+
+.gold-border {
+  border-color: rgba(255, 215, 0, 0.3);
+}
+
+.gold-border:hover {
+  border-color: #FFD700;
+}
+
+/* Custom Luxury Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #121212;
+}
+
+body.light-mode ::-webkit-scrollbar-track {
+  background: #F4F4F6;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #B8860B;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FFD700;
+}
+
+/* Pulsación suave para badges y citas */
+@keyframes softPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.02);
+  }
+}
+
+.pulse-gold {
+  animation: softPulse 2.5s infinite ease-in-out;
+}
+
+/* Leaflet map styling override */
+.leaflet-container {
+  font-family: inherit;
+  background-color: #121212 !important;
+  border-radius: 1rem;
+}
+
+/* Adaptación de modo oscuro / claro para mapa interactivo sin marcas de agua ni API Keys */
+.leaflet-tile-pane {
+  filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(92%);
+}
+
+body.light-mode .leaflet-tile-pane,
+html.light-mode .leaflet-tile-pane {
+  filter: none !important;
+}
+
+/* Popups personalizados de Leaflet */
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background: #1E1E1E !important;
+  color: #F4F4F5 !important;
+  border: 1.5px solid rgba(255, 215, 0, 0.5) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
+  border-radius: 14px !important;
+}
+
+body.light-mode .leaflet-popup-content-wrapper,
+body.light-mode .leaflet-popup-tip {
+  background: #FFFFFF !important;
+  color: #18181B !important;
+  border: 1.5px solid #FFD700 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.custom-gold-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #121212;
+  border: 2.5px solid #FFD700;
+  border-radius: 50%;
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.65);
+  color: #FFD700;
+  font-size: 18px;
+}
+
+.leaflet-control-attribution {
+  background: rgba(18, 18, 18, 0.85) !important;
+  color: #71717a !important;
+  font-size: 9px !important;
+  border-radius: 6px;
+  margin: 4px !important;
+  padding: 2px 6px !important;
+}
+
+.leaflet-control-attribution a {
+  color: #a1a1aa !important;
+  text-decoration: none !important;
+}
+
+/* Impresión para Vouchers Transbank */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #transbank-receipt-voucher, #transbank-receipt-voucher * {
+    visibility: visible;
+  }
+  #transbank-receipt-voucher {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+    background: white !important;
+    color: black !important;
+  }
+}
+
+/* =========================================================
+   REGLAS DEL MODO CLARO (LIGHT MODE)
+   Transformación completa de componentes manteniendo el lujo Big Boys
+   ========================================================= */
+
+body.light-mode,
+html.light-mode body {
+  background-color: #F4F4F6 !important;
+  color: #18181B !important;
+}
+
+/* Fondos Generales */
+body.light-mode .bg-\[\#121212\],
+body.light-mode .bg-\[\#0e0e10\],
+body.light-mode .bg-\[\#0e0e0f\],
+body.light-mode .bg-\[\#0d0d0f\],
+body.light-mode .bg-\[\#000000\],
+body.light-mode .bg-black {
+  background-color: #F4F4F6 !important;
+}
+
+/* Tarjetas y Contenedores */
+body.light-mode .bg-\[\#1E1E1E\],
+body.light-mode .bg-\[\#18181b\],
+body.light-mode .bg-\[\#1E1A16\],
+body.light-mode .bg-\[\#141416\],
+body.light-mode .bg-zinc-900,
+body.light-mode .bg-zinc-950 {
+  background-color: #FFFFFF !important;
+  color: #18181B !important;
+  border-color: #E4E4E7 !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+}
+
+/* Fondos Secundarios y Chips */
+body.light-mode .bg-zinc-800,
+body.light-mode .bg-\[\#171717\] {
+  background-color: #F4F4F6 !important;
+  color: #18181B !important;
+  border-color: #E4E4E7 !important;
+}
+
+body.light-mode .bg-zinc-800\/50,
+body.light-mode .bg-zinc-800\/60,
+body.light-mode .bg-zinc-800\/80,
+body.light-mode .bg-zinc-900\/50,
+body.light-mode .bg-zinc-900\/60,
+body.light-mode .bg-zinc-900\/70,
+body.light-mode .bg-zinc-900\/80,
+body.light-mode .bg-zinc-900\/90 {
+  background-color: #F8F8FA !important;
+  border-color: #E4E4E7 !important;
+}
+
+/* Cabeceras y Navegación */
+body.light-mode header,
+body.light-mode nav,
+body.light-mode .sticky.top-0,
+body.light-mode .fixed.bottom-0 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: #E4E4E7 !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* Tipografía y Textos */
+body.light-mode .text-white,
+body.light-mode .text-zinc-100,
+body.light-mode .text-zinc-200 {
+  color: #18181B !important;
+}
+
+body.light-mode .text-zinc-300,
+body.light-mode .text-zinc-400 {
+  color: #52525B !important;
+}
+
+body.light-mode .text-zinc-500 {
+  color: #71717A !important;
+}
+
+/* Bordes y Divisores */
+body.light-mode .border-zinc-800,
+body.light-mode .border-zinc-700,
+body.light-mode .border-zinc-900,
+body.light-mode .border-zinc-800\/80,
+body.light-mode .border-zinc-800\/50,
+body.light-mode .border-zinc-800\/40,
+body.light-mode .border-zinc-800\/60,
+body.light-mode .border-zinc-700\/60,
+body.light-mode .border-zinc-700\/80 {
+  border-color: #E4E4E7 !important;
+}
+
+body.light-mode .divide-zinc-800 > :not([hidden]) ~ :not([hidden]),
+body.light-mode .divide-zinc-800\/60 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #E4E4E7 !important;
+}
+
+/* Inputs, Selects y Textareas */
+body.light-mode input:not([type="checkbox"]):not([type="radio"]),
+body.light-mode select,
+body.light-mode textarea {
+  background-color: #FFFFFF !important;
+  color: #18181B !important;
+  border-color: #D4D4D8 !important;
+}
+
+body.light-mode input:focus,
+body.light-mode select:focus,
+body.light-mode textarea:focus {
+  border-color: #FFD700 !important;
+  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.25) !important;
+}
+
+body.light-mode input::placeholder,
+body.light-mode textarea::placeholder {
+  color: #A1A1AA !important;
+}
+
+/* Estados Hover */
+body.light-mode .hover\:bg-zinc-800:hover {
+  background-color: #E4E4E7 !important;
+}
+
+body.light-mode .hover\:bg-zinc-700:hover {
+  background-color: #D4D4D8 !important;
+}
+
+body.light-mode .hover\:border-zinc-700:hover {
+  border-color: #CBD5E1 !important;
+}
+
+body.light-mode .hover\:text-white:hover {
+  color: #09090B !important;
+}
+
+/* Modales y Ventanas */
+body.light-mode .fixed.inset-0.bg-black\/90,
+body.light-mode .fixed.inset-0.bg-black\/80,
+body.light-mode .fixed.inset-0.bg-black\/70,
+body.light-mode .fixed.inset-0.bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.55) !important;
+}
+
+body.light-mode .fixed.inset-0 .bg-\[\#121212\],
+body.light-mode .fixed.inset-0 .bg-\[\#18181b\],
+body.light-mode .fixed.inset-0 .bg-\[\#1E1E1E\] {
+  background-color: #FFFFFF !important;
+  color: #18181B !important;
+  border-color: #E4E4E7 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Alertas y Notificaciones */
+body.light-mode .bg-amber-950\/30,
+body.light-mode .bg-amber-950\/20,
+body.light-mode .bg-amber-950\/40 {
+  background-color: #FFFBEB !important;
+  border-color: #FDE68A !important;
+}
+
+body.light-mode .bg-amber-950\/30 span,
+body.light-mode .bg-amber-950\/30 p,
+body.light-mode .bg-amber-950\/20 span,
+body.light-mode .bg-amber-950\/20 p {
+  color: #92400E !important;
+}
+
+body.light-mode .bg-amber-950\/30 strong,
+body.light-mode .bg-amber-950\/20 strong {
+  color: #78350F !important;
+}
+
+/* Banner de Modo Admin */
+body.light-mode .from-amber-950.via-zinc-900.to-amber-950 {
+  background: linear-gradient(90deg, #FEF3C7 0%, #FDE68A 50%, #FEF3C7 100%) !important;
+  border-color: #D97706 !important;
+}
+
+body.light-mode .from-amber-950.via-zinc-900.to-amber-950 .text-\[\#FFD700\] {
+  color: #92400E !important;
+}
+
