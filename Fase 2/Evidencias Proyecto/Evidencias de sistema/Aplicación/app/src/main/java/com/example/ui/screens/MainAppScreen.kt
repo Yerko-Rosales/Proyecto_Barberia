@@ -97,7 +97,7 @@ fun MainAppScreen(
             onFinish = { showSplashScreen = false }
         )
     } else if (loggedInBarber != null) {
-        BarberDashboardScreen(
+        BarberEarningsScreen(
             viewModel = viewModel,
             barber = loggedInBarber!!,
             onLogout = {
@@ -298,6 +298,20 @@ fun MainAppScreen(
                     )
                 )
 
+                NavigationBarItem(
+                    icon = { Icon(Icons.Filled.ConfirmationNumber, "Fila") },
+                    label = { Text("Fila", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = 10.sp)) },
+                    selected = activeTab == "fila",
+                    onClick = { activeTab = "fila" },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        indicatorColor = Color.Transparent,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
+
                 if (loggedInUser != null) {
                     NavigationBarItem(
                         icon = { Icon(Icons.Filled.History, "Historial") },
@@ -405,6 +419,7 @@ fun MainAppScreen(
                             )
                         }
                     }
+                    "fila" -> QueueScreen(viewModel = viewModel)
                     "admin" -> AdminScreen(viewModel = viewModel)
                 }
             }
@@ -1528,7 +1543,7 @@ fun RescheduleDialog(
         allAppointments.filter { appt ->
             appt.barberId == appointment.barberId &&
             AppFormatters.isSameDay(appt.dateTime, selectedDate) &&
-            !appt.status.equals("Cancelada", ignoreCase = true) &&
+            appt.status.lowercase().let { it.startsWith("confirmad") || it.startsWith("pendiente") || it.startsWith("completad") } &&
             appt.id != appointment.id
         }.map { AppFormatters.extractHourSlot(it.dateTime) }.toSet()
     }
@@ -2763,7 +2778,7 @@ fun BookingWizardDialog(
                                     allAppointments.filter { appt ->
                                         appt.barberId == bookingBarber?.id &&
                                         AppFormatters.isSameDay(appt.dateTime, bookingDate) &&
-                                        !appt.status.equals("Cancelada", ignoreCase = true)
+                                        appt.status.lowercase().let { it.startsWith("confirmad") || it.startsWith("pendiente") || it.startsWith("completad") }
                                     }.map { appt ->
                                         AppFormatters.extractHourSlot(appt.dateTime)
                                     }.toSet()
@@ -3055,51 +3070,25 @@ fun BookingWizardDialog(
                                         modifier = Modifier.padding(bottom = 6.dp)
                                     )
                                 }
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    OutlinedButton(
-                                        onClick = {
-                                            if (readyToPay) {
-                                                isSimulatingPaymentWindow = true
-                                            }
-                                        },
-                                        enabled = readyToPay,
-                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = GoldPrimary),
-                                        border = BorderStroke(1.dp, if (readyToPay) GoldPrimary else TextMuted.copy(alpha = 0.3f))
-                                    ) {
-                                        Text("Webpay", fontSize = 12.sp)
-                                    }
-
-                                    Button(
-                                        onClick = {
-                                            if (readyToPay) {
-                                                viewModel.confirmAndBook {
-                                                    onDismiss()
-                                                }
-                                            }
-                                        },
-                                        enabled = readyToPay,
-                                        colors = ButtonDefaults.buttonColors(containerColor = GoldPrimary),
-                                        modifier = Modifier.testTag("book_submit_final")
-                                    ) {
-                                        Text("CONFIRMAR CITA 💈", color = DarkBackground, fontWeight = FontWeight.Black)
-                                    }
+                                Button(
+                                    onClick = { if (readyToPay) isSimulatingPaymentWindow = true },
+                                    enabled = readyToPay,
+                                    colors = ButtonDefaults.buttonColors(containerColor = GoldPrimary),
+                                    modifier = Modifier.testTag("book_submit_final")
+                                ) {
+                                    Text("PAGAR ABONO CON WEBPAY 💳", color = DarkBackground, fontWeight = FontWeight.Black)
                                 }
                             }
                         }
                     }
                 } else {
-                    // WEBPAY / PAYMENTS WINDOW SIMULATOR
-                    WebpaySimulationScreen(
+                    // Pago real del abono en Webpay Plus (ambiente de integración de Transbank)
+                    WebpayPaymentPanel(
+                        viewModel = viewModel,
                         serviceName = bookingService,
                         amountToPay = prepayVal,
-                        onPaymentSuccess = {
-                            viewModel.confirmAndBook {
-                                onDismiss()
-                            }
-                        },
-                        onPaymentCancel = {
-                            isSimulatingPaymentWindow = false
-                        }
+                        onFinished = { onDismiss() },
+                        onCancel = { isSimulatingPaymentWindow = false }
                     )
                 }
             }
@@ -3107,648 +3096,6 @@ fun BookingWizardDialog(
     }
 }
 
-@Composable
-fun WebpaySimulationScreen(
-    serviceName: String,
-    amountToPay: Double,
-    onPaymentSuccess: () -> Unit,
-    onPaymentCancel: () -> Unit
-) {
-    // State indicators
-    var currentWebpayStep by remember { mutableStateOf(1) } // 1: Select Bank/RUT, 2: Redirect, 3: Bank Login Portal, 4: Transbank Processing, 5: Success Ticket
-    
-    // Bank & form details
-    val banks = remember {
-        listOf(
-            Pair("BancoEstado", Color(0xFF003366)), // Traditional Orange/Blue
-            Pair("Banco de Chile / Edwards", Color(0xFF0E1E38)), // Navy
-            Pair("Santander", Color(0xFFCC0000)), // Red
-            Pair("BCI / TBanc", Color(0xFF1E351A)), // Dark Green
-            Pair("Itaú", Color(0xFFEC7000)), // Orange
-            Pair("Banco Falabella", Color(0xFFCAD822)), // Lime
-            Pair("Scotiabank Chile", Color(0xFFE51D24)), // Bright Red
-            Pair("Banco BICE", Color(0xFF121824)), // Slate Dark
-            Pair("Coopeuch", Color(0xFF007FA3)) // Blueish green
-        )
-    }
-    
-    var selectedBankOrdinal by remember { mutableIntStateOf(0) }
-    var userRut by remember { mutableStateOf("") }
-    var paymentMethodType by remember { mutableStateOf("Débito (Redcompra)") } // Débito, Crédito, Prepago
-    
-    // Gateway security credentials
-    var bankPassword by remember { mutableStateOf("") }
-    var securityToken3rdFactor by remember { mutableStateOf("") }
-    
-    // Automated transaction identifiers
-    val transactionToken = remember { "TSB_" + UUID.randomUUID().toString().substring(0, 8).uppercase() }
-    val authCode = remember { (100000 + Random().nextInt(899999)).toString() }
-    val buyOrder = remember { "BO-" + (20000 + Random().nextInt(79999)).toString() }
-    
-    val selectedBankName = banks[selectedBankOrdinal].first
-    val selectedBankColor = banks[selectedBankOrdinal].second
-
-    // Async simulated delay triggers
-    if (currentWebpayStep == 2) {
-        LaunchedEffect(Unit) {
-            kotlinx.coroutines.delay(1500)
-            currentWebpayStep = 3
-        }
-    }
-    if (currentWebpayStep == 4) {
-        LaunchedEffect(Unit) {
-            kotlinx.coroutines.delay(1800)
-            currentWebpayStep = 5
-        }
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Red Top Header Representing official Webpay Plus transbank
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFFD32F2F), RoundedCornerShape(10.dp))
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.Lock, "Secure", tint = Color.White, modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    "webpayplus",
-                    fontWeight = FontWeight.Black,
-                    color = Color.White,
-                    fontSize = 14.sp
-                )
-                Text(
-                    " | Transbank",
-                    color = Color.White.copy(alpha = 0.8f),
-                    fontSize = 10.sp
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(4.dp))
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
-            ) {
-                Text(
-                    "100% SEGURO",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 9.sp
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        // STATE MACHINE
-        when (currentWebpayStep) {
-            1 -> {
-                // STEP 1: SELECT BANK, RUT & PAYMENT TYPE
-                Column {
-                    // Summary card in transbank
-                    Card(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
-                        border = BorderStroke(1.dp, GoldPrimary.copy(alpha = 0.2f))
-                    ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("Orden de Compra:", fontSize = 11.sp, color = TextMuted)
-                                Text(buyOrder, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextIvory)
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("Comercio:", fontSize = 11.sp, color = TextMuted)
-                                Text("Club Big Boys Chile S.A.", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = GoldAccent)
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("Servicio:", fontSize = 11.sp, color = TextMuted)
-                                Text(serviceName, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextIvory)
-                            }
-                            Divider(modifier = Modifier.padding(vertical = 8.dp), color = Color.White.copy(alpha = 0.1f))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text("Valor Abono:", fontSize = 12.sp, color = TextIvory, fontWeight = FontWeight.Bold)
-                                Text(
-                                    "$${formatClp(amountToPay)} CLP",
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = GoldPrimary
-                                )
-                            }
-                        }
-                    }
-
-                    // Select Payment Method Tab
-                    Text("Medio de Pago:", fontSize = 11.sp, color = GoldAccent, fontWeight = FontWeight.Bold)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 6.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        listOf("Débito (Redcompra)", "Crédito", "Prepago").forEach { mode ->
-                            val isSelected = paymentMethodType == mode
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .background(
-                                        if (isSelected) GoldPrimary else Color(0xFF27272A),
-                                        RoundedCornerShape(8.dp)
-                                    )
-                                    .border(
-                                        1.dp,
-                                        if (isSelected) GoldAccent else Color.White.copy(alpha = 0.1f),
-                                        RoundedCornerShape(8.dp)
-                                    )
-                                    .clickable { paymentMethodType = mode }
-                                    .padding(vertical = 8.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    mode,
-                                    color = if (isSelected) DarkBackground else TextIvory,
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    // Input RUT
-                    val isWebpayRutValid = ValidationUtils.isValidChileanRut(userRut)
-                    OutlinedTextField(
-                        value = userRut,
-                        onValueChange = { input ->
-                            // Clean entry and allow only digits, 'k', 'K', '.', '-' and spaces
-                            val cleanInput = input.filter { it.isDigit() || it == 'k' || it == 'K' || it == '-' || it == '.' || it == ' ' }
-                            userRut = cleanInput
-                        },
-                        label = { Text("Ingresa tu RUT (Ej: 19.342.110-3)") },
-                        trailingIcon = {
-                            if (userRut.isNotBlank()) {
-                                Icon(
-                                    imageVector = if (isWebpayRutValid) Icons.Filled.CheckCircle else Icons.Filled.Cancel,
-                                    contentDescription = null,
-                                    tint = if (isWebpayRutValid) GreenConfirm else RedCancel
-                                )
-                            }
-                        },
-                        supportingText = {
-                            if (userRut.isNotBlank() && !isWebpayRutValid) {
-                                Text("RUT inválido (debe cumplir Módulo 11)", color = RedCancel, fontSize = 10.sp)
-                            }
-                        },
-                        colors = TextFieldDefaults.colors(
-                            focusedIndicatorColor = if (userRut.isNotBlank() && !isWebpayRutValid) RedCancel else GoldPrimary,
-                            focusedContainerColor = DarkBackground,
-                            unfocusedContainerColor = DarkBackground,
-                            focusedLabelColor = GoldPrimary
-                        ),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 6.dp)
-                    )
-
-                    // Grid of Chilean Banks
-                    Text("Selecciona tu Banco de Origen:", fontSize = 11.sp, color = GoldAccent, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(6.dp))
-                    
-                    Box(modifier = Modifier.height(180.dp)) {
-                        LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            items(banks.size) { idx ->
-                                val bName = banks[idx].first
-                                val bColor = banks[idx].second
-                                val isSelected = selectedBankOrdinal == idx
-                                
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .background(
-                                            if (isSelected) GoldPrimary.copy(alpha = 0.15f) else Color(0xFF18181B),
-                                            RoundedCornerShape(8.dp)
-                                        )
-                                        .border(
-                                            1.dp,
-                                            if (isSelected) GoldPrimary else Color.White.copy(alpha = 0.05f),
-                                            RoundedCornerShape(8.dp)
-                                        )
-                                        .clickable { selectedBankOrdinal = idx }
-                                        .padding(10.dp)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .background(bColor, CircleShape)
-                                            .border(1.dp, Color.White.copy(alpha = 0.5f), CircleShape),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            bName.take(1),
-                                            color = Color.White,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 11.sp
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Text(
-                                        bName,
-                                        color = if (isSelected) GoldAccent else TextIvory,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        fontSize = 12.sp
-                                    )
-                                    Spacer(modifier = Modifier.weight(1f))
-                                    if (isSelected) {
-                                        Icon(Icons.Filled.CheckCircle, "Selected", tint = GoldAccent, modifier = Modifier.size(16.dp))
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        OutlinedButton(
-                            onClick = onPaymentCancel,
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = RedCancel),
-                            border = BorderStroke(1.dp, RedCancel)
-                        ) {
-                            Text("Cancelar", fontSize = 12.sp)
-                        }
-
-                        Button(
-                            onClick = {
-                                if (userRut.isNotBlank()) {
-                                    currentWebpayStep = 2 // Move to redirecting
-                                }
-                            },
-                            enabled = userRut.isNotBlank(),
-                            modifier = Modifier.weight(1f).testTag("webpay_proceed_button"),
-                            colors = ButtonDefaults.buttonColors(containerColor = GreenConfirm)
-                        ) {
-                            Text("Pagar", color = DarkBackground, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                        }
-                    }
-                }
-            }
-            2 -> {
-                // STEP 2: REDIRECTING ANIMATED SCREEN
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 30.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    CircularProgressIndicator(color = GoldPrimary, modifier = Modifier.size(48.dp))
-                    Spacer(modifier = Modifier.height(18.dp))
-                    Text(
-                        "Redireccionando al portal seguro de su banco emisor...",
-                        color = TextIvory,
-                        fontSize = 13.sp,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        selectedBankName.uppercase(),
-                        fontWeight = FontWeight.Black,
-                        color = GoldAccent,
-                        fontSize = 16.sp,
-                        letterSpacing = 1.sp
-                    )
-                    Spacer(modifier = Modifier.height(14.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(Icons.Filled.Lock, null, tint = TextMuted, modifier = Modifier.size(12.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Servidor de Pago Encriptado SSL (HTTPS)", fontSize = 10.sp, color = TextMuted)
-                    }
-                }
-            }
-            3 -> {
-                // STEP 3: INTERACTIVE BRANDED CHILEAN BANK AUTHORIZATION
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF111827)),
-                    border = BorderStroke(1.dp, selectedBankColor),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Column {
-                        // Header color based on Selected Bank
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(selectedBankColor)
-                                .padding(12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                "PORTAL SEGURO: $selectedBankName",
-                                color = Color.White,
-                                fontWeight = FontWeight.Black,
-                                fontSize = 12.sp,
-                                letterSpacing = 0.5.sp
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .background(Color.White.copy(alpha = 0.3f), RoundedCornerShape(2.dp))
-                                    .padding(horizontal = 4.dp, vertical = 1.dp)
-                            ) {
-                                Text("SSL ACTIVADO", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
-                            }
-                        }
-
-                        Column(modifier = Modifier.padding(14.dp)) {
-                            Text(
-                                "Para proceder con la autorización del cargo bancario de $${formatClp(amountToPay)} CLP, ingresa tus credenciales bancarias de seguridad.",
-                                fontSize = 11.sp,
-                                color = TextMuted,
-                                lineHeight = 14.sp
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-
-                            Text("RUT Cliente:", fontSize = 10.sp, color = TextIvory, fontWeight = FontWeight.Bold)
-                            OutlinedTextField(
-                                value = userRut,
-                                onValueChange = { userRut = it },
-                                colors = TextFieldDefaults.colors(focusedIndicatorColor = selectedBankColor, focusedContainerColor = DarkBackground, unfocusedContainerColor = DarkBackground),
-                                modifier = Modifier.fillMaxWidth().height(48.dp),
-                                enabled = false
-                            )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Text("Clave Internet / Pin de Acceso:", fontSize = 10.sp, color = TextIvory, fontWeight = FontWeight.Bold)
-                            OutlinedTextField(
-                                value = bankPassword,
-                                onValueChange = { bankPassword = it },
-                                visualTransformation = PasswordVisualTransformation(),
-                                colors = TextFieldDefaults.colors(focusedIndicatorColor = selectedBankColor, focusedContainerColor = DarkBackground).copy(
-                                    focusedIndicatorColor = selectedBankColor
-                                ),
-                                placeholder = { Text("Mínimo 4 dígitos", fontSize = 12.sp) },
-                                modifier = Modifier.fillMaxWidth().height(48.dp),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-                            )
-
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            // 3rd Factor Token (e.g. BE Pass or Coord)
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = CardDefaults.cardColors(containerColor = selectedBankColor.copy(alpha = 0.08f)),
-                                border = BorderStroke(1.dp, selectedBankColor.copy(alpha = 0.3f))
-                            ) {
-                                Column(modifier = Modifier.padding(10.dp)) {
-                                    val factorName = when {
-                                        selectedBankName.contains("Estado") -> "Clave de Transferencias o BE Pass App"
-                                        selectedBankName.contains("Santander") -> "SuperClave Dinámica de Santander"
-                                        selectedBankName.contains("Chile") -> "Dispositivo Pinpass / Mi Pass"
-                                        else -> "Código Electrónico / SMS PIN"
-                                    }
-                                    
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(Icons.Filled.Lock, null, tint = selectedBankColor, modifier = Modifier.size(14.dp))
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text(factorName, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = TextIvory)
-                                    }
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text("Ingrese su token de confirmación de 4-6 dígitos enviado a su celular o pin dinámico:", fontSize = 9.sp, color = TextMuted)
-                                    Spacer(modifier = Modifier.height(6.dp))
-
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        OutlinedTextField(
-                                            value = securityToken3rdFactor,
-                                            onValueChange = { securityToken3rdFactor = it },
-                                            placeholder = { Text("Ej: 47820", fontSize = 11.sp) },
-                                            colors = TextFieldDefaults.colors(focusedIndicatorColor = selectedBankColor, focusedContainerColor = DarkBackground),
-                                            modifier = Modifier.weight(1f).height(46.dp),
-                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                                        )
-
-                                        Button(
-                                            onClick = {
-                                                securityToken3rdFactor = (10000 + Random().nextInt(89999)).toString()
-                                            },
-                                            colors = ButtonDefaults.buttonColors(containerColor = selectedBankColor)
-                                        ) {
-                                            Text("SMS Token", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                                        }
-                                    }
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                OutlinedButton(
-                                    onClick = { currentWebpayStep = 1 },
-                                    modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = RedCancel),
-                                    border = BorderStroke(1.dp, RedCancel)
-                                ) {
-                                    Text("Rechazar", fontSize = 12.sp)
-                                }
-
-                                Button(
-                                    onClick = {
-                                        if (bankPassword.isNotBlank() && securityToken3rdFactor.isNotBlank()) {
-                                            currentWebpayStep = 4 // Move to Transbank processing success
-                                        }
-                                    },
-                                    enabled = bankPassword.isNotBlank() && securityToken3rdFactor.isNotBlank(),
-                                    modifier = Modifier.weight(1f).testTag("bank_auth_agree_button"),
-                                    colors = ButtonDefaults.buttonColors(containerColor = selectedBankColor)
-                                ) {
-                                    Text("Autorizar Pago", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            4 -> {
-                // STEP 4: TRANSBANK CONCURRENT AUTHORIZATION
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 35.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    CircularProgressIndicator(color = Color(0xFFD32F2F), modifier = Modifier.size(52.dp))
-                    Spacer(modifier = Modifier.height(18.dp))
-                    Text(
-                        "Procesando transacción segura con Transbank...",
-                        color = TextIvory,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        "Validando con $selectedBankName en tiempo real...",
-                        color = TextMuted,
-                        fontSize = 11.sp,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        "Token ID: $transactionToken",
-                        color = GoldAccent,
-                        fontSize = 11.sp,
-                        fontFamily = FontFamily.Monospace
-                    )
-                }
-            }
-            5 -> {
-                // STEP 5: DETAILED RECEIPT AND SUCCESS VOUCHER
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(52.dp)
-                            .background(GreenConfirm.copy(alpha = 0.2f), CircleShape)
-                            .border(1.5.dp, GreenConfirm, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Filled.Check, null, tint = GreenConfirm, modifier = Modifier.size(32.dp))
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text("¡TRANSACCIÓN EXITOSA!", fontWeight = FontWeight.Black, color = GreenConfirm, fontSize = 16.sp, letterSpacing = 0.5.sp)
-                    Text("Tu reserva ha sido pre-pagada con éxito", fontSize = 11.sp, color = TextMuted)
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
-                        border = BorderStroke(1.dp, GoldPrimary.copy(alpha = 0.3f))
-                    ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("Comercio:", fontSize = 10.sp, color = TextMuted)
-                                Text("Club Big Boys Chile Ltda.", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextIvory)
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("RUT Comercio:", fontSize = 10.sp, color = TextMuted)
-                                Text("RT-76.438.291-K", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextIvory)
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("Orden Compra:", fontSize = 10.sp, color = TextMuted)
-                                Text(buyOrder, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextIvory)
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("Código Autorización:", fontSize = 10.sp, color = TextMuted)
-                                Text(authCode, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = GoldAccent)
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("Medio Pago:", fontSize = 10.sp, color = TextMuted)
-                                Text("$paymentMethodType (banco: $selectedBankName)", fontSize = 10.sp, color = TextIvory)
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("ID Transacción:", fontSize = 10.sp, color = TextMuted)
-                                Text(transactionToken, fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = TextIvory)
-                            }
-                            
-                            Divider(modifier = Modifier.padding(vertical = 10.dp), color = Color.White.copy(alpha = 0.1f))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text("MONTO RECAUDADO:", fontSize = 11.sp, color = GoldAccent, fontWeight = FontWeight.Bold)
-                                Text(
-                                    "$${formatClp(amountToPay)} CLP",
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = GreenConfirm
-                                )
-                            }
-                            Text("Fijación sujeta a contrato. Factura exenta de IVA.", fontSize = 9.sp, color = TextMuted, modifier = Modifier.padding(top = 4.dp))
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(18.dp))
-
-                    Button(
-                        onClick = onPaymentSuccess,
-                        colors = ButtonDefaults.buttonColors(containerColor = GoldPrimary),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("final_ticket_agree_button")
-                    ) {
-                        Text("COMPLETAR Y FINALIZAR AGENDAMIENTO ✂️", color = DarkBackground, fontWeight = FontWeight.Black, fontSize = 12.sp)
-                    }
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-        Text("🔐 Conexión segura encriptada por Transbank S.A. Chile", fontSize = 9.sp, color = TextMuted)
-    }
-}
-
-// --- ADMINISTRATIVE SECTION MAIN VIEW & DEDICATED ADMIN DASHBOARD ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminDashboardScreen(
@@ -8090,7 +7437,7 @@ fun LoginRegisterScreen(
     val barbers by viewModel.allBarbersFlow.collectAsState()
     val locations by viewModel.locationsFlow.collectAsState()
     var selectedBarberForLogin by remember(barbers) { mutableStateOf(barbers.firstOrNull()) }
-    var barberPinInput by remember { mutableStateOf("1234") }
+    var barberPinInput by remember { mutableStateOf("") }
     var barberErrorMessage by remember { mutableStateOf<String?>(null) }
     var isBarberLoggingIn by remember { mutableStateOf(false) }
 
@@ -8126,6 +7473,8 @@ fun LoginRegisterScreen(
 
     var showAdminPinDialog by remember { mutableStateOf(false) }
     var adminPinInput by remember { mutableStateOf("") }
+    var adminEmailInput by remember { mutableStateOf("") }
+    var adminLoginError by remember { mutableStateOf<String?>(null) }
     var pinError by remember { mutableStateOf(false) }
 
     // Security and identity validation calculations for registration
@@ -8235,7 +7584,7 @@ fun LoginRegisterScreen(
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                "Accede a tu panel para ver tus citas diarias agendadas, atender clientes o suspender turnos por fuerza mayor con reembolso automático.",
+                                "Elige tu nombre e ingresa la contraseña de tu cuenta para ver tus atenciones del día y lo ganado.",
                                 color = TextMuted,
                                 fontSize = 11.sp,
                                 lineHeight = 15.sp
@@ -8244,54 +7593,6 @@ fun LoginRegisterScreen(
                     }
                 }
 
-                // Quick 1-click test barber logins:
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = GoldPrimary.copy(alpha = 0.08f)),
-                        border = BorderStroke(1.dp, GoldPrimary.copy(alpha = 0.5f)),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Filled.FlashOn, null, tint = GoldPrimary, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("Accesos Rápidos de Prueba (1 toque):", color = GoldPrimary, fontWeight = FontWeight.Bold, fontSize = 11.sp)
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Button(
-                                    onClick = {
-                                        val b = barbers.find { it.id == 1 } ?: barbers.firstOrNull()
-                                        if (b != null) {
-                                            viewModel.loginAsBarber(b, "1234") { _, _ -> }
-                                        }
-                                    },
-                                    colors = ButtonDefaults.buttonColors(containerColor = DarkBackground),
-                                    border = BorderStroke(1.dp, GoldPrimary),
-                                    modifier = Modifier.weight(1f).height(40.dp).testTag("quick_barber_mateo"),
-                                    shape = RoundedCornerShape(8.dp)
-                                ) {
-                                    Text("Mateo S. (Talagante)", color = GoldPrimary, fontSize = 10.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-                                }
-                                Button(
-                                    onClick = {
-                                        val b = barbers.find { it.id == 2 } ?: barbers.getOrNull(1)
-                                        if (b != null) {
-                                            viewModel.loginAsBarber(b, "1234") { _, _ -> }
-                                        }
-                                    },
-                                    colors = ButtonDefaults.buttonColors(containerColor = DarkBackground),
-                                    border = BorderStroke(1.dp, GoldPrimary),
-                                    modifier = Modifier.weight(1f).height(40.dp).testTag("quick_barber_carlos"),
-                                    shape = RoundedCornerShape(8.dp)
-                                ) {
-                                    Text("Carlos M. (Talagante)", color = GoldPrimary, fontSize = 10.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-                                }
-                            }
-                        }
-                    }
-                }
 
                 // Barber List Selection
                 item {
@@ -8355,10 +7656,10 @@ fun LoginRegisterScreen(
                             barberPinInput = it
                             barberErrorMessage = null
                         },
-                        label = { Text("PIN de Seguridad Staff (Por defecto: 1234)") },
+                        label = { Text("Contraseña de tu cuenta") },
                         leadingIcon = { Icon(Icons.Filled.Lock, null, tint = GoldPrimary) },
                         visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         colors = TextFieldDefaults.colors(
                             focusedIndicatorColor = GoldPrimary,
                             focusedContainerColor = CardBackground,
@@ -9123,7 +8424,7 @@ fun LoginRegisterScreen(
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            "Requiere un PIN de seguridad del local para gestionar citas y visualizar reportes.",
+                            "Requiere la cuenta del Dueño (correo y contraseña) para gestionar citas y visualizar reportes.",
                             color = TextMuted,
                             fontSize = 12.sp,
                             textAlign = TextAlign.Center
@@ -9134,7 +8435,7 @@ fun LoginRegisterScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = CardBackground),
                             border = BorderStroke(1.dp, GoldPrimary)
                         ) {
-                            Text("INGRESAR PIN DE ADMIN", color = GoldPrimary, fontSize = 12.sp)
+                            Text("INGRESAR COMO DUEÑO", color = GoldPrimary, fontSize = 12.sp)
                         }
                     }
                 }
@@ -9157,9 +8458,19 @@ fun LoginRegisterScreen(
                     ) {
                         Icon(Icons.Filled.LockOpen, null, tint = GoldPrimary, modifier = Modifier.size(36.dp))
                         Spacer(modifier = Modifier.height(12.dp))
-                        Text("Ingresa PIN de Administrador", fontWeight = FontWeight.Bold, color = TextIvory)
-                        Text("PIN por defecto: 1234", fontSize = 11.sp, color = TextMuted)
+                        Text("Ingreso del Dueño", fontWeight = FontWeight.Bold, color = TextIvory)
+                        Text("Usa la cuenta creada para la administración.", fontSize = 11.sp, color = TextMuted)
                         Spacer(modifier = Modifier.height(12.dp))
+
+                        OutlinedTextField(
+                            value = adminEmailInput,
+                            onValueChange = { adminEmailInput = it; pinError = false },
+                            label = { Text("Correo") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                            colors = TextFieldDefaults.colors(focusedIndicatorColor = GoldPrimary, focusedContainerColor = DarkBackground),
+                            modifier = Modifier.fillMaxWidth().testTag("admin_email_field")
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         OutlinedTextField(
                             value = adminPinInput,
@@ -9167,9 +8478,9 @@ fun LoginRegisterScreen(
                                 adminPinInput = it
                                 pinError = false
                             },
-                            label = { Text("Código PIN") },
+                            label = { Text("Contraseña") },
                             visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                             colors = TextFieldDefaults.colors(focusedIndicatorColor = GoldPrimary, focusedContainerColor = DarkBackground),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -9178,7 +8489,7 @@ fun LoginRegisterScreen(
 
                         if (pinError) {
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text("PIN de local incorrecto", color = RedCancel, fontSize = 11.sp)
+                            Text(adminLoginError ?: "Correo o contraseña incorrectos", color = RedCancel, fontSize = 11.sp)
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -9192,11 +8503,12 @@ fun LoginRegisterScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Button(
                                 onClick = {
-                                    viewModel.loginAsAdminWithPin(adminPinInput) { success ->
+                                    viewModel.loginAsOwner(adminEmailInput, adminPinInput) { success, err ->
                                         if (success) {
                                             showAdminPinDialog = false
                                             adminPinInput = ""
                                         } else {
+                                            adminLoginError = err
                                             pinError = true
                                         }
                                     }
@@ -9221,7 +8533,7 @@ fun BarberQuickLoginDialog(
     val barbers by viewModel.allBarbersFlow.collectAsState()
     val locations by viewModel.locationsFlow.collectAsState()
     var selectedBarber by remember(barbers) { mutableStateOf(barbers.firstOrNull()) }
-    var pinInput by remember { mutableStateOf("1234") }
+    var pinInput by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isSubmitting by remember { mutableStateOf(false) }
 
@@ -9315,7 +8627,7 @@ fun BarberQuickLoginDialog(
                         pinInput = it
                         errorMessage = null
                     },
-                    label = { Text("PIN de Barbero (Por defecto: 1234)") },
+                    label = { Text("Contraseña de tu cuenta") },
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     colors = TextFieldDefaults.colors(

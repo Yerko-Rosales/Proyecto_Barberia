@@ -758,6 +758,11 @@ fun ProfileScreenContent(
                 }
             }
 
+            // «Mis datos»: derechos del titular (solo clientes con cuenta)
+            if (!isAdmin && loggedInUser != null) {
+                item { MyDataSection(viewModel = viewModel) }
+            }
+
             // 6. SAVE BUTTON
             item {
                 Button(

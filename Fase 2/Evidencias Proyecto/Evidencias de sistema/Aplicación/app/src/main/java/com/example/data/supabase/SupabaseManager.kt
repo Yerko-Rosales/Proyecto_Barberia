@@ -296,4 +296,111 @@ object SupabaseManager {
             emptyList()
         }
     }
+
+    // ------------------------------------------------------------------
+    // S12: Webpay Plus, fila por orden de llegada, «Mis datos» y cuentas del personal
+    // ------------------------------------------------------------------
+
+    /**
+     * Página pública de la web (ambiente UAT). Webpay devuelve al cliente ahí y la web confirma el pago;
+     * la app consulta el estado con api_webpay_estado.
+     */
+    const val WEB_RETURN_URL = "https://yerko-rosales.github.io/Proyecto_Barberia/"
+
+    /** Traduce los códigos que lanza la base de datos (RAISE EXCEPTION) a un mensaje para el usuario. */
+    fun friendlyError(e: Throwable): String {
+        val msg = e.message ?: ""
+        return when {
+            "HORARIO_OCUPADO" in msg -> "Ese horario ya fue tomado. Elige otra hora."
+            "CREDENCIALES_INVALIDAS" in msg -> "Correo o contraseña incorrectos."
+            "SIN_PERMISO" in msg -> "Tu cuenta no tiene permiso para esta acción."
+            "SOLO_CLIENTES" in msg -> "Esta opción es solo para clientes."
+            "WEBPAY_ERROR" in msg -> "Webpay no respondió. Intenta nuevamente en unos minutos."
+            "PAGO_NO_ENCONTRADO" in msg -> "No encontramos el pago."
+            else -> "No se pudo conectar con el servidor. Revisa tu conexión."
+        }
+    }
+
+    private suspend fun callRpcObject(function: String, params: JsonObject): JsonObject? {
+        val result = callRpc(function, params)
+        val raw = result.data.trim()
+        return if (raw.isBlank() || raw == "null") null else result.decodeAs<JsonObject>()
+    }
+
+    /** Crea la reserva PENDIENTE_PAGO (15 min) y la transacción en Transbank. Devuelve url, token y codigo. */
+    suspend fun startWebpay(appointment: Appointment): JsonObject? = callRpcObject("api_webpay_iniciar", buildJsonObject {
+        put("p", buildJsonObject {
+            put("id", System.currentTimeMillis())
+            put("canal", CHANNEL)
+            put("barber_id", appointment.barberId)
+            put("location_id", appointment.locationId)
+            put("service_name", appointment.serviceName.ifBlank { "Corte" })
+            put("date_time", toIsoDateTime(appointment.dateTime))
+            put("customer_name", appointment.customerName.ifBlank { "Cliente" })
+            put("customer_phone", appointment.customerPhone)
+            put("customer_email", appointment.customerEmail)
+        })
+        put("p_return_url", WEB_RETURN_URL)
+    })
+
+    /** Estado del pago de una reserva (INICIADO, AUTORIZADO, RECHAZADO o ANULADO). */
+    suspend fun webpayStatus(codigo: String): JsonObject? =
+        callRpcObject("api_webpay_estado", buildJsonObject { put("p_codigo", codigo) })
+
+    /** Confirma el pago con Transbank (lo usa el botón «Ya pagué» si la web no alcanzó a confirmarlo). */
+    suspend fun confirmWebpay(token: String): JsonObject? =
+        callRpcObject("api_webpay_confirmar", buildJsonObject { put("p_token", token) })
+
+    /** Fila de hoy de una sucursal: solo números, nombres abreviados y espera estimada. */
+    suspend fun fetchQueue(locationId: Int): JsonObject? =
+        callRpcObject("api_fila_listar", buildJsonObject { put("p_sucursal", locationId) })
+
+    /** «Mis datos» del titular (acceso o portabilidad); queda registrado como solicitud respondida. */
+    suspend fun fetchMyData(type: String = "ACCESO"): JsonObject? = callRpcObject("api_mis_datos", buildJsonObject {
+        put("p_email", sessionEmail ?: "")
+        put("p_password_sha256", sessionPasswordHash ?: "")
+        put("p_tipo", type)
+    })
+
+    /** Solicitud de rectificación, oposición o bloqueo (plazo legal de 30 días). */
+    suspend fun requestRight(type: String, detail: String): JsonObject? = callRpcObject("api_solicitud_derecho", buildJsonObject {
+        put("p_email", sessionEmail ?: "")
+        put("p_password_sha256", sessionPasswordHash ?: "")
+        put("p_tipo", type)
+        put("p_detalle", detail)
+    })
+
+    /** Ingreso del barbero con su contraseña (reemplaza el PIN compartido). */
+    suspend fun loginBarber(barberId: Int, passwordHash: String): JsonObject? = callRpcObject("api_login_barbero", buildJsonObject {
+        put("p_id_barbero", barberId)
+        put("p_password_sha256", passwordHash)
+    })
+
+    /** Ingreso del personal por correo (Dueño en el panel de la app). */
+    suspend fun loginStaff(email: String, passwordHash: String): JsonObject? = callRpcObject("api_login", buildJsonObject {
+        put("p_email", email.trim().lowercase())
+        put("p_password_sha256", passwordHash)
+    })
+
+    /** Atenciones del día del barbero y lo ganado (CU-41). */
+    suspend fun fetchMyEarnings(email: String, passwordHash: String, date: String): JsonObject? =
+        callRpcObject("api_mis_atenciones", buildJsonObject {
+            put("p_email", email)
+            put("p_password_sha256", passwordHash)
+            put("p_fecha", date)
+        })
+
+    /** Cambia la contraseña (primer ingreso con clave temporal). */
+    suspend fun changePassword(email: String, passwordHash: String, newPasswordHash: String): JsonObject? =
+        callRpcObject("api_actualizar_perfil", buildJsonObject {
+            put("p_email", email)
+            put("p_password_sha256", passwordHash)
+            put("p_nueva_password_sha256", newPasswordHash)
+        })
 }
+
+/** Valor de texto de un campo JSON (sin comillas); null si falta o es null. */
+fun JsonObject.text(key: String): String? =
+    (this[key] as? kotlinx.serialization.json.JsonPrimitive)
+        ?.takeIf { it !is kotlinx.serialization.json.JsonNull }
+        ?.content

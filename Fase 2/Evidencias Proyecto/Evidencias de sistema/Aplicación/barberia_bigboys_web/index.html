@@ -2533,6 +2533,7 @@
         { id: 'inicio', label: 'Inicio', icon: '🏠' },
         { id: 'barberos', label: 'Barberos', icon: '💈' },
         { id: 'sucursales', label: 'Sucursales', icon: '📍' },
+        { id: 'fila', label: 'Fila', icon: '🎟️' },
         { id: 'resenas', label: 'Reseñas', icon: '⭐' },
         ...(hasUser ? [{ id: 'historial', label: 'Historial', icon: '📜' }] : []),
         ...(isAdmin ? [{ id: 'admin', label: 'Panel Admin', icon: '🛡️' }] : [])
@@ -3463,7 +3464,7 @@
           .filter(a => {
             if (!a || a.id === reschedulingAppt.id) return false;
             if (Number(a.barberId) !== Number(reschedulingAppt.barberId)) return false;
-            if (a.status && (a.status.startsWith('Cancelad') || a.status.includes('No-Show'))) return false;
+            if (!/^(Confirmada|Pendiente|Completada)/.test(a.status || 'Confirmada')) return false;
             const parts = (a.dateTime || '').trim().split(' ');
             return AppFormatters.normalizeDateToYMD(parts[0] || '') === normSelected;
           })
@@ -3790,12 +3791,14 @@
         } else {
           setStep(1);
         }
-      }, [isOpen, preselectedBarber, preselectedLocation, locations]);
+        // Sin «locations» en las dependencias: la consulta periódica de reservas (cada 8 s) recrea
+        // la lista y devolvía el asistente al paso 1 mientras el cliente reservaba.
+      }, [isOpen, preselectedBarber, preselectedLocation]);
 
       // Mover todos los hooks useMemo ANTES de cualquier return condicional (Regla fundamental de React)
       const branchBarbers = useMemo(() => {
         if (!selectedLocation || !barbers) return [];
-        return (barbers || []).filter(b => b && b.locationId === selectedLocation.id && b.availableHours !== 'NO_DISPONIBLE');
+        return (barbers || []).filter(b => b && b.locationId === selectedLocation.id && b.active !== false && b.availableHours !== 'NO_DISPONIBLE');
       }, [selectedLocation, barbers]);
 
       const takenHours = useMemo(() => {
@@ -3805,7 +3808,8 @@
         const taken = (appointments || [])
           .filter(a => {
             if (!a || Number(a.barberId) !== Number(selectedBarber.id)) return false;
-            if (a.status === 'Cancelada') return false;
+            // Solo bloquean el horario las reservas pendientes de pago, confirmadas o atendidas
+            if (!/^(Confirmada|Pendiente|Completada)/.test(a.status || 'Confirmada')) return false;
             if (!a.dateTime) return false;
 
             const parts = (a.dateTime || '').trim().split(' ');
@@ -4088,156 +4092,6 @@
     }
 
     // Webpay Modal
-    function WebpayModal({ isOpen, bookingDraft, onPaymentSuccess, onCancel }) {
-      const [currentStage, setCurrentStage] = useState(1);
-      const [selectedBankIndex, setSelectedBankIndex] = useState(0);
-      const [paymentType, setPaymentType] = useState('Débito (Redcompra)');
-      const [bankPassword, setBankPassword] = useState('');
-      const [securityToken, setSecurityToken] = useState('');
-
-      const [transactionData, setTransactionData] = useState({ token: '', authCode: '', buyOrder: '' });
-
-      useEffect(() => {
-        if (isOpen) {
-          setCurrentStage(1);
-          setBankPassword('');
-          setSecurityToken('');
-          setTransactionData({
-            token: 'TSB_' + Math.random().toString(36).substring(2, 10).toUpperCase(),
-            authCode: Math.floor(100000 + Math.random() * 900000).toString(),
-            buyOrder: 'BO-' + Math.floor(20000 + Math.random() * 80000).toString()
-          });
-        }
-      }, [isOpen]);
-
-      useEffect(() => {
-        if (currentStage === 2) {
-          const t = setTimeout(() => setCurrentStage(3), 1200);
-          return () => clearTimeout(t);
-        }
-        if (currentStage === 4) {
-          const t = setTimeout(() => setCurrentStage(5), 1500);
-          return () => clearTimeout(t);
-        }
-      }, [currentStage]);
-
-      if (!isOpen || !bookingDraft) return null;
-
-      const selectedBank = CHILEAN_BANKS[selectedBankIndex];
-      const amountToPay = bookingDraft.prepayAmount || 3000;
-
-      return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-md animate-fade-in overflow-y-auto">
-          <div className="bg-[#121212] border border-zinc-700 rounded-3xl w-full max-w-md p-5 sm:p-6 relative shadow-2xl my-6">
-            {currentStage === 1 && (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
-                  <span className="text-xs font-black uppercase text-white font-mono">WEBPAY PLUS · TRANSBANK</span>
-                  <button onClick={onCancel} className="text-zinc-500 hover:text-white text-xs">Cancelar</button>
-                </div>
-
-                <div className="p-3 bg-[#1E1E1E] rounded-2xl border border-zinc-800 flex justify-between items-center">
-                  <div>
-                    <span className="text-[10px] text-zinc-400 block uppercase font-bold">Abono Reserva:</span>
-                    <strong className="text-base text-[#FFD700] font-black">{AppFormatters.formatClp(amountToPay)}</strong>
-                  </div>
-                  <span className="text-xs font-bold text-white">Big Boys Chile</span>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-zinc-300 mb-1">Banco Emisor:</label>
-                  <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                    {CHILEAN_BANKS.map((b, idx) => (
-                      <div key={b.name} onClick={() => setSelectedBankIndex(idx)} className={`p-2.5 rounded-xl border cursor-pointer flex items-center justify-between ${selectedBankIndex === idx ? 'border-[#FFD700] bg-[#1E1E1E]' : 'border-zinc-800 bg-[#171717]'}`}>
-                        <div className="flex items-center space-x-2">
-                          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: b.color }}></span>
-                          <span className="text-xs font-bold text-white">{b.name}</span>
-                        </div>
-                        <input type="radio" checked={selectedBankIndex === idx} onChange={() => setSelectedBankIndex(idx)} className="accent-[#FFD700]" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <button onClick={() => setCurrentStage(2)} className="w-full py-3 bg-[#FFD700] hover:bg-[#E5C100] text-black font-black text-xs uppercase rounded-xl">
-                  Continuar al Portal Seguro de {selectedBank.name} &rarr;
-                </button>
-              </div>
-            )}
-
-            {currentStage === 2 && (
-              <div className="py-12 flex flex-col items-center justify-center text-center space-y-4">
-                <div className="w-12 h-12 border-3 border-[#FFD700] border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-xs text-zinc-300">Conectando de forma segura con...</p>
-                <h4 className="text-lg font-black uppercase tracking-wider text-[#FFD700]">{selectedBank.name}</h4>
-                <span className="text-[10px] text-zinc-500">🔒 Encriptación TLS 1.3 Transbank</span>
-              </div>
-            )}
-
-            {currentStage === 3 && (
-              <form onSubmit={(e) => { e.preventDefault(); if (bankPassword && securityToken) setCurrentStage(4); }} className="space-y-4">
-                <div className="p-3.5 rounded-2xl text-white flex justify-between items-center shadow-md" style={{ backgroundColor: selectedBank.color }}>
-                  <h4 className="text-sm font-black">{selectedBank.name}</h4>
-                  <span className="px-2 py-0.5 bg-white/20 rounded text-[9px] font-black uppercase">SSL Seguro</span>
-                </div>
-
-                <p className="text-xs text-zinc-400">Autoriza el cargo por <strong>{AppFormatters.formatClp(amountToPay)}</strong></p>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-zinc-300 mb-1">Clave Internet / PIN</label>
-                  <input type="password" required value={bankPassword} onChange={e => setBankPassword(e.target.value)} placeholder="••••••••" className="w-full px-3 py-2 rounded-xl bg-[#1E1E1E] border border-zinc-700 text-white text-xs focus:border-[#FFD700]" />
-                </div>
-
-                <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
-                  <span className="text-[10px] font-black uppercase text-[#FFD700] block">{selectedBank.factorName}</span>
-                  <div className="flex space-x-2">
-                    <input type="text" required maxLength={6} value={securityToken} onChange={e => setSecurityToken(e.target.value)} placeholder="Ej: 48920" className="flex-1 px-3 py-1.5 rounded-lg bg-[#1E1E1E] border border-zinc-700 text-white text-xs text-center font-mono font-bold" />
-                    <button type="button" onClick={() => setSecurityToken(Math.floor(10000 + Math.random() * 90000).toString())} className="px-3 py-1.5 bg-zinc-800 text-[#FFD700] text-xs font-bold rounded-lg">SMS Token</button>
-                  </div>
-                </div>
-
-                <div className="flex space-x-2 pt-2">
-                  <button type="button" onClick={() => setCurrentStage(1)} className="flex-1 py-2 bg-zinc-800 text-zinc-400 text-xs font-bold rounded-xl">Rechazar</button>
-                  <button type="submit" disabled={!bankPassword || !securityToken} className="flex-1 py-2 bg-[#FFD700] text-black font-black text-xs uppercase rounded-xl">Autorizar Pago</button>
-                </div>
-              </form>
-            )}
-
-            {currentStage === 4 && (
-              <div className="py-12 flex flex-col items-center justify-center text-center space-y-4">
-                <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-                <h4 className="text-sm font-black text-white uppercase">Procesando con Transbank Webpay...</h4>
-                <span className="text-[10px] text-zinc-500 font-mono">Token: {transactionData.token}</span>
-              </div>
-            )}
-
-            {currentStage === 5 && (
-              <div className="space-y-4 text-center">
-                <div className="w-14 h-14 rounded-full bg-green-500/20 border-2 border-green-500 flex items-center justify-center text-green-400 text-2xl mx-auto">✓</div>
-                <div>
-                  <span className="text-[10px] font-black uppercase text-green-400 tracking-widest block">TRANSACCIÓN APROBADA</span>
-                  <h3 className="text-lg font-black text-white font-brand">COMPROBANTE DE PAGO ELECTRÓNICO</h3>
-                </div>
-
-                <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-4 text-xs space-y-2 text-left">
-                  <div className="flex justify-between py-1 border-b border-zinc-800/60"><span className="text-zinc-400">Comercio:</span><strong className="text-white">Club Big Boys Chile Ltda.</strong></div>
-                  <div className="flex justify-between py-1 border-b border-zinc-800/60"><span className="text-zinc-400">RUT Comercio:</span><strong className="text-white">76.438.291-K</strong></div>
-                  <div className="flex justify-between py-1 border-b border-zinc-800/60"><span className="text-zinc-400">Orden de Compra:</span><strong className="text-zinc-200 font-mono">{transactionData.buyOrder}</strong></div>
-                  <div className="flex justify-between py-1 border-b border-zinc-800/60"><span className="text-zinc-400">Cód. Autorización:</span><strong className="text-[#FFD700] font-mono">{transactionData.authCode}</strong></div>
-                  <div className="flex justify-between pt-2"><span className="text-zinc-400 font-bold">Total Abono Pagado:</span><strong className="text-base text-green-400 font-black">{AppFormatters.formatClp(amountToPay)}</strong></div>
-                </div>
-
-                <div className="flex space-x-2 pt-2">
-                  <button type="button" onClick={() => window.print()} className="flex-1 py-2.5 bg-zinc-800 text-zinc-300 text-xs font-bold rounded-xl">🖨️ Imprimir</button>
-                  <button type="button" onClick={onPaymentSuccess} className="flex-1 py-2.5 bg-[#FFD700] text-black font-black text-xs uppercase rounded-xl">Finalizar & Ver Cita &rarr;</button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    }
-
     // Auth Modal
     function AuthModal({ isOpen, onClose, initialMode = 'login', onGuestContinue }) {
       const [mode, setMode] = useState(initialMode);
@@ -4557,7 +4411,7 @@
                   }`}
                 >
                   <span>🛡️</span>
-                  <span>Admin</span>
+                  <span>Administración</span>
                 </button>
               </div>
 
@@ -4668,53 +4522,13 @@
 
               {/* FORM BARBERO: ACCESO ESTILISTAS */}
               {mode === 'barbero' && (
-                <form onSubmit={handleBarberSubmit} className="space-y-4">
-                  <div className="p-3 bg-cyan-950/30 border border-cyan-500/40 rounded-xl text-xs text-cyan-200 flex items-start space-x-2">
-                    <span className="text-base">💈</span>
-                    <div>
-                      <strong className="block text-white">Portal Exclusivo de Barberos</strong>
-                      <span className="text-[11px] text-zinc-400">Gestiona tu agenda diaria, marca cortes realizados y cancela por emergencia si es necesario.</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-zinc-300 mb-1">Selecciona tu Nombre de Barbero</label>
-                    <select
-                      value={selectedBarberId}
-                      onChange={e => setSelectedBarberId(Number(e.target.value))}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#121212] border border-cyan-500/50 text-white text-xs focus:border-cyan-400 focus:outline-none font-medium"
-                    >
-                      {availableBarbers.map(b => {
-                        const loc = availableLocations.find(l => l.id === b.locationId);
-                        return (
-                          <option key={b.id} value={b.id}>
-                            {b.name} — {loc ? loc.name : 'Sucursal'}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-zinc-300 mb-1">PIN de Barbero (Predeterminado: 1234)</label>
-                    <input
-                      type="password"
-                      required
-                      maxLength={8}
-                      value={barberPin}
-                      onChange={e => setBarberPin(e.target.value)}
-                      placeholder="1234"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#121212] border border-zinc-700 text-white text-center font-mono text-xl tracking-widest focus:border-cyan-400 focus:outline-none"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all"
-                  >
-                    Ingresar a mi Turno 💈 →
-                  </button>
-                </form>
+                <StaffLoginForm
+                  allowedRoles={['BARBERO']}
+                  accent="cyan"
+                  title="Portal de Barberos"
+                  description="Revisa tus atenciones del día y lo ganado. Ingresa con la cuenta que te entregó la administración."
+                  onSuccess={(session) => onBarberSuccess && onBarberSuccess(session)}
+                />
               )}
 
               {/* FORM 2: REGISTRARME */}
@@ -4790,33 +4604,13 @@
 
               {/* FORM 3: ACCESO ADMINISTRADOR */}
               {mode === 'admin' && (
-                <form onSubmit={handleAdminSubmit} className="space-y-4">
-                  <div className="p-3 bg-red-950/30 border border-red-500/40 rounded-xl text-xs text-red-200 flex items-start space-x-2">
-                    <span className="text-base">🛡️</span>
-                    <div>
-                      <strong className="block text-white">Panel de Administración Central</strong>
-                      <span className="text-[11px] text-zinc-400">Control de agenda, barberos, reportes Excel y caja. (PIN por defecto: 1234)</span>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-zinc-300 mb-1">PIN de Seguridad Administrador</label>
-                    <input
-                      type="password"
-                      required
-                      maxLength={8}
-                      value={adminPin}
-                      onChange={e => setAdminPin(e.target.value)}
-                      placeholder="••••"
-                      className="w-full px-3.5 py-3 rounded-xl bg-[#121212] border-2 border-red-500/60 focus:border-red-500 text-white text-center font-mono text-2xl tracking-[0.3em] focus:outline-none shadow-inner"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all"
-                  >
-                    Acceder al Panel de Control 🛡️
-                  </button>
-                </form>
+                <StaffLoginForm
+                  allowedRoles={['DUENO', 'ADMIN_SUCURSAL']}
+                  accent="red"
+                  title="Administración y caja"
+                  description="Dueño: panel completo. Cajero/a: fila por orden de llegada y reservas de su sucursal."
+                  onSuccess={(session) => onAdminSuccess(session)}
+                />
               )}
 
               {/* OPCIÓN CONTINUAR COMO INVITADO */}
@@ -5757,6 +5551,9 @@
               { id: 'correos_db', label: '📧 Base Correos', count: (emailDatabase || []).length },
               { id: 'cupones', label: '🎁 Cupones PIN', count: null },
               { id: 'excel', label: '📑 Reportes Excel', count: null },
+              { id: 'fila_mgr', label: '🎟️ Fila por llegada', count: null },
+              { id: 'personal_mgr', label: '🪪 Cuentas del personal', count: null },
+              { id: 'derechos_mgr', label: '⚖️ Derechos (Ley 21.719)', count: null },
               { id: 'supabase_cfg', label: '🐘 Supabase DB', count: null }
             ].map(tab => (
               <button
@@ -5783,6 +5580,21 @@
               </button>
             ))}
           </div>
+
+          {['fila_mgr', 'personal_mgr', 'derechos_mgr'].includes(subTab) && !StaffSession.get() && (
+            <div className="p-4 rounded-2xl bg-amber-950/30 border border-amber-500/40 text-xs text-amber-200">
+              Para esta sección ingresa con la cuenta del Dueño (correo y contraseña) en la pestaña Administración.
+            </div>
+          )}
+          {subTab === 'fila_mgr' && StaffSession.get() && (
+            <QueueManager staff={StaffSession.get()} locations={locations} barbers={barbers} />
+          )}
+          {subTab === 'personal_mgr' && StaffSession.get() && (
+            <StaffManager staff={StaffSession.get()} locations={locations} />
+          )}
+          {subTab === 'derechos_mgr' && StaffSession.get() && (
+            <RightsRequestsManager staff={StaffSession.get()} />
+          )}
 
           {/* PESTAÑA: VENTAS & REPORTES */}
           {subTab === 'reportes' && (
@@ -8309,7 +8121,7 @@
 
       return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="bg-[#1E1E1E] border border-[#FFD700]/50 rounded-2xl w-full max-w-md p-6 relative shadow-2xl">
+          <div className="bg-[#1E1E1E] border border-[#FFD700]/50 rounded-2xl w-full max-w-md p-6 relative shadow-2xl max-h-[92vh] overflow-y-auto">
             <button onClick={onClose} className="absolute top-4 right-4 text-zinc-400 hover:text-white">✕</button>
             <h3 className="text-base font-black text-white font-brand mb-4">MI PERFIL DE CLIENTE</h3>
 
@@ -8322,7 +8134,807 @@
               <input type="password" value={newPass} onChange={e => setNewPass(e.target.value)} placeholder="Nueva contraseña (opcional)" className="w-full px-3 py-2 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs" />
               <button type="submit" className="w-full py-2.5 bg-[#FFD700] text-black font-black text-xs uppercase rounded-xl">Guardar Cambios</button>
             </form>
+            {user.passwordHash && <MyDataPanel user={user} />}
           </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 4b. MÓDULO S12: PERSONAL, WEBPAY, FILA Y «MIS DATOS» (API api_* de Supabase)
+    // ==========================================
+    const STAFF_KEY = 'bigboys_staff_session';
+    const ROLE_LABELS = { DUENO: 'Dueño / Administración', ADMIN_SUCURSAL: 'Cajero/a de sucursal', BARBERO: 'Barbero', CLIENTE: 'Cliente' };
+    const QUEUE_LABELS = { EN_ESPERA: 'En espera', LLAMADO: 'Llamado', EN_ATENCION: 'En atención', ATENDIDO: 'Atendido', ABANDONO: 'Se fue' };
+    const QUEUE_COLORS = { EN_ESPERA: 'text-zinc-300', LLAMADO: 'text-[#FFD700]', EN_ATENCION: 'text-cyan-400', ATENDIDO: 'text-emerald-400', ABANDONO: 'text-red-400' };
+
+    // Mensajes de los errores que devuelve la base de datos (RAISE EXCEPTION 'CODIGO')
+    const API_ERRORS = {
+      CREDENCIALES_INVALIDAS: 'Correo o contraseña incorrectos.',
+      SIN_PERMISO: 'Tu cuenta no tiene permiso para esta acción.',
+      HORARIO_OCUPADO: 'Ese horario ya fue tomado. Elige otra hora.',
+      BARBERO_REQUERIDO: 'Selecciona el barbero que atenderá.',
+      NOMBRE_REQUERIDO: 'Ingresa el nombre.',
+      CORREO_INVALIDO: 'Ingresa un correo válido.',
+      CORREO_YA_REGISTRADO: 'Ese correo ya tiene una cuenta.',
+      CLAVE_INVALIDA: 'La contraseña no es válida.',
+      PAGO_NO_ENCONTRADO: 'No encontramos el pago. Si se descontó dinero, contáctanos con tu comprobante.',
+      RESERVA_NO_PENDIENTE: 'La reserva ya no está pendiente de pago.',
+      SOLO_CLIENTES: 'Esta opción es solo para clientes.'
+    };
+    function apiErrorMessage(error) {
+      const msg = (error && error.message) || String(error || '');
+      const code = Object.keys(API_ERRORS).find(k => msg.includes(k));
+      if (code) return API_ERRORS[code];
+      if (msg.includes('WEBPAY_ERROR')) return 'Webpay no respondió. Intenta nuevamente en unos minutos.';
+      return msg || 'Ocurrió un error. Intenta nuevamente.';
+    }
+
+    async function callApi(fn, params) {
+      const sb = window.supabaseClient;
+      if (!sb) throw new Error('Sin conexión con la base de datos (Supabase).');
+      const { data, error } = await sb.rpc(fn, params || {});
+      if (error) throw new Error(apiErrorMessage(error));
+      return data;
+    }
+
+    const StaffSession = {
+      get() {
+        try { return JSON.parse(sessionStorage.getItem(STAFF_KEY) || 'null'); } catch (e) { return null; }
+      },
+      set(s) { sessionStorage.setItem(STAFF_KEY, JSON.stringify(s)); },
+      clear() { sessionStorage.removeItem(STAFF_KEY); },
+      creds(s) { return { p_email: s.email, p_password_sha256: s.hash }; }
+    };
+
+    // Contraseña temporal legible para entregar en persona (sin caracteres ambiguos)
+    function generateTempPassword() {
+      const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+      const bytes = new Uint8Array(10);
+      crypto.getRandomValues(bytes);
+      return 'BB-' + Array.from(bytes, b => chars[b % chars.length]).join('');
+    }
+
+    const inputCls = 'w-full px-3 py-2 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs focus:border-[#FFD700] focus:outline-none';
+    const cardCls = 'bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-4';
+
+    // ---------- Ingreso del personal (cuentas creadas por el Dueño) ----------
+    function StaffLoginForm({ allowedRoles, accent = 'cyan', title, description, onSuccess }) {
+      const [email, setEmail] = useState('');
+      const [pass, setPass] = useState('');
+      const [pending, setPending] = useState(null); // cuenta que debe cambiar la clave temporal
+      const [newPass, setNewPass] = useState('');
+      const [newPass2, setNewPass2] = useState('');
+      const [error, setError] = useState('');
+      const [loading, setLoading] = useState(false);
+      const btn = accent === 'red' ? 'bg-red-600 hover:bg-red-500' : 'bg-cyan-600 hover:bg-cyan-500';
+
+      const finish = (u, hash) => {
+        const session = { id: u.id, email: u.email, hash, role: u.role, name: u.full_name, locationId: u.location_id || null };
+        StaffSession.set(session);
+        onSuccess(session);
+      };
+
+      const handleLogin = async (e) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+        try {
+          const hash = await ValidationUtils.hashPassword(pass);
+          const u = await callApi('api_login', { p_email: email.trim().toLowerCase(), p_password_sha256: hash });
+          if (!u) throw new Error('Correo o contraseña incorrectos (tras 5 intentos la cuenta se bloquea).');
+          if (!allowedRoles.includes(u.role)) throw new Error(`Esta cuenta es de ${ROLE_LABELS[u.role] || u.role}; usa la pestaña que corresponde.`);
+          if (u.must_change_password) setPending({ u, hash });
+          else finish(u, hash);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const handleChange = async (e) => {
+        e.preventDefault();
+        setError('');
+        const errs = ValidationUtils.validatePasswordRequirements(newPass);
+        if (errs.length) return setError(`Contraseña: ${errs.join(', ')}`);
+        if (newPass !== newPass2) return setError('Las contraseñas no coinciden.');
+        setLoading(true);
+        try {
+          const newHash = await ValidationUtils.hashPassword(newPass);
+          const u = await callApi('api_actualizar_perfil', {
+            p_email: pending.u.email, p_password_sha256: pending.hash, p_nueva_password_sha256: newHash
+          });
+          finish({ ...pending.u, ...u }, newHash);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      return (
+        <div className="space-y-4">
+          <div className={`p-3 rounded-xl text-xs flex items-start space-x-2 ${accent === 'red' ? 'bg-red-950/30 border border-red-500/40 text-red-200' : 'bg-cyan-950/30 border border-cyan-500/40 text-cyan-200'}`}>
+            <span className="text-base">{accent === 'red' ? '🛡️' : '💈'}</span>
+            <div>
+              <strong className="block text-white">{pending ? 'Crea tu contraseña personal' : title}</strong>
+              <span className="text-[11px] text-zinc-400">{pending ? 'Es tu primer ingreso: la contraseña temporal que te entregaron debe reemplazarse.' : description}</span>
+            </div>
+          </div>
+          {error && <div className="p-3 bg-red-950/50 border border-red-500/50 rounded-xl text-red-300 text-xs">⚠️ {error}</div>}
+          {!pending ? (
+            <form onSubmit={handleLogin} className="space-y-3">
+              <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="correo@bigboys.cl" className={inputCls} />
+              <input type="password" required value={pass} onChange={e => setPass(e.target.value)} placeholder="Contraseña" className={inputCls} />
+              <button type="submit" disabled={loading} className={`w-full py-3 ${btn} text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all`}>
+                {loading ? 'Verificando…' : 'Ingresar →'}
+              </button>
+              <p className="text-[10px] text-zinc-500 text-center">Las cuentas del personal las crea solo la administración. ¿Olvidaste tu clave? Pide una nueva clave temporal.</p>
+            </form>
+          ) : (
+            <form onSubmit={handleChange} className="space-y-3">
+              <input type="password" required value={newPass} onChange={e => setNewPass(e.target.value)} placeholder="Nueva contraseña" className={inputCls} />
+              <input type="password" required value={newPass2} onChange={e => setNewPass2(e.target.value)} placeholder="Repite la nueva contraseña" className={inputCls} />
+              <button type="submit" disabled={loading} className={`w-full py-3 ${btn} text-white font-black text-xs uppercase rounded-xl`}>
+                {loading ? 'Guardando…' : 'Guardar y entrar'}
+              </button>
+            </form>
+          )}
+        </div>
+      );
+    }
+
+    // ---------- Webpay Plus: pago real del abono (ambiente de integración de Transbank) ----------
+    function buildWebpayPayload(draft, user) {
+      return {
+        id: Date.now(),
+        canal: 'WEB',
+        barber_id: Number(draft.barber.id),
+        location_id: Number(draft.location.id),
+        service_name: draft.service.name,
+        date_time: AppFormatters.normalizeDateTimeString(`${draft.date} ${draft.hour}`),
+        customer_name: user ? user.fullName : (draft.guestName || ''),
+        customer_phone: user ? (user.phone || '') : (draft.guestPhone || ''),
+        customer_email: user ? user.email : (draft.guestEmail || '')
+      };
+    }
+
+    // Webpay recibe el token por POST desde un formulario (así lo exige Transbank)
+    function redirectToWebpay(url, token) {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = url;
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'token_ws';
+      input.value = token;
+      form.appendChild(input);
+      document.body.appendChild(form);
+      form.submit();
+    }
+
+    function WebpayModal({ isOpen, bookingDraft, onCancel }) {
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState('');
+      if (!isOpen || !bookingDraft) return null;
+      const user = store.getLoggedInUser();
+      const amountToPay = bookingDraft.prepayAmount || 3000;
+
+      const handlePay = async () => {
+        setError('');
+        setLoading(true);
+        try {
+          const returnUrl = window.location.origin + window.location.pathname;
+          const tx = await callApi('api_webpay_iniciar', { p: buildWebpayPayload(bookingDraft, user), p_return_url: returnUrl });
+          sessionStorage.setItem('bigboys_webpay_pending', JSON.stringify({ codigo: tx.codigo, token: tx.token }));
+          redirectToWebpay(tx.url, tx.token);
+        } catch (err) {
+          setError(err.message);
+          setLoading(false);
+        }
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="bg-[#121212] border border-zinc-700 rounded-3xl w-full max-w-md p-5 sm:p-6 relative shadow-2xl my-6 space-y-4">
+            <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
+              <span className="text-xs font-black uppercase text-white font-mono">WEBPAY PLUS · TRANSBANK</span>
+              <button onClick={onCancel} disabled={loading} className="text-zinc-500 hover:text-white text-xs">Cancelar</button>
+            </div>
+            <div className="p-3 bg-[#1E1E1E] rounded-2xl border border-zinc-800 space-y-1 text-xs">
+              <div className="flex justify-between"><span className="text-zinc-400">Servicio:</span><strong className="text-white">{bookingDraft.service.name}</strong></div>
+              <div className="flex justify-between"><span className="text-zinc-400">Barbero:</span><strong className="text-white">{bookingDraft.barber.name}</strong></div>
+              <div className="flex justify-between"><span className="text-zinc-400">Fecha y hora:</span><strong className="text-white">{bookingDraft.date} · {bookingDraft.hour}</strong></div>
+              <div className="flex justify-between pt-2 border-t border-zinc-800"><span className="text-zinc-400 font-bold uppercase">Abono a pagar:</span><strong className="text-base text-[#FFD700] font-black">{AppFormatters.formatClp(amountToPay)}</strong></div>
+            </div>
+            <p className="text-[11px] text-zinc-400">
+              Serás redirigido al formulario seguro de Webpay. Big Boys no recibe ni guarda los datos de tu tarjeta.
+              El horario queda reservado por 15 minutos mientras pagas.
+            </p>
+            <div className="p-2.5 rounded-xl bg-amber-950/30 border border-amber-500/40 text-[10px] text-amber-200">
+              Ambiente de integración (pruebas) de Transbank: usa la tarjeta de prueba VISA 4051 8856 0044 6623, CVV 123, cualquier fecha futura; RUT 11.111.111-1 y clave 123.
+            </div>
+            {error && <div className="p-3 bg-red-950/50 border border-red-500/50 rounded-xl text-red-300 text-xs">⚠️ {error}</div>}
+            <button onClick={handlePay} disabled={loading} className="w-full py-3 bg-[#FFD700] hover:bg-[#E5C100] text-black font-black text-xs uppercase rounded-xl">
+              {loading ? 'Conectando con Webpay…' : `Pagar ${AppFormatters.formatClp(amountToPay, false)} con Webpay →`}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // Lee el retorno de Webpay en la URL: token_ws (pago terminado) o TBK_TOKEN (pago anulado)
+    function readWebpayReturn() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('token_ws');
+        const tbk = params.get('TBK_TOKEN');
+        if (token) return { token, aborted: false };
+        if (tbk) return { token: tbk, aborted: true };
+        if (params.get('TBK_ORDEN_COMPRA')) return { token: null, aborted: true, timeout: true };
+      } catch (e) {}
+      return null;
+    }
+
+    function WebpayReturnModal({ webpayReturn, onClose }) {
+      const [result, setResult] = useState(null);
+      const [error, setError] = useState('');
+
+      useEffect(() => {
+        window.history.replaceState({}, '', window.location.pathname);
+        const pending = JSON.parse(sessionStorage.getItem('bigboys_webpay_pending') || 'null');
+        const token = webpayReturn.token || (pending && pending.token);
+        if (!token) { setError('El pago no se completó a tiempo. La reserva no quedó confirmada.'); return; }
+        callApi('api_webpay_confirmar', { p_token: token, p_abortado: webpayReturn.aborted })
+          .then(r => {
+            setResult(r);
+            sessionStorage.removeItem('bigboys_webpay_pending');
+            store.refreshAppointmentsFromCloud();
+            if (r.aprobado) store.addNotification('Reserva confirmada', `Tu abono fue aprobado. Código de reserva ${r.codigo}.`);
+          })
+          .catch(err => setError(err.message));
+      }, []);
+
+      const ok = result && result.aprobado && !result.sin_cupo;
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="bg-[#121212] border border-zinc-700 rounded-3xl w-full max-w-md p-5 sm:p-6 shadow-2xl my-6 space-y-4 text-center">
+            {!result && !error && (
+              <div className="py-10 space-y-3">
+                <div className="w-12 h-12 border-4 border-[#FFD700] border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <p className="text-xs text-zinc-300">Confirmando el pago con Transbank…</p>
+              </div>
+            )}
+            {error && (
+              <>
+                <div className="text-3xl">⚠️</div>
+                <p className="text-sm text-red-300">{error}</p>
+              </>
+            )}
+            {result && (
+              <>
+                <div className={`w-14 h-14 rounded-full border-2 flex items-center justify-center text-2xl mx-auto ${ok ? 'bg-green-500/20 border-green-500 text-green-400' : 'bg-red-500/20 border-red-500 text-red-400'}`}>{ok ? '✓' : '✕'}</div>
+                <div>
+                  <span className={`text-[10px] font-black uppercase tracking-widest block ${ok ? 'text-green-400' : 'text-red-400'}`}>
+                    {ok ? 'TRANSACCIÓN APROBADA' : result.sin_cupo ? 'PAGO APROBADO SIN HORARIO DISPONIBLE' : result.estado === 'ANULADO' ? 'PAGO ANULADO' : 'TRANSACCIÓN RECHAZADA'}
+                  </span>
+                  <h3 className="text-lg font-black text-white font-brand">{ok ? 'RESERVA CONFIRMADA' : 'LA RESERVA NO SE CONFIRMÓ'}</h3>
+                </div>
+                {ok ? (
+                  <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-4 text-xs space-y-2 text-left">
+                    <div className="flex justify-between"><span className="text-zinc-400">Código de reserva:</span><strong className="text-[#FFD700] font-mono">{result.codigo}</strong></div>
+                    <div className="flex justify-between"><span className="text-zinc-400">Orden de compra:</span><strong className="text-zinc-200 font-mono">{result.orden_compra}</strong></div>
+                    <div className="flex justify-between"><span className="text-zinc-400">Cód. autorización:</span><strong className="text-zinc-200 font-mono">{result.autorizacion}</strong></div>
+                    <div className="flex justify-between"><span className="text-zinc-400">Medio de pago:</span><strong className="text-zinc-200">{({ DEBITO: 'Débito', CREDITO: 'Crédito', PREPAGO: 'Prepago' })[result.tipo_medio] || 'Tarjeta'}{result.tarjeta ? ` ···· ${result.tarjeta}` : ''}</strong></div>
+                    <div className="flex justify-between"><span className="text-zinc-400">Fecha:</span><strong className="text-zinc-200">{result.fecha}</strong></div>
+                    <div className="flex justify-between pt-2 border-t border-zinc-800"><span className="text-zinc-400 font-bold">Abono pagado:</span><strong className="text-base text-green-400 font-black">{AppFormatters.formatClp(result.monto)}</strong></div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-zinc-400">
+                    {result.sin_cupo
+                      ? 'Tu pago se aprobó, pero el horario ya no estaba disponible. Te devolveremos el abono; contáctanos con el código ' + result.codigo + '.'
+                      : 'No se realizó ningún cargo. El horario quedó libre y puedes intentar nuevamente.'}
+                  </p>
+                )}
+              </>
+            )}
+            <div className="flex space-x-2">
+              {ok && <button onClick={() => window.print()} className="flex-1 py-2.5 bg-zinc-800 text-zinc-300 text-xs font-bold rounded-xl">🖨️ Imprimir</button>}
+              <button onClick={onClose} disabled={!result && !error} className="flex-1 py-2.5 bg-[#FFD700] text-black font-black text-xs uppercase rounded-xl">{ok ? 'Ver mis citas →' : 'Volver'}</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Fila por orden de llegada ----------
+    function useQueue(locationId, intervalMs = 8000) {
+      const [queue, setQueue] = useState(null);
+      const [error, setError] = useState('');
+      const reload = async () => {
+        if (!locationId) return;
+        try {
+          setQueue(await callApi('api_fila_listar', { p_sucursal: Number(locationId) }));
+          setError('');
+        } catch (err) { setError(err.message); }
+      };
+      useEffect(() => {
+        reload();
+        const t = setInterval(reload, intervalMs);
+        return () => clearInterval(t);
+      }, [locationId]);
+      return { queue, error, reload };
+    }
+
+    // Vista pública: cuántas personas esperan y a quién se está llamando (sin datos personales)
+    function QueueBoardScreen({ locations }) {
+      const [locationId, setLocationId] = useState(() => (locations[0] && locations[0].id) || 1);
+      const { queue, error } = useQueue(locationId);
+      const turns = (queue && queue.turnos) || [];
+      const called = turns.filter(t => t.estado === 'LLAMADO');
+      const waiting = turns.filter(t => t.estado === 'EN_ESPERA');
+      return (
+        <div className="space-y-4 pb-28">
+          <div>
+            <h2 className="text-2xl font-black italic text-white font-brand">FILA POR ORDEN DE LLEGADA</h2>
+            <p className="text-xs text-zinc-400">Revisa cuánta gente hay antes de ir. Al llegar, el cajero/a te da tu número.</p>
+          </div>
+          <select value={locationId} onChange={e => setLocationId(Number(e.target.value))} className={inputCls}>
+            {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+          </select>
+          {error && <div className="p-3 bg-red-950/50 border border-red-500/50 rounded-xl text-red-300 text-xs">⚠️ {error}</div>}
+          <div className="grid grid-cols-2 gap-3">
+            <div className={cardCls + ' text-center'}>
+              <span className="text-[10px] uppercase text-zinc-400 font-bold block">Personas esperando</span>
+              <strong className="text-4xl font-black text-[#FFD700]">{queue ? queue.en_espera : '–'}</strong>
+            </div>
+            <div className={cardCls + ' text-center'}>
+              <span className="text-[10px] uppercase text-zinc-400 font-bold block">Espera estimada</span>
+              <strong className="text-4xl font-black text-white">{queue ? queue.espera_estimada_min : '–'}</strong>
+              <span className="text-xs text-zinc-400"> min</span>
+            </div>
+          </div>
+          <div className={cardCls}>
+            <span className="text-[10px] uppercase text-zinc-400 font-bold">Llamando ahora</span>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {called.length === 0 ? <span className="text-xs text-zinc-500">Nadie por ahora.</span> :
+                called.map(t => <span key={t.id} className="px-3 py-2 rounded-xl bg-[#FFD700] text-black font-black text-lg">N° {t.numero}</span>)}
+            </div>
+          </div>
+          <div className={cardCls}>
+            <span className="text-[10px] uppercase text-zinc-400 font-bold">En espera</span>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {waiting.length === 0 ? <span className="text-xs text-zinc-500">Sin fila: ¡ven ahora!</span> :
+                waiting.map(t => <span key={t.id} className="px-3 py-1.5 rounded-lg bg-zinc-800 text-white font-bold text-xs">N° {t.numero}</span>)}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Gestión de la fila: registrar llegada, llamar, iniciar, terminar con monto y medio de pago, o marcar que se fue
+    function QueueManager({ staff, locations, barbers, fixedLocationId }) {
+      const [locationId, setLocationId] = useState(() => fixedLocationId || (locations[0] && locations[0].id) || 1);
+      const { queue, error, reload } = useQueue(locationId, 6000);
+      const [name, setName] = useState('');
+      const [serviceName, setServiceName] = useState('Corte');
+      const [barberId, setBarberId] = useState('');
+      const [finishing, setFinishing] = useState(null);
+      const [amount, setAmount] = useState('');
+      const [tip, setTip] = useState('0');
+      const [payMethod, setPayMethod] = useState('EFECTIVO');
+      const [msg, setMsg] = useState('');
+      const [services, setServices] = useState([]);
+      const branchBarbers = barbers.filter(b => Number(b.locationId) === Number(locationId) && b.active !== false);
+
+      useEffect(() => {
+        callApi('api_servicios', { p_sucursal: Number(locationId) })
+          .then(list => setServices((list || []).filter(s => s.bookable)))
+          .catch(() => setServices([]));
+      }, [locationId]);
+
+      const run = async (fn) => {
+        setMsg('');
+        try { await fn(); await reload(); } catch (err) { setMsg('⚠️ ' + err.message); }
+      };
+
+      const register = (e) => {
+        e.preventDefault();
+        run(async () => {
+          const r = await callApi('api_fila_registrar', { ...StaffSession.creds(staff), p: {
+            location_id: Number(locationId), nombre: name, service_name: serviceName, barber_id: barberId ? Number(barberId) : null } });
+          setMsg(`✓ ${name} quedó con el número ${r.numero}.`);
+          setName('');
+        });
+      };
+      const act = (turn, action, extra = {}) => run(() => callApi('api_fila_actualizar', {
+        ...StaffSession.creds(staff), p_id_turno: turn.id, p_accion: action, p: extra }));
+
+      const turns = (queue && queue.turnos) || [];
+      const active = turns.filter(t => !['ATENDIDO', 'ABANDONO'].includes(t.estado));
+      const done = turns.filter(t => ['ATENDIDO', 'ABANDONO'].includes(t.estado));
+
+      return (
+        <div className="space-y-4">
+          {!fixedLocationId && (
+            <select value={locationId} onChange={e => setLocationId(Number(e.target.value))} className={inputCls}>
+              {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+            </select>
+          )}
+          <form onSubmit={register} className={cardCls + ' space-y-2'}>
+            <strong className="text-xs text-white uppercase">Registrar llegada</strong>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+              <input required value={name} onChange={e => setName(e.target.value)} placeholder="Nombre para llamarlo" className={inputCls} />
+              <select value={serviceName} onChange={e => setServiceName(e.target.value)} className={inputCls}>
+                {(services.length ? services : [{ id: 0, name: 'Corte' }]).map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+              </select>
+              <select value={barberId} onChange={e => setBarberId(e.target.value)} className={inputCls}>
+                <option value="">Cualquier barbero</option>
+                {branchBarbers.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+              <button type="submit" className="py-2 bg-[#FFD700] text-black font-black text-xs uppercase rounded-xl">Dar número</button>
+            </div>
+          </form>
+          {(msg || error) && <div className="p-2.5 rounded-xl bg-zinc-800 text-xs text-[#FFD700]">{msg || error}</div>}
+          <div className="grid grid-cols-3 gap-2 text-center text-xs">
+            <div className={cardCls}><span className="text-zinc-400 block">En espera</span><strong className="text-2xl text-[#FFD700]">{queue ? queue.en_espera : '–'}</strong></div>
+            <div className={cardCls}><span className="text-zinc-400 block">Atendidos hoy</span><strong className="text-2xl text-emerald-400">{turns.filter(t => t.estado === 'ATENDIDO').length}</strong></div>
+            <div className={cardCls}><span className="text-zinc-400 block">Se fueron</span><strong className="text-2xl text-red-400">{turns.filter(t => t.estado === 'ABANDONO').length}</strong></div>
+          </div>
+          <div className="space-y-2">
+            {active.length === 0 && <p className="text-xs text-zinc-500 text-center py-4">No hay clientes en la fila.</p>}
+            {active.map(t => (
+              <div key={t.id} className={cardCls + ' flex flex-col sm:flex-row sm:items-center gap-2 justify-between'}>
+                <div className="text-xs">
+                  <strong className="text-lg text-white mr-2">N° {t.numero}</strong>
+                  <span className="text-white font-bold">{t.nombre}</span>
+                  <span className="text-zinc-400"> · {t.servicio || 'Corte'} · llegó {t.llegada}{t.barbero ? ` · ${t.barbero}` : ''}</span>
+                  <span className={`ml-2 font-bold ${QUEUE_COLORS[t.estado]}`}>{QUEUE_LABELS[t.estado]}</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {t.estado === 'EN_ESPERA' && <button onClick={() => act(t, 'LLAMAR')} className="px-3 py-1.5 bg-zinc-800 text-[#FFD700] text-xs font-bold rounded-lg">📣 Llamar</button>}
+                  {['EN_ESPERA', 'LLAMADO'].includes(t.estado) && (
+                    <>
+                      <button onClick={() => {
+                        const chosen = t.barber_id || (branchBarbers[0] && branchBarbers[0].id);
+                        act(t, 'INICIAR', { barber_id: chosen });
+                      }} className="px-3 py-1.5 bg-cyan-700 text-white text-xs font-bold rounded-lg">✂️ Iniciar</button>
+                      <button onClick={() => act(t, 'ABANDONO')} className="px-3 py-1.5 bg-zinc-800 text-red-400 text-xs font-bold rounded-lg">Se fue</button>
+                    </>
+                  )}
+                  {t.estado === 'EN_ATENCION' && <button onClick={() => { setFinishing(t); setAmount(''); setTip('0'); setPayMethod('EFECTIVO'); }} className="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg">✓ Terminar y cobrar</button>}
+                </div>
+              </div>
+            ))}
+          </div>
+          {done.length > 0 && (
+            <details className={cardCls}>
+              <summary className="text-xs text-zinc-400 cursor-pointer">Atendidos y retirados hoy ({done.length})</summary>
+              <div className="mt-2 space-y-1">
+                {done.map(t => <div key={t.id} className="text-xs text-zinc-400">N° {t.numero} · {t.nombre} · <span className={QUEUE_COLORS[t.estado]}>{QUEUE_LABELS[t.estado]}</span>{t.barbero ? ` · ${t.barbero}` : ''}</div>)}
+              </div>
+            </details>
+          )}
+          {finishing && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
+              <form onSubmit={(e) => { e.preventDefault(); act(finishing, 'TERMINAR', { monto: amount ? Number(amount) : null, propina: Number(tip) || 0, medio_pago: payMethod }); setFinishing(null); }}
+                className="bg-[#1E1E1E] border border-[#FFD700]/50 rounded-2xl w-full max-w-sm p-5 space-y-3">
+                <h3 className="text-sm font-black text-white">Cobrar N° {finishing.numero} · {finishing.nombre}</h3>
+                <input type="number" min="0" value={amount} onChange={e => setAmount(e.target.value)} placeholder="Monto cobrado (vacío = precio del servicio)" className={inputCls} />
+                <input type="number" min="0" value={tip} onChange={e => setTip(e.target.value)} placeholder="Propina" className={inputCls} />
+                <select value={payMethod} onChange={e => setPayMethod(e.target.value)} className={inputCls}>
+                  <option value="EFECTIVO">Efectivo</option><option value="DEBITO">Débito</option>
+                  <option value="CREDITO">Crédito</option><option value="TRANSFERENCIA">Transferencia</option>
+                </select>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => setFinishing(null)} className="flex-1 py-2 bg-zinc-800 text-zinc-300 text-xs font-bold rounded-xl">Cancelar</button>
+                  <button type="submit" className="flex-1 py-2 bg-emerald-600 text-white text-xs font-black rounded-xl">Registrar</button>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ---------- Cuentas del personal (solo el Dueño) ----------
+    function StaffManager({ staff, locations }) {
+      const [list, setList] = useState([]);
+      const [msg, setMsg] = useState('');
+      const [tempShown, setTempShown] = useState(null);
+      const [form, setForm] = useState({ full_name: '', email: '', phone: '', role: 'BARBERO', location_id: (locations[0] && locations[0].id) || 1, public_name: '', specialty: '' });
+      const reload = () => callApi('api_personal_listar', StaffSession.creds(staff)).then(setList).catch(err => setMsg('⚠️ ' + err.message));
+      useEffect(() => { reload(); }, []);
+      const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+
+      const create = async (e) => {
+        e.preventDefault();
+        setMsg('');
+        try {
+          const temp = generateTempPassword();
+          const r = await callApi('api_personal_crear', { ...StaffSession.creds(staff), p: {
+            ...form, location_id: Number(form.location_id), temp_password_sha256: await ValidationUtils.hashPassword(temp) } });
+          setTempShown({ email: r.email, temp });
+          setForm({ ...form, full_name: '', email: '', phone: '', public_name: '', specialty: '' });
+          reload();
+          store.refreshCatalogFromCloud();
+        } catch (err) { setMsg('⚠️ ' + err.message); }
+      };
+      const toggle = async (p, activo) => {
+        setMsg('');
+        try {
+          let temp = null;
+          if (activo) temp = generateTempPassword();
+          await callApi('api_personal_actualizar', { ...StaffSession.creds(staff), p_id_usuario: p.id, p_activo: activo,
+            p_temp_password_sha256: temp ? await ValidationUtils.hashPassword(temp) : null });
+          if (temp) setTempShown({ email: p.email, temp });
+          reload();
+          store.refreshCatalogFromCloud();
+        } catch (err) { setMsg('⚠️ ' + err.message); }
+      };
+      const locName = (id) => (locations.find(l => Number(l.id) === Number(id)) || {}).name || '—';
+
+      return (
+        <div className="space-y-4">
+          <form onSubmit={create} className={cardCls + ' space-y-2'}>
+            <strong className="text-xs text-white uppercase">Crear cuenta de colaborador</strong>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <input required value={form.full_name} onChange={set('full_name')} placeholder="Nombre y apellido" className={inputCls} />
+              <input required type="email" value={form.email} onChange={set('email')} placeholder="Correo" className={inputCls} />
+              <input value={form.phone} onChange={set('phone')} placeholder="Teléfono (opcional)" className={inputCls} />
+              <select value={form.role} onChange={set('role')} className={inputCls}>
+                <option value="BARBERO">Barbero</option>
+                <option value="ADMIN_SUCURSAL">Cajero/a de sucursal</option>
+              </select>
+              <select value={form.location_id} onChange={set('location_id')} className={inputCls}>
+                {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+              </select>
+              {form.role === 'BARBERO' && <input value={form.public_name} onChange={set('public_name')} placeholder="Nombre público (opcional)" className={inputCls} />}
+              {form.role === 'BARBERO' && <input value={form.specialty} onChange={set('specialty')} placeholder="Especialidad (opcional)" className={inputCls} />}
+            </div>
+            <button type="submit" className="px-4 py-2 bg-[#FFD700] text-black font-black text-xs uppercase rounded-xl">Crear y generar clave temporal</button>
+          </form>
+          {tempShown && (
+            <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/50 text-xs text-emerald-200">
+              Clave temporal de <strong>{tempShown.email}</strong>: <code className="text-base text-white font-mono">{tempShown.temp}</code>
+              <span className="block text-[11px] text-zinc-400 mt-1">Entrégala en persona. No se vuelve a mostrar y el colaborador debe cambiarla al ingresar.</span>
+              <button onClick={() => setTempShown(null)} className="mt-2 px-3 py-1 bg-zinc-800 rounded-lg text-zinc-300">Ya la entregué</button>
+            </div>
+          )}
+          {msg && <div className="p-2.5 rounded-xl bg-zinc-800 text-xs text-[#FFD700]">{msg}</div>}
+          <div className="space-y-2">
+            {list.map(p => (
+              <div key={p.id} className={cardCls + ' flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs'}>
+                <div>
+                  <strong className="text-white">{p.public_name || p.full_name}</strong>
+                  <span className="text-zinc-400"> · {p.email} · {ROLE_LABELS[p.role]} · {locName(p.location_id)}</span>
+                  <span className={`ml-2 font-bold ${p.estado === 'ACTIVO' ? 'text-emerald-400' : 'text-red-400'}`}>{p.estado}</span>
+                  {p.must_change_password && <span className="ml-2 text-amber-300">(debe cambiar su clave)</span>}
+                  <span className="block text-[10px] text-zinc-500">Último acceso: {p.ultimo_acceso || 'nunca'}</span>
+                </div>
+                {p.estado === 'ACTIVO'
+                  ? <button onClick={() => toggle(p, false)} className="px-3 py-1.5 bg-zinc-800 text-red-400 font-bold rounded-lg">Bloquear acceso</button>
+                  : <button onClick={() => toggle(p, true)} className="px-3 py-1.5 bg-zinc-800 text-emerald-400 font-bold rounded-lg">Reactivar con clave nueva</button>}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Solicitudes de derechos del titular (solo el Dueño) ----------
+    function RightsRequestsManager({ staff }) {
+      const [list, setList] = useState([]);
+      const [msg, setMsg] = useState('');
+      const [answer, setAnswer] = useState({});
+      const reload = () => callApi('api_solicitudes_listar', StaffSession.creds(staff)).then(setList).catch(err => setMsg('⚠️ ' + err.message));
+      useEffect(() => { reload(); }, []);
+      const respond = async (d, estado) => {
+        setMsg('');
+        try {
+          await callApi('api_solicitud_responder', { ...StaffSession.creds(staff), p_id: d.id, p_estado: estado, p_respuesta: answer[d.id] || '' });
+          reload();
+        } catch (err) { setMsg('⚠️ ' + err.message); }
+      };
+      const open = list.filter(d => !['RESPONDIDA', 'RECHAZADA'].includes(d.estado));
+      return (
+        <div className="space-y-3">
+          <p className="text-xs text-zinc-400">Plazo legal: 30 días corridos desde el ingreso (Ley N° 21.719), prorrogable una vez. Pendientes: <strong className="text-[#FFD700]">{open.length}</strong></p>
+          {msg && <div className="p-2.5 rounded-xl bg-zinc-800 text-xs text-[#FFD700]">{msg}</div>}
+          {list.length === 0 && <p className="text-xs text-zinc-500 text-center py-4">No hay solicitudes.</p>}
+          {list.map(d => (
+            <div key={d.id} className={cardCls + ' text-xs space-y-2'}>
+              <div className="flex flex-wrap justify-between gap-2">
+                <span><strong className="text-white font-mono">{d.codigo}</strong> · {d.tipo} · {d.titular} ({d.email || 'sin correo'})</span>
+                <span className="text-zinc-400">Ingreso {d.ingreso} · vence {d.fecha_limite} · <strong className="text-[#FFD700]">{d.estado}</strong></span>
+              </div>
+              {d.detalle && <p className="text-zinc-300">“{d.detalle}”</p>}
+              {d.respuesta && <p className="text-emerald-300">Respuesta: {d.respuesta}</p>}
+              {!['RESPONDIDA', 'RECHAZADA'].includes(d.estado) && (
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input value={answer[d.id] || ''} onChange={e => setAnswer({ ...answer, [d.id]: e.target.value })} placeholder="Respuesta al titular" className={inputCls} />
+                  <button onClick={() => respond(d, 'RESPONDIDA')} className="px-3 py-1.5 bg-emerald-600 text-white font-bold rounded-lg">Responder</button>
+                  <button onClick={() => respond(d, 'PRORROGADA')} className="px-3 py-1.5 bg-zinc-800 text-amber-300 font-bold rounded-lg">Prorrogar</button>
+                  <button onClick={() => respond(d, 'RECHAZADA')} className="px-3 py-1.5 bg-zinc-800 text-red-400 font-bold rounded-lg">Rechazar</button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // ---------- Panel del cajero/a: fila de su sucursal y reservas del día ----------
+    function CashierDashboard({ staff, locations, barbers, appointments, onLogout }) {
+      const [tab, setTab] = useState('fila');
+      const locationId = staff.locationId || (locations[0] && locations[0].id);
+      const loc = locations.find(l => Number(l.id) === Number(locationId));
+      const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Santiago' });
+      const todays = appointments.filter(a => Number(a.locationId) === Number(locationId) && (a.dateTime || '').startsWith(today));
+      return (
+        <div className="space-y-4 pb-10">
+          <div className="flex flex-wrap justify-between items-center gap-2">
+            <div>
+              <span className="text-[10px] font-black uppercase text-cyan-400 tracking-widest">Cajero/a · {loc ? loc.name : 'Sucursal'}</span>
+              <h2 className="text-xl font-black text-white font-brand">Hola, {staff.name}</h2>
+            </div>
+            <button onClick={onLogout} className="px-3 py-2 bg-zinc-800 text-zinc-300 text-xs font-bold rounded-xl">Cerrar sesión</button>
+          </div>
+          <div className="flex gap-2">
+            {[['fila', '🎟️ Fila por llegada'], ['reservas', `📅 Reservas de hoy (${todays.length})`]].map(([id, label]) => (
+              <button key={id} onClick={() => setTab(id)} className={`px-4 py-2 rounded-2xl text-xs font-bold ${tab === id ? 'bg-[#FFD700] text-black' : 'bg-[#1E1E1E] text-zinc-400 border border-zinc-800'}`}>{label}</button>
+            ))}
+          </div>
+          {tab === 'fila' && <QueueManager staff={staff} locations={locations} barbers={barbers} fixedLocationId={locationId} />}
+          {tab === 'reservas' && (
+            <div className="space-y-2">
+              {todays.length === 0 && <p className="text-xs text-zinc-500 text-center py-4">No hay reservas para hoy en esta sucursal.</p>}
+              {todays.sort((a, b) => a.dateTime.localeCompare(b.dateTime)).map(a => {
+                const b = barbers.find(x => Number(x.id) === Number(a.barberId));
+                return (
+                  <div key={a.id} className={cardCls + ' flex flex-wrap justify-between gap-2 text-xs'}>
+                    <span><strong className="text-white">{a.dateTime.slice(11, 16)}</strong> · {a.customerName} · {a.serviceName} · {b ? b.name : ''}</span>
+                    <span className="flex items-center gap-2">
+                      <span className="text-[#FFD700] font-bold">{a.status}</span>
+                      {a.status === 'Confirmada' && (
+                        <>
+                          <button onClick={() => store.updateAppointmentStatusAdmin(a.id, 'Completada')} className="px-2 py-1 bg-emerald-700 text-white rounded-lg">Atendida</button>
+                          <button onClick={() => store.updateAppointmentStatusAdmin(a.id, 'No-Show (Inasistencia)')} className="px-2 py-1 bg-zinc-800 text-red-400 rounded-lg">No llegó</button>
+                        </>
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ---------- Panel del barbero: solo sus atenciones y lo ganado (CU-41) ----------
+    function BarberEarningsDashboard({ staff, onLogout }) {
+      const [day, setDay] = useState(() => new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Santiago' }));
+      const [data, setData] = useState(null);
+      const [error, setError] = useState('');
+      useEffect(() => {
+        const load = () => callApi('api_mis_atenciones', { ...StaffSession.creds(staff), p_fecha: day }).then(setData).catch(err => setError(err.message));
+        load();
+        const t = setInterval(load, 15000);
+        return () => clearInterval(t);
+      }, [day]);
+      return (
+        <div className="space-y-4 pb-10 max-w-xl mx-auto">
+          <div className="flex justify-between items-center">
+            <div>
+              <span className="text-[10px] font-black uppercase text-cyan-400 tracking-widest">Barbero</span>
+              <h2 className="text-xl font-black text-white font-brand">{staff.name}</h2>
+            </div>
+            <button onClick={onLogout} className="px-3 py-2 bg-zinc-800 text-zinc-300 text-xs font-bold rounded-xl">Cerrar sesión</button>
+          </div>
+          <input type="date" value={day} onChange={e => setDay(e.target.value)} className={inputCls} />
+          {error && <div className="p-3 bg-red-950/50 border border-red-500/50 rounded-xl text-red-300 text-xs">⚠️ {error}</div>}
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className={cardCls}><span className="text-[10px] text-zinc-400 block">Atenciones</span><strong className="text-2xl text-white">{data ? data.atenciones.length : '–'}</strong></div>
+            <div className={cardCls}><span className="text-[10px] text-zinc-400 block">Total cobrado</span><strong className="text-lg text-[#FFD700]">{data ? AppFormatters.formatClp(data.total, false) : '–'}</strong></div>
+            <div className={cardCls}><span className="text-[10px] text-zinc-400 block">Propinas</span><strong className="text-lg text-emerald-400">{data ? AppFormatters.formatClp(data.propinas, false) : '–'}</strong></div>
+          </div>
+          <div className="space-y-1.5">
+            {data && data.atenciones.length === 0 && <p className="text-xs text-zinc-500 text-center py-4">Sin atenciones registradas este día.</p>}
+            {data && data.atenciones.map((a, i) => (
+              <div key={i} className={cardCls + ' flex justify-between text-xs'}>
+                <span className="text-white"><strong>{a.hora}</strong> · {a.servicio}</span>
+                <span className="text-[#FFD700] font-bold">{AppFormatters.formatClp(a.monto, false)}{Number(a.propina) > 0 ? ` + ${AppFormatters.formatClp(a.propina, false)}` : ''}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-[10px] text-zinc-500 text-center">Por privacidad, aquí no se muestran datos de contacto de los clientes.</p>
+        </div>
+      );
+    }
+
+    // ---------- «Mis datos»: derechos del titular (Ley N° 21.719) ----------
+    function MyDataPanel({ user }) {
+      const [msg, setMsg] = useState('');
+      const [data, setData] = useState(null);
+      const [requestType, setRequestType] = useState('RECTIFICACION');
+      const [detail, setDetail] = useState('');
+      const [promo, setPromo] = useState(null);
+      const creds = { p_email: user.email, p_password_sha256: user.passwordHash };
+
+      const view = async (tipo) => {
+        setMsg('');
+        try {
+          const d = await callApi('api_mis_datos', { ...creds, p_tipo: tipo });
+          setData(d);
+          const active = (d.consentimientos || []).find(k => k.finalidad === 'PROMOCIONAL' && !k.revocado_en);
+          setPromo(Boolean(active));
+          if (tipo === 'PORTABILIDAD') {
+            const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `mis_datos_bigboys_${d.generado_en.slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            setMsg('✓ Descargaste tus datos en formato JSON (portabilidad).');
+          }
+        } catch (err) { setMsg('⚠️ ' + err.message); }
+      };
+      const sendRequest = async (e) => {
+        e.preventDefault();
+        setMsg('');
+        try {
+          const r = await callApi('api_solicitud_derecho', { ...creds, p_tipo: requestType, p_detalle: detail });
+          setMsg(`✓ Solicitud ${r.codigo} recibida. Te responderemos a más tardar el ${r.fecha_limite}.`);
+          setDetail('');
+          if (data) view('ACCESO');
+        } catch (err) { setMsg('⚠️ ' + err.message); }
+      };
+      const togglePromo = async () => {
+        try {
+          const r = await callApi('api_consentimiento', { ...creds, p_otorgado: !promo, p_canal: 'WEB' });
+          setPromo(r.promocional);
+          setMsg(r.promocional ? '✓ Aceptaste recibir promociones.' : '✓ Ya no recibirás promociones.');
+        } catch (err) { setMsg('⚠️ ' + err.message); }
+      };
+
+      return (
+        <div className="mt-5 pt-4 border-t border-zinc-800 space-y-3">
+          <h4 className="text-xs font-black text-[#FFD700] uppercase">Mis datos · Ley N° 21.719</h4>
+          {msg && <div className="p-2 rounded bg-zinc-800 text-xs text-[#FFD700]">{msg}</div>}
+          <div className="grid grid-cols-2 gap-2">
+            <button type="button" onClick={() => view('ACCESO')} className="py-2 bg-zinc-800 text-white text-xs font-bold rounded-xl">👁️ Ver mis datos</button>
+            <button type="button" onClick={() => view('PORTABILIDAD')} className="py-2 bg-zinc-800 text-white text-xs font-bold rounded-xl">⬇️ Descargar (JSON)</button>
+          </div>
+          {data && (
+            <div className="max-h-40 overflow-y-auto p-2 rounded-xl bg-[#121212] border border-zinc-800 text-[11px] text-zinc-300 space-y-1">
+              <div>Nombre: <strong>{data.cuenta.nombre} {data.cuenta.apellido || ''}</strong> · {data.cuenta.email} · {data.cuenta.telefono || 'sin teléfono'}</div>
+              <div>Reservas: {data.reservas.length} · Pagos: {data.pagos.length} · Atenciones: {data.atenciones.length} · Reseñas: {data.resenas.length}</div>
+              <div>Consentimientos: {data.consentimientos.map(k => `${k.finalidad}${k.revocado_en ? ' (revocado)' : ''}`).join(', ') || 'ninguno'}</div>
+              <div>Solicitudes: {data.solicitudes.map(s => `${s.codigo} ${s.tipo} ${s.estado}`).join(' · ') || 'ninguna'}</div>
+            </div>
+          )}
+          {promo !== null && (
+            <label className="flex items-center justify-between text-xs text-zinc-300">
+              <span>Recibir promociones por correo</span>
+              <input type="checkbox" checked={promo} onChange={togglePromo} className="accent-[#FFD700] w-4 h-4" />
+            </label>
+          )}
+          <form onSubmit={sendRequest} className="space-y-2">
+            <select value={requestType} onChange={e => setRequestType(e.target.value)} className={inputCls}>
+              <option value="RECTIFICACION">Rectificar un dato incorrecto</option>
+              <option value="OPOSICION">Oponerme a un tratamiento</option>
+              <option value="BLOQUEO">Bloquear temporalmente mis datos</option>
+            </select>
+            <textarea required value={detail} onChange={e => setDetail(e.target.value)} placeholder="Cuéntanos qué necesitas" rows={2} className={inputCls} />
+            <button type="submit" className="w-full py-2 bg-zinc-800 text-[#FFD700] text-xs font-bold rounded-xl">Enviar solicitud</button>
+          </form>
+          <button type="button" onClick={async () => {
+            if (!window.confirm('¿Eliminar tu cuenta? Tus datos personales se anonimizan y no se puede deshacer.')) return;
+            await store.deleteUser(user.email);
+            window.location.reload();
+          }} className="w-full py-2 bg-red-950/50 border border-red-500/40 text-red-300 text-xs font-bold rounded-xl">🗑️ Eliminar mi cuenta (supresión)</button>
         </div>
       );
     }
@@ -8351,7 +8963,9 @@
       });
 
       // Control de sesión: La aplicación comienza obligatoriamente en la pantalla de Login
-      const [sessionUnlocked, setSessionUnlocked] = useState(false);
+      const [sessionUnlocked, setSessionUnlocked] = useState(() => Boolean(readWebpayReturn()) || Boolean(StaffSession.get()));
+      const [staff, setStaff] = useState(() => StaffSession.get());
+      const [webpayReturn, setWebpayReturn] = useState(() => readWebpayReturn());
       const [showSplash, setShowSplash] = useState(false);
 
       const [previewAsClient, setPreviewAsClient] = useState(false);
@@ -8437,30 +9051,12 @@
         setWebpayModalOpen(true);
       };
 
-      const handlePaymentSuccess = () => {
-        if (!currentBookingDraft) return;
-
-        store.confirmAndBook({
-          locationId: currentBookingDraft.location.id,
-          barberId: currentBookingDraft.barber.id,
-          serviceName: currentBookingDraft.service.name,
-          servicePrice: currentBookingDraft.service.price,
-          prepayAmount: currentBookingDraft.prepayAmount,
-          dateTime: `${currentBookingDraft.date} ${currentBookingDraft.hour}`,
-          customerName: currentBookingDraft.guestName,
-          customerPhone: currentBookingDraft.guestPhone,
-          customerEmail: currentBookingDraft.guestEmail,
-          isGuest: !storeState.user
-        });
-
-        setWebpayModalOpen(false);
-        setCurrentBookingDraft(null);
-        setActiveTab('inicio');
-      };
-
       const handleLogout = () => {
         store.logout();
         store.logoutBarber();
+        StaffSession.clear();
+        setStaff(null);
+        localStorage.setItem('bigboys_is_admin', 'false');
         if (typeof sessionStorage !== 'undefined') {
           sessionStorage.removeItem('bigboys_session_active');
           sessionStorage.removeItem('bigboys_splash_shown');
@@ -8492,19 +9088,27 @@
               setSessionUnlocked(true);
               setActiveTab('inicio');
             }}
-            onBarberSuccess={(loggedBarber) => {
+            onBarberSuccess={(session) => {
               if (typeof sessionStorage !== 'undefined') {
                 sessionStorage.setItem('bigboys_session_active', 'true');
               }
+              setStaff(session);
               setSessionUnlocked(true);
             }}
-            onAdminSuccess={() => {
+            onAdminSuccess={(session) => {
               if (typeof sessionStorage !== 'undefined') {
                 sessionStorage.setItem('bigboys_session_active', 'true');
+              }
+              setStaff(session);
+              if (session.role === 'DUENO') {
+                // El Dueño entra al panel de administración completo
+                localStorage.setItem('bigboys_is_admin', 'true');
+                localStorage.setItem('bigboys_logged_user', JSON.stringify({ id: session.id, fullName: session.name, email: session.email, phone: '' }));
+                store.notify();
+                setActiveTab('admin');
               }
               setSessionUnlocked(true);
               setPreviewAsClient(false);
-              setActiveTab('admin');
             }}
             onRegisterSuccess={(newUser) => {
               if (typeof sessionStorage !== 'undefined') {
@@ -8566,7 +9170,7 @@
           )}
 
           {/* Navegación inferior y botón flotante: SOLO si NO es admin ni barbero o si está en Vista Previa Cliente */}
-          {(!storeState.isAdmin && !storeState.barber || previewAsClient) && (
+          {(!storeState.isAdmin && !storeState.barber && !(staff && staff.role !== 'DUENO') || previewAsClient) && (
             <BottomNav
               activeTab={activeTab}
               onTabChange={(tab) => { setActiveTab(tab); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
@@ -8577,8 +9181,13 @@
           )}
 
           <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-            {/* Si es Barbero logueado, mostrar EXCLUSIVAMENTE su Dashboard Diario de Barbero */}
-            {storeState.barber ? (
+            {/* Personal con cuenta: barbero (sus atenciones) y cajero/a (fila y reservas de su sucursal) */}
+            {staff && staff.role === 'BARBERO' ? (
+              <BarberEarningsDashboard staff={staff} onLogout={handleLogout} />
+            ) : staff && staff.role === 'ADMIN_SUCURSAL' ? (
+              <CashierDashboard staff={staff} locations={storeState.locations} barbers={storeState.barbers}
+                appointments={storeState.appointments} onLogout={handleLogout} />
+            ) : storeState.barber ? (
               <BarberDashboard
                 barber={storeState.barber}
                 locations={storeState.locations}
@@ -8629,6 +9238,10 @@
                     onSelectBranchForBooking={handleSelectBranchForBooking}
                     isDarkMode={storeState.isDarkMode}
                   />
+                )}
+
+                {activeTab === 'fila' && (
+                  <QueueBoardScreen locations={storeState.locations} />
                 )}
 
                 {activeTab === 'resenas' && (
@@ -8697,8 +9310,14 @@
             <WebpayModal
               isOpen={webpayModalOpen}
               bookingDraft={currentBookingDraft}
-              onPaymentSuccess={handlePaymentSuccess}
               onCancel={() => setWebpayModalOpen(false)}
+            />
+          )}
+
+          {webpayReturn && (
+            <WebpayReturnModal
+              webpayReturn={webpayReturn}
+              onClose={() => { setWebpayReturn(null); setActiveTab(storeState.user ? 'historial' : 'inicio'); }}
             />
           )}
 
