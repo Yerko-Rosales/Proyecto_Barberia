@@ -1,0 +1,23 @@
+Pruebas de seguridad · Proyecto Barbería Big-Boys · 28-10-2026
+Base: Supabase «Big Boys Project» (PostgreSQL 17). Script: 08_pruebas_seguridad.sql (migración 07_seguridad_reservas.sql)
+Las pruebas corren en una transacción que se deshace al final (no dejan datos).
+
+1 OK | S-01 Reserva confirmada sin pago rechazada | PAGO_REQUERIDO
+2 OK | S-02 Atención LOCAL anónima rechazada | PAGO_REQUERIDO
+3 OK | S-03 Cajero/a registra atención LOCAL | Completada
+4 OK | S-04 Cancelar reserva ajena sin credenciales | SIN_PERMISO
+5 OK | S-05 Invitado no confirma sin pagar | SIN_PERMISO
+6 OK | S-06 Otro cliente no cancela reserva ajena | SIN_PERMISO
+7 OK | S-07 Barbero no cambia estados | SIN_PERMISO
+8 OK | S-08 Cajero/a limitado a su sucursal | SIN_PERMISO
+9 OK | S-09 Invitado cancela su reserva con su correo | Cancelada
+10 OK | S-10 Dueño cambia estado con auditoría | No-Show (Inasistencia)
+11 OK | S-11 Barbero sin datos de contacto | contacto oculto
+12 OK | S-12 Contacto según sucursal | cajero/a oculto, Dueño visible
+13 OK | S-13 Sin datos de una cuenta ajena | Usuario D.
+14 OK | S-14 Bloqueo temporal tras 5 intentos | clave correcta rechazada; cuenta ACTIVA
+15 OK | S-15 Bloqueo aplica a toda la API | CREDENCIALES_INVALIDAS
+16 OK | S-16 Ingreso tras el bloqueo | contador en 0
+
+Resultado: 16/16 OK
+Regresión: 06_pruebas_api_s12.sql vuelve a dar 20/20 OK con la migración aplicada.

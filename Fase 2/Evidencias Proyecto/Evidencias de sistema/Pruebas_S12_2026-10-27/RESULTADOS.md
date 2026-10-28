@@ -54,3 +54,24 @@ y permisos (solo el Dueño crea personal, el cajero/a opera solo su sucursal, el
 Dueño (admin@bigboys.cl), cajero/a (caja1@bigboys.cl), barberos (mateo@, esteban@, cristian@, diego@bigboys.cl) y cliente (test@bigboys.cl).
 Las contraseñas del personal **no se publican** en este repositorio (es público); el equipo las comparte por un canal privado.
 Para repetir las pruebas se cargan como variables de entorno: `BB_CLAVE_DUENO`, `BB_CLAVE_BARBERO`, `BB_CLAVE_CAJA`, `BB_CLAVE_CAJA_TEMPORAL`.
+
+## 6. Corrección de riesgos de seguridad (28-10-2026)
+
+Migración `Base de datos/supabase_2026-10-27/07_seguridad_reservas.sql`; pruebas `08_pruebas_seguridad.sql` → **16/16 OK**
+(`resultado_pruebas_seguridad.txt`). La regresión de la API S12 sigue en 20/20.
+
+| Riesgo encontrado | Corrección |
+|---|---|
+| Con la clave pública cualquiera podía cancelar o reagendar reservas ajenas, o dejar «Confirmada» una reserva sin pagar (`api_actualizar_reserva` sin credenciales) | El cliente solo cancela o reagenda **su** reserva (el invitado indica el correo con que reservó); los demás cambios de estado son del Dueño o del cajero/a de esa sucursal; todo cambio queda en `registro_auditoria` |
+| `api_crear_reserva` permitía crear reservas confirmadas o atenciones presenciales sin pagar el abono | Sin cuenta del Dueño o del cajero/a solo se crea la reserva pendiente que confirma Webpay (`PAGO_REQUERIDO`) |
+| Reservar con el correo de una cuenta registrada devolvía su nombre y teléfono | Solo se devuelven los datos que escribió el propio invitado |
+| El barbero veía teléfono y correo de todos los clientes en el listado de reservas | Contacto solo para el titular, el Dueño y el cajero/a de la sucursal |
+| 5 claves erradas dejaban la cuenta BLOQUEADA para siempre (cualquiera podía bloquear la cuenta del Dueño) | Bloqueo temporal de 15 min (parámetros `MAX_INTENTOS_LOGIN` y `MINUTOS_BLOQUEO_LOGIN`); durante el bloqueo ninguna función acepta la clave |
+
+**Web** (`scripts/web_seguridad.js`, Chrome automatizado): 4/4 — reserva confirmada sin pago rechazada, cancelación con otro correo
+rechazada, invitado cancela con su correo, el Dueño registra y cancela una atención. Sin errores de página.
+**App**: envía las credenciales de la sesión y el correo del invitado al cambiar reservas; el Dueño inicia la sesión de datos al entrar
+al panel. Compilación de depuración correcta.
+
+Riesgos que quedan (aceptados por ahora): los intentos fallidos solo se cuentan en el inicio de sesión (no en las demás funciones);
+`api_usuario_existe` permite saber si un correo está registrado; el correo del invitado no es un secreto fuerte.

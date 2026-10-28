@@ -371,6 +371,8 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
             }
             _isAdmin.value = true
             _loggedInBarber.value = null
+            // The owner's credentials authorize status changes in api_actualizar_reserva
+            SupabaseManager.setSession(email, hash)
             _loggedInUser.value = User(
                 id = -99,
                 fullName = profile["full_name"]?.toString()?.trim('"') ?: _adminName.value,
