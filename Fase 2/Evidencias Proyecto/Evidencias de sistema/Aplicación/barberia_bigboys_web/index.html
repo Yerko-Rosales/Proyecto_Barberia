@@ -848,8 +848,11 @@
         return Boolean(this.cloudSyncActive && this.getCloudClient());
       }
 
-      // Credenciales de la sesión para las funciones api_* (la contraseña viaja como SHA-256)
+      // Credenciales de la sesión para las funciones api_* (la contraseña viaja como SHA-256).
+      // Si hay una sesión del personal (Dueño o cajero/a), se usa esa
       getCloudCredentials() {
+        const staff = typeof StaffSession !== 'undefined' ? StaffSession.get() : null;
+        if (staff && staff.email && staff.hash) return StaffSession.creds(staff);
         const user = this.getLoggedInUser();
         return user && user.email && user.passwordHash
           ? { p_email: user.email, p_password_sha256: user.passwordHash }
@@ -989,7 +992,9 @@
               customer_name: appointment.customerName || '',
               customer_phone: appointment.customerPhone || '',
               customer_email: appointment.customerEmail || ''
-            }
+            },
+            // Sin cuenta del personal la base solo acepta reservas pendientes de pago (Webpay)
+            ...this.getCloudCredentials()
           });
           if (error) {
             console.warn('Aviso publicando en Supabase:', error.message);
@@ -1015,8 +1020,11 @@
               date_time: appointment.dateTime,
               status: newStatus,
               cancelled_by: appointment.cancelledBy || appointment.canceledBy || null,
-              cancellation_reason: appointment.cancellationReason || null
-            }
+              cancellation_reason: appointment.cancellationReason || null,
+              // El invitado se identifica con el correo con que reservó
+              customer_email: appointment.customerEmail || null
+            },
+            ...this.getCloudCredentials()
           });
           if (!error) {
             console.log(`✓ Estado actualizado a '${newStatus}' en Supabase:`, appointment.id);
@@ -1041,8 +1049,10 @@
               canal: 'WEB',
               barber_id: Number(appointment.barberId),
               date_time: oldDateTime,
-              new_date_time: appointment.dateTime
-            }
+              new_date_time: appointment.dateTime,
+              customer_email: appointment.customerEmail || null
+            },
+            ...this.getCloudCredentials()
           });
           if (error) {
             console.warn('Aviso reagendando en Supabase:', error.message);

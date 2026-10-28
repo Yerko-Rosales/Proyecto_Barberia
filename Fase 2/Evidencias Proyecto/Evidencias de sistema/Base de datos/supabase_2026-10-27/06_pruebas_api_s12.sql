@@ -23,7 +23,7 @@ BEGIN
   INSERT INTO resultado (prueba, ok, detalle) VALUES ('P-01 Reserva pendiente con vencimiento de 15 min', PROCEDURE_OK, v->>'status');
 
   BEGIN
-    PERFORM api_crear_reserva('{"id": 1790000000002, "canal": "WEB", "barber_id": 2, "service_name": "Corte", "date_time": "2026-11-03 10:00", "customer_name": "Prueba B"}');
+    PERFORM api_crear_reserva('{"id": 1790000000002, "canal": "WEB", "barber_id": 2, "service_name": "Corte", "date_time": "2026-11-03 10:00", "status": "Pendiente", "customer_name": "Prueba B"}');
     INSERT INTO resultado (prueba, ok, detalle) VALUES ('P-02 Mismo horario rechazado mientras se paga', false, 'se permitió');
   EXCEPTION WHEN OTHERS THEN
     INSERT INTO resultado (prueba, ok, detalle) VALUES ('P-02 Mismo horario rechazado mientras se paga', SQLERRM LIKE '%HORARIO_OCUPADO%', SQLERRM);
@@ -31,7 +31,9 @@ BEGIN
 
   -- P-03 Al vencer el plazo, la reserva pasa a EXPIRADA y libera el horario
   UPDATE reserva SET expira_en = now() - interval '1 min' WHERE codigo = v->>'codigo';
-  v2 := api_crear_reserva('{"id": 1790000000003, "canal": "WEB", "barber_id": 2, "service_name": "Corte", "date_time": "2026-11-03 10:00", "customer_name": "Prueba C"}');
+  -- (desde 07_seguridad_reservas solo el Dueño o el cajero/a confirman sin pasar por Webpay)
+  v2 := api_crear_reserva('{"id": 1790000000003, "canal": "WEB", "barber_id": 2, "service_name": "Corte", "date_time": "2026-11-03 10:00", "customer_name": "Prueba C"}',
+                          'admin@bigboys.cl', h_admin);
   INSERT INTO resultado (prueba, ok, detalle)
   SELECT 'P-03 Pendiente vencida se libera', (SELECT estado FROM reserva WHERE codigo = v->>'codigo') = 'EXPIRADA' AND v2->>'status' = 'Confirmada',
          (SELECT estado FROM reserva WHERE codigo = v->>'codigo') || ' / nueva ' || (v2->>'status');

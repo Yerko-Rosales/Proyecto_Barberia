@@ -55,6 +55,12 @@ object SupabaseManager {
         _manualRefreshSignal.tryEmit(Unit)
     }
 
+    // The database checks who changes a reservation (owner, cashier or the customer who booked it)
+    private fun kotlinx.serialization.json.JsonObjectBuilder.putSessionCredentials() {
+        sessionEmail?.let { put("p_email", it) }
+        sessionPasswordHash?.let { put("p_password_sha256", it) }
+    }
+
     private suspend fun callRpc(function: String, params: JsonObject = buildJsonObject { }) =
         client.postgrest.rpc(function, params)
 
@@ -147,6 +153,8 @@ object SupabaseManager {
                     put("customer_phone", appointment.customerPhone)
                     put("customer_email", appointment.customerEmail)
                 })
+                // Without staff credentials the database only accepts pending (Webpay) bookings
+                putSessionCredentials()
             })
             Log.d(TAG, "Reservation inserted into Supabase: $isoDateTime, barberId: ${appointment.barberId}")
             triggerCloudRefresh()
@@ -172,7 +180,10 @@ object SupabaseManager {
                     put("date_time", toIsoDateTime(appointment.dateTime))
                     put("status", newStatus)
                     cancelledBy?.let { put("cancelled_by", it) }
+                    // A guest proves ownership with the e-mail used to book
+                    put("customer_email", appointment.customerEmail)
                 })
+                putSessionCredentials()
             })
             Log.d(TAG, "Reservation status updated in Supabase: $newStatus")
             triggerCloudRefresh()
@@ -196,7 +207,9 @@ object SupabaseManager {
                     put("barber_id", appointment.barberId)
                     put("date_time", toIsoDateTime(oldDateTime))
                     put("new_date_time", toIsoDateTime(appointment.dateTime))
+                    put("customer_email", appointment.customerEmail)
                 })
+                putSessionCredentials()
             })
             triggerCloudRefresh()
             true
