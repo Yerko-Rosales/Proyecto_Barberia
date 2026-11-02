@@ -424,6 +424,31 @@
         return trimmed;
       },
 
+      // Anticipación mínima para reservar (parámetro MINUTOS_ANTICIPACION_RESERVA de la base)
+      MIN_BOOKING_LEAD_MIN: 90,
+
+      // Minutos desde ahora hasta una hora de cita; ambas en hora de Chile, sin importar el reloj del equipo
+      minutesUntilSlot(dateStr, hour) {
+        const [y, m, d] = this.normalizeDateToYMD(dateStr).split('-').map(Number);
+        const [hh, mm] = String(hour || '').split(':').map(Number);
+        const [nd, nt] = new Date().toLocaleString('sv-SE', { timeZone: 'America/Santiago' }).split(' ');
+        const [ny, nmo, nda] = nd.split('-').map(Number);
+        const [nh, nmi] = nt.split(':').map(Number);
+        return (Date.UTC(y, m - 1, d, hh, mm || 0) - Date.UTC(ny, nmo - 1, nda, nh, nmi)) / 60000;
+      },
+
+      // Una hora se puede reservar si empieza al menos 90 minutos después de ahora
+      isSlotBookable(dateStr, hour) {
+        if (!dateStr || !hour) return false;
+        return this.minutesUntilSlot(dateStr, hour) >= this.MIN_BOOKING_LEAD_MIN;
+      },
+
+      // Fecha para mostrar: siempre dd-mm-aaaa. Convierte cada fecha aaaa-mm-dd del texto (la base las entrega así)
+      fecha(valor) {
+        if (valor === null || valor === undefined) return '';
+        return String(valor).replace(/(?<!\d)(\d{4})-(\d{2})-(\d{2})(?!\d)/g, '$3-$2-$1').replace(/(\d{2}-\d{2}-\d{4})T(\d{2}:\d{2})(:\d{2}(\.\d+)?)?Z?/g, '$1 $2');
+      },
+
       normalizeDateTimeString(dateTimeStr) {
         if (!dateTimeStr) return '';
         const parts = dateTimeStr.trim().split(' ');
@@ -1233,7 +1258,7 @@
           `📋 DETALLES DE LA RESERVA:\n` +
           `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
           `• Código de Cita: #${appt.id}\n` +
-          `• Fecha y Hora: ${appt.dateTime} hrs\n` +
+          `• Fecha y Hora: ${AppFormatters.fecha(appt.dateTime)} hrs\n` +
           `• Sucursal: ${locName}\n` +
           `• Barbero Asignado: ${bName}\n` +
           `• Servicio Reservado: ${appt.serviceName}\n` +
@@ -1290,8 +1315,8 @@
           `📋 NUEVOS DETALLES DE TU ATENCIÓN:\n` +
           `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
           `• Código de Cita: #${appt.id}\n` +
-          `• Fecha y Hora Anterior: ${oldDateTime} hrs\n` +
-          `• NUEVA Fecha y Hora: ${newDateTime} hrs [CONFIRMADA ✓]\n` +
+          `• Fecha y Hora Anterior: ${AppFormatters.fecha(oldDateTime)} hrs\n` +
+          `• NUEVA Fecha y Hora: ${AppFormatters.fecha(newDateTime)} hrs [CONFIRMADA ✓]\n` +
           `• Sucursal: ${locName}\n` +
           `• Barbero: ${bName}\n` +
           `• Servicio: ${appt.serviceName}\n` +
@@ -1327,7 +1352,7 @@
 
         const subject = `⚠️ Notificación de Anulación Tardía / No-Show - Cita #${appt.id} | Big Boys Barbershop`;
         const body = `Estimado/a ${appt.customerName}:\n\n` +
-          `Le informamos que su cita #${appt.id} programada para el ${appt.dateTime} hrs con ${bName} en la sucursal ${locName} ha sido cancelada fuera del plazo estipulado o registrada como No-Show (inasistencia).\n\n` +
+          `Le informamos que su cita #${appt.id} programada para el ${AppFormatters.fecha(appt.dateTime)} hrs con ${bName} en la sucursal ${locName} ha sido cancelada fuera del plazo estipulado o registrada como No-Show (inasistencia).\n\n` +
           `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
           `⚠️ POLÍTICA DE RETENCIÓN DE ABONO:\n` +
           `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
@@ -1367,7 +1392,7 @@
           `📋 DATOS DE LA CITA CANCELADA:\n` +
           `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
           `• Número de Cita: #${appt.id}\n` +
-          `• Fecha y Hora: ${appt.dateTime} hrs\n` +
+          `• Fecha y Hora: ${AppFormatters.fecha(appt.dateTime)} hrs\n` +
           `• Sucursal: ${locName}\n` +
           `• Barbero: ${bName}\n` +
           `• Servicio: ${appt.serviceName}\n` +
@@ -1854,7 +1879,7 @@
 
         this.addNotification(
           '¡Cita Reagendada con Éxito! ✂️',
-          `Tu nueva fecha es el ${newDateTime} hrs con ${bName}. Reagendamientos usados: ${appt.rescheduleCount}/2.`
+          `Tu nueva fecha es el ${AppFormatters.fecha(newDateTime)} hrs con ${bName}. Reagendamientos usados: ${appt.rescheduleCount}/2.`
         );
         this.notify();
         return { success: true, appointment: appt };
@@ -1977,14 +2002,14 @@
             newAppointment.customerName,
             newAppointment.customerPhone,
             newAppointment.isGuest ? 'Reserva Invitado' : 'Reserva Cliente',
-            `Cita agendada: ${serviceName} para el ${normalizedDateTime}`
+            `Cita agendada: ${serviceName} para el ${AppFormatters.fecha(normalizedDateTime)}`
           );
 
           // Envío Automático de Confirmación y Comprobante
           this.sendBookingConfirmationEmail(newAppointment, bName, locName);
         }
 
-        this.addNotification('¡Cita Confirmada! ✂️', `Tu reserva para el ${normalizedDateTime} con ${bName} en ${locName} fue agendada con éxito.`);
+        this.addNotification('¡Cita Confirmada! ✂️', `Tu reserva para el ${AppFormatters.fecha(normalizedDateTime)} con ${bName} en ${locName} fue agendada con éxito.`);
         this.notify();
         return newAppointment;
       }
@@ -2723,7 +2748,7 @@
               </div>
               <p className="text-xs text-zinc-400 mt-3 pt-3 border-t border-zinc-800">
                 {coupon.isRedeemed
-                  ? `Este cupón ya fue validado en caja el ${coupon.createdAt}. ¡Esperamos que disfrutes de tu estilo Big Boys!`
+                  ? `Este cupón ya fue validado en caja el ${AppFormatters.fecha(coupon.createdAt)}. ¡Esperamos que disfrutes de tu estilo Big Boys!`
                   : 'Muestra este PIN exclusivo de 4 dígitos a tu barbero al momento de tu primer servicio para activar tu perfilado de cejas de regalo.'}
               </p>
             </div>
@@ -2813,7 +2838,7 @@
                           {appt.status}
                         </span>
                       </div>
-                      <p className="text-xs text-zinc-400">Fecha: <strong className="text-zinc-200">{appt.dateTime} hrs</strong></p>
+                      <p className="text-xs text-zinc-400">Fecha: <strong className="text-zinc-200">{AppFormatters.fecha(appt.dateTime)} hrs</strong></p>
                       <p className="text-[11px] text-zinc-500">Abono online: {AppFormatters.formatClp(appt.prepayAmount)}</p>
                     </div>
                     <div className="text-left sm:text-right">
@@ -3328,7 +3353,7 @@
                     </div>
                     <div className="text-right">
                       <div className="text-[#FFD700] text-xs">{'★'.repeat(rev.rating)}<span className="text-zinc-600">{'★'.repeat(5 - rev.rating)}</span></div>
-                      <span className="text-[10px] text-zinc-500">{rev.date}</span>
+                      <span className="text-[10px] text-zinc-500">{AppFormatters.fecha(rev.date)}</span>
                     </div>
                   </div>
                   <p className="text-xs text-zinc-300 leading-relaxed mb-4">"{rev.comment}"</p>
@@ -3506,6 +3531,11 @@
           setRescheduleError('Selecciona una hora disponible.');
           return;
         }
+        if (!AppFormatters.isSlotBookable(rescheduleDate, rescheduleHour)) {
+          setRescheduleHour('');
+          setRescheduleError(`Esa hora ya no está disponible: se reserva con al menos ${AppFormatters.MIN_BOOKING_LEAD_MIN} minutos de anticipación.`);
+          return;
+        }
 
         const res = store.rescheduleAppointment(reschedulingAppt.id, rescheduleDate, rescheduleHour);
         if (res.success) {
@@ -3520,7 +3550,7 @@
         const prepayFormatted = AppFormatters.formatClp(appt.prepayAmount || 3000);
 
         if (hoursLeft >= 24) {
-          const msg = `¿Deseas anular tu cita de ${appt.serviceName} para el ${appt.dateTime}?\n\n` +
+          const msg = `¿Deseas anular tu cita de ${appt.serviceName} para el ${AppFormatters.fecha(appt.dateTime)}?\n\n` +
             `✓ ANULACIÓN CON ANTICIPACIÓN (quedan aprox. ${Math.round(hoursLeft)} hrs para la cita):\n` +
             `Conforme a nuestras políticas, se gestionará la DEVOLUCIÓN ÍNTEGRA del 100% de tu abono (${prepayFormatted}) vía transferencia bancaria directa en un plazo de 24 a 48 hrs hábiles.\n\n` +
             `¿Confirmar anulación y solicitar devolución?`;
@@ -3603,7 +3633,7 @@
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-zinc-400">Fecha y Hora: <strong className="text-zinc-200">{appt.dateTime} hrs</strong></p>
+                          <p className="text-xs text-zinc-400">Fecha y Hora: <strong className="text-zinc-200">{AppFormatters.fecha(appt.dateTime)} hrs</strong></p>
                           <div className="flex items-center space-x-2 mt-1">
                             <span className="text-xs text-[#FFD700] font-semibold">Abono Webpay: {AppFormatters.formatClp(appt.prepayAmount || 3000)}</span>
                             <span className="text-[10px] text-zinc-500">• Saldo en local: {AppFormatters.formatClp(Math.max(0, (appt.servicePrice || 0) - (appt.prepayAmount || 3000)))}</span>
@@ -3687,7 +3717,7 @@
 
                 <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800 text-xs space-y-1">
                   <p className="text-zinc-300">• Barbero: <strong className="text-white">{reschedulingBarber?.name || 'Barbero Asignado'}</strong></p>
-                  <p className="text-zinc-300">• Hora actual: <strong className="text-zinc-400">{reschedulingAppt.dateTime} hrs</strong></p>
+                  <p className="text-zinc-300">• Hora actual: <strong className="text-zinc-400">{AppFormatters.fecha(reschedulingAppt.dateTime)} hrs</strong></p>
                   <p className="text-[#FFD700] font-semibold">• Abono: $3.000 CLP (se mantiene 100% válido)</p>
                   <p className="text-zinc-400">• Reagendamiento <strong className="text-white">{(reschedulingAppt.rescheduleCount || 0) + 1} de 2 permitidos</strong></p>
                 </div>
@@ -3716,15 +3746,17 @@
                     <div className="grid grid-cols-4 gap-1.5 max-h-40 overflow-y-auto pr-1">
                       {barberAvailableHours.map(hour => {
                         const isTaken = takenHoursForReschedule.has(hour);
+                        const tooSoon = !isTaken && !AppFormatters.isSlotBookable(rescheduleDate, hour);
                         const isSelected = rescheduleHour === hour;
                         return (
                           <button
                             type="button"
                             key={hour}
-                            disabled={isTaken}
+                            disabled={isTaken || tooSoon}
                             onClick={() => setRescheduleHour(hour)}
                             className={`py-2 rounded-lg text-xs font-bold border transition-all ${
                               isTaken ? 'bg-red-950/20 border-red-500/20 text-red-400/40 cursor-not-allowed' :
+                              tooSoon ? 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed' :
                               isSelected ? 'bg-[#FFD700] border-[#FFD700] text-black font-black' :
                               'bg-[#121212] border-zinc-800 text-zinc-200 hover:border-zinc-600'
                             }`}
@@ -3873,12 +3905,21 @@
         if (step === 4) {
           if (!selectedDate) { setFormError('Selecciona una fecha.'); return; }
           if (!selectedHour) { setFormError('Selecciona una hora disponible.'); return; }
+          if (!AppFormatters.isSlotBookable(selectedDate, selectedHour)) {
+            setSelectedHour('');
+            setFormError(`Esa hora ya no está disponible: se reserva con al menos ${AppFormatters.MIN_BOOKING_LEAD_MIN} minutos de anticipación.`);
+            return;
+          }
         }
         setStep(step + 1);
       };
 
       const handleLaunchPayment = () => {
         setFormError('');
+        if (!AppFormatters.isSlotBookable(selectedDate, selectedHour)) {
+          setFormError(`Esa hora ya no está disponible: se reserva con al menos ${AppFormatters.MIN_BOOKING_LEAD_MIN} minutos de anticipación. Vuelve y elige otra.`);
+          return;
+        }
         if (!user) {
           if (!guestName.trim()) { setFormError('Ingresa tu nombre.'); return; }
           if (!guestPhone.trim()) { setFormError('Ingresa tu teléfono.'); return; }
@@ -4021,20 +4062,23 @@
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                       {barberHours.map(hour => {
                         const isTaken = takenHours.has(hour);
+                        const tooSoon = !isTaken && !AppFormatters.isSlotBookable(selectedDate, hour);
                         const isSelected = selectedHour === hour;
                         return (
                           <button
                             key={hour}
-                            disabled={isTaken}
+                            disabled={isTaken || tooSoon}
                             onClick={() => setSelectedHour(hour)}
                             className={`py-2 px-1 rounded-xl text-xs font-bold border ${
                               isTaken ? 'bg-red-950/20 border-red-500/30 text-red-400/50 cursor-not-allowed' :
+                              tooSoon ? 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed' :
                               isSelected ? 'bg-[#FFD700] border-[#FFD700] text-black font-black' :
                               'bg-[#121212] border-zinc-800 text-white'
                             }`}
                           >
                             <span>{hour} hrs</span>
                             {isTaken && <span className="block text-[8px] uppercase">Ocupado</span>}
+                            {tooSoon && <span className="block text-[8px] uppercase">No disponible</span>}
                           </button>
                         );
                       })}
@@ -4047,7 +4091,7 @@
                 <div className="space-y-4">
                   <h4 className="text-xs font-bold text-white">Paso 5: Resumen de tu Agendamiento</h4>
                   <div className="p-4 rounded-2xl bg-[#1E1A16] border border-[#FFD700]/50 space-y-2 text-xs">
-                    <p>🕰️ Fecha y Hora: <strong className="text-white">{selectedDate} a las {selectedHour} hrs</strong></p>
+                    <p>🕰️ Fecha y Hora: <strong className="text-white">{AppFormatters.fecha(selectedDate)} a las {selectedHour} hrs</strong></p>
                     <p>👤 Barbero: <strong className="text-white">{selectedBarber?.name}</strong></p>
                     <p>📍 Sucursal: <strong className="text-white">{selectedLocation?.name}</strong></p>
                     <p>✂️ Servicio: <strong className="text-white">{selectedService?.name}</strong> — {AppFormatters.formatClp(selectedService?.price)}</p>
@@ -4981,6 +5025,7 @@
       const [agendaCalendarMonth, setAgendaCalendarMonth] = useState(() => new Date().getMonth());
       const [agendaCalendarYear, setAgendaCalendarYear] = useState(() => new Date().getFullYear());
       const [cancelFeedbackMsg, setCancelFeedbackMsg] = useState('');
+      const [settlingAppt, setSettlingAppt] = useState(null);
 
       // --- Estados para Gestión de Usuarios ---
       const [userSearch, setUserSearch] = useState('');
@@ -5266,7 +5311,7 @@
       // Generador de Libro Excel Real (.xlsx) con SheetJS y fallback XML
       const handleGenerateRealExcel = () => {
         const periodLabels = {
-          diario: `Diario (${excelCustomDate})`,
+          diario: `Diario (${AppFormatters.fecha(excelCustomDate)})`,
           semanal: 'Semanal (Últimos 7 días)',
           mensual: 'Mensual (Mes en Curso)',
           anual: 'Anual (Año en Curso)',
@@ -5405,7 +5450,7 @@
         const rows = appointments.map(a => {
           const b = barbers.find(x => x.id === a.barberId)?.name || `Barbero #${a.barberId}`;
           const loc = locations.find(x => x.id === a.locationId)?.name || 'Chile';
-          return `${a.id}\t${a.dateTime}\t${loc}\t${b}\t${a.customerName}\t${a.customerPhone}\t${a.serviceName}\t${a.servicePrice}\t${a.prepayAmount}\t${a.status}`;
+          return `${a.id}\t${AppFormatters.fecha(a.dateTime)}\t${loc}\t${b}\t${a.customerName}\t${a.customerPhone}\t${a.serviceName}\t${a.servicePrice}\t${a.prepayAmount}\t${a.status}`;
         }).join('\n');
 
         const blob = new Blob([header + rows], { type: 'text/tab-separated-values;charset=utf-8;' });
@@ -5496,6 +5541,10 @@
       return (
         <div className="space-y-6 pb-20 md:pb-12 animate-fade-in">
           {/* Header Superior del Centro de Mando Admin */}
+          {settlingAppt && (
+            <SettleBalanceModal appointment={settlingAppt} onClose={() => setSettlingAppt(null)}
+              onDone={(r) => { setCancelFeedbackMsg(markSettled(settlingAppt, r)); setSettlingAppt(null); setTimeout(() => setCancelFeedbackMsg(''), 5000); }} />
+          )}
           <div className="bg-gradient-to-r from-[#18181B] via-[#1E1E1E] to-[#121212] border border-[#FFD700]/30 rounded-3xl p-5 sm:p-6 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-80 h-80 bg-[#FFD700]/5 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -5845,7 +5894,7 @@
                 <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-4">
                   <span className="text-[10px] text-zinc-400 uppercase font-bold block">Citas en Filtro</span>
                   <h4 className="text-2xl font-black text-white mt-0.5">{agendaKpis.total}</h4>
-                  <p className="text-[10px] text-zinc-500 mt-0.5">{agendaDateFilter === 'custom' ? `Para ${agendaSelectedDate}` : 'Según filtro activo'}</p>
+                  <p className="text-[10px] text-zinc-500 mt-0.5">{agendaDateFilter === 'custom' ? `Para ${AppFormatters.fecha(agendaSelectedDate)}` : 'Según filtro activo'}</p>
                 </div>
                 <div className="bg-[#1E1E1E] border border-emerald-500/30 rounded-2xl p-4">
                   <span className="text-[10px] text-zinc-400 uppercase font-bold block">Confirmadas Pendientes</span>
@@ -6062,7 +6111,7 @@
                                         {(a.dateTime || '').split(' ')[1] || 'Hora pendiente'}
                                       </span>
                                       <span className="text-[10px] text-zinc-400 font-mono">
-                                        {(a.dateTime || '').split(' ')[0]}
+                                        {AppFormatters.fecha((a.dateTime || '').split(' ')[0])}
                                       </span>
                                       {(a.rescheduleCount || 0) > 0 && (
                                         <span className="text-[9px] bg-amber-950/60 text-[#FFD700] border border-amber-500/40 px-1.5 py-0.2 rounded font-bold">
@@ -6154,14 +6203,10 @@
                                 {a.status === 'Confirmada' && (
                                   <div className="flex items-center space-x-1.5">
                                     <button
-                                      onClick={() => {
-                                        store.updateAppointmentStatusAdmin(a.id, 'Completada');
-                                        setCancelFeedbackMsg(`✓ Cita #${a.id} de "${a.customerName}" marcada como Completada con éxito.`);
-                                        setTimeout(() => setCancelFeedbackMsg(''), 5000);
-                                      }}
+                                      onClick={() => setSettlingAppt(a)}
                                       className="px-2.5 py-1 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-500/40 rounded-lg text-[10px] font-bold transition-all shadow"
                                     >
-                                      ✓ Atendida
+                                      💵 Cobrar saldo
                                     </button>
                                     <button
                                       onClick={() => {
@@ -6247,7 +6292,7 @@
                                     </span>
                                   </div>
                                   <span className="text-white text-xs block font-bold mt-0.5">
-                                    {(a.dateTime || '').split(' ')[0]}
+                                    {AppFormatters.fecha((a.dateTime || '').split(' ')[0])}
                                   </span>
                                   {(a.rescheduleCount || 0) > 0 && (
                                     <span className="text-[10px] text-[#FFD700] font-bold block mt-0.5">
@@ -6314,15 +6359,11 @@
                                   {a.status === 'Confirmada' ? (
                                     <div className="flex items-center justify-end space-x-1.5">
                                       <button
-                                        onClick={() => {
-                                          store.updateAppointmentStatusAdmin(a.id, 'Completada');
-                                          setCancelFeedbackMsg(`✓ Cita #${a.id} de "${a.customerName}" marcada como Completada con éxito.`);
-                                          setTimeout(() => setCancelFeedbackMsg(''), 5000);
-                                        }}
+                                        onClick={() => setSettlingAppt(a)}
                                         className="px-2.5 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-500/40 font-bold text-[10px] rounded-xl transition-all shadow"
-                                        title="Marcar como atendida"
+                                        title="Cobrar el saldo y marcar como atendida"
                                       >
-                                        ✓ Atendida
+                                        💵 Cobrar saldo
                                       </button>
                                       <button
                                         onClick={() => {
@@ -7349,7 +7390,7 @@
                             <tr key={a.id} className="hover:bg-zinc-800/30 transition-colors">
                               <td className="p-3 font-mono text-zinc-400 text-[11px] whitespace-nowrap">
                                 <span className="font-bold text-white block">#{a.id}</span>
-                                <span>{a.dateTime}</span>
+                                <span>{AppFormatters.fecha(a.dateTime)}</span>
                               </td>
                               <td className="p-3 text-zinc-300 whitespace-nowrap">{loc}</td>
                               <td className="p-3 text-zinc-200 font-bold whitespace-nowrap">{b}</td>
@@ -7458,7 +7499,7 @@
                                 {u.phone || 'N/A'}
                               </td>
                               <td className="p-3 text-zinc-400 text-[11px] whitespace-nowrap">
-                                {u.createdAt || 'N/A'}
+                                {AppFormatters.fecha(u.createdAt) || 'N/A'}
                               </td>
                               <td className="p-3 text-right whitespace-nowrap">
                                 <button
@@ -7836,7 +7877,7 @@
                   <span>📅 AGENDA DE CLIENTES ({barberAppts.length})</span>
                 </h3>
                 <p className="text-xs text-zinc-400">
-                  Fecha seleccionada: <strong className="text-[#FFD700]">{selectedDate}</strong>
+                  Fecha seleccionada: <strong className="text-[#FFD700]">{AppFormatters.fecha(selectedDate)}</strong>
                 </p>
               </div>
               <span className="text-xs text-zinc-500">
@@ -8008,7 +8049,7 @@
                 <div className="p-3.5 rounded-xl bg-[#121212] border border-zinc-800 text-xs space-y-1 font-mono">
                   <p><strong className="text-zinc-300">Cliente:</strong> {cancelingAppt.customerName}</p>
                   <p><strong className="text-zinc-300">Correo:</strong> {cancelingAppt.customerEmail}</p>
-                  <p><strong className="text-zinc-300">Hora:</strong> {cancelingAppt.dateTime} hrs</p>
+                  <p><strong className="text-zinc-300">Hora:</strong> {AppFormatters.fecha(cancelingAppt.dateTime)} hrs</p>
                   <p><strong className="text-zinc-300">Abono a reembolsar:</strong> <span className="text-emerald-400 font-bold">{AppFormatters.formatClp(cancelingAppt.prepayAmount)}</span></p>
                 </div>
 
@@ -8170,7 +8211,13 @@
       CLAVE_INVALIDA: 'La contraseña no es válida.',
       PAGO_NO_ENCONTRADO: 'No encontramos el pago. Si se descontó dinero, contáctanos con tu comprobante.',
       RESERVA_NO_PENDIENTE: 'La reserva ya no está pendiente de pago.',
-      SOLO_CLIENTES: 'Esta opción es solo para clientes.'
+      SOLO_CLIENTES: 'Esta opción es solo para clientes.',
+      RESERVA_NO_ENCONTRADA: 'No encontramos la reserva.',
+      RESERVA_YA_COBRADA: 'Esta reserva ya fue cobrada.',
+      RESERVA_NO_COBRABLE: 'Solo se cobra una reserva confirmada (no un no-show ni una anulación).',
+      MEDIO_PAGO_REQUERIDO: 'Selecciona con qué pagó el cliente el saldo.',
+      MONTO_INVALIDO: 'El monto y la propina no pueden ser negativos.',
+      ANTICIPACION_MINIMA: 'Esa hora ya no está disponible: se reserva con al menos 90 minutos de anticipación.'
     };
     function apiErrorMessage(error) {
       const msg = (error && error.message) || String(error || '');
@@ -8355,7 +8402,7 @@
             <div className="p-3 bg-[#1E1E1E] rounded-2xl border border-zinc-800 space-y-1 text-xs">
               <div className="flex justify-between"><span className="text-zinc-400">Servicio:</span><strong className="text-white">{bookingDraft.service.name}</strong></div>
               <div className="flex justify-between"><span className="text-zinc-400">Barbero:</span><strong className="text-white">{bookingDraft.barber.name}</strong></div>
-              <div className="flex justify-between"><span className="text-zinc-400">Fecha y hora:</span><strong className="text-white">{bookingDraft.date} · {bookingDraft.hour}</strong></div>
+              <div className="flex justify-between"><span className="text-zinc-400">Fecha y hora:</span><strong className="text-white">{AppFormatters.fecha(bookingDraft.date)} · {bookingDraft.hour}</strong></div>
               <div className="flex justify-between pt-2 border-t border-zinc-800"><span className="text-zinc-400 font-bold uppercase">Abono a pagar:</span><strong className="text-base text-[#FFD700] font-black">{AppFormatters.formatClp(amountToPay)}</strong></div>
             </div>
             <p className="text-[11px] text-zinc-400">
@@ -8437,7 +8484,7 @@
                     <div className="flex justify-between"><span className="text-zinc-400">Orden de compra:</span><strong className="text-zinc-200 font-mono">{result.orden_compra}</strong></div>
                     <div className="flex justify-between"><span className="text-zinc-400">Cód. autorización:</span><strong className="text-zinc-200 font-mono">{result.autorizacion}</strong></div>
                     <div className="flex justify-between"><span className="text-zinc-400">Medio de pago:</span><strong className="text-zinc-200">{({ DEBITO: 'Débito', CREDITO: 'Crédito', PREPAGO: 'Prepago' })[result.tipo_medio] || 'Tarjeta'}{result.tarjeta ? ` ···· ${result.tarjeta}` : ''}</strong></div>
-                    <div className="flex justify-between"><span className="text-zinc-400">Fecha:</span><strong className="text-zinc-200">{result.fecha}</strong></div>
+                    <div className="flex justify-between"><span className="text-zinc-400">Fecha:</span><strong className="text-zinc-200">{AppFormatters.fecha(result.fecha)}</strong></div>
                     <div className="flex justify-between pt-2 border-t border-zinc-800"><span className="text-zinc-400 font-bold">Abono pagado:</span><strong className="text-base text-green-400 font-black">{AppFormatters.formatClp(result.monto)}</strong></div>
                   </div>
                 ) : (
@@ -8648,6 +8695,87 @@
       );
     }
 
+    // ---------- Cobro del saldo de una reserva atendida (Dueño o cajero/a) ----------
+    // El abono pagado por Webpay se descuenta del precio; el resto se paga en el local
+    function SettleBalanceModal({ appointment, onClose, onDone }) {
+      const [info, setInfo] = useState(null);
+      const [amount, setAmount] = useState('');
+      const [tip, setTip] = useState('0');
+      const [payMethod, setPayMethod] = useState('EFECTIVO');
+      const [msg, setMsg] = useState('');
+      const [busy, setBusy] = useState(false);
+      const ref = {
+        id: Number(appointment.id), barber_id: Number(appointment.barberId), date_time: appointment.dateTime,
+        ...(appointment.codigo ? { codigo: appointment.codigo } : {})
+      };
+      const creds = () => store.getCloudCredentials();
+
+      useEffect(() => {
+        callApi('api_reserva_saldo', { ...creds(), p: ref })
+          .then(r => { setInfo(r); setAmount(String(r.precio)); })
+          .catch(err => setMsg('⚠️ ' + err.message));
+      }, [appointment.id]);
+
+      const total = Number(amount) || 0;
+      const applied = info ? Math.min(Number(info.abono_pagado) || 0, total) : 0;
+      const balance = total - applied;
+
+      const submit = async (e) => {
+        e.preventDefault();
+        setMsg('');
+        setBusy(true);
+        try {
+          const r = await callApi('api_reserva_cobrar_saldo', { ...creds(), p: {
+            ...ref, monto: total, propina: Number(tip) || 0, medio_pago: balance + (Number(tip) || 0) > 0 ? payMethod : null } });
+          onDone(r);
+        } catch (err) { setMsg('⚠️ ' + err.message); }
+        setBusy(false);
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
+          <form onSubmit={submit} className="bg-[#1E1E1E] border border-[#FFD700]/50 rounded-2xl w-full max-w-sm p-5 space-y-3 text-xs">
+            <h3 className="text-sm font-black text-white">Cobrar saldo · {appointment.customerName}</h3>
+            <p className="text-zinc-400">{appointment.serviceName} · {(appointment.dateTime || '').slice(11, 16)}</p>
+            {!info && !msg && <p className="text-zinc-400">Calculando saldo…</p>}
+            {info && (
+              <>
+                <label className="block text-zinc-400">Monto del servicio
+                  <input type="number" min="0" value={amount} onChange={e => setAmount(e.target.value)} className={inputCls + ' mt-1'} />
+                </label>
+                <div className="p-3 rounded-xl bg-zinc-900 space-y-1">
+                  <div className="flex justify-between text-zinc-300"><span>Abono pagado con Webpay</span><span>− {AppFormatters.formatClp(applied, false)}</span></div>
+                  <div className="flex justify-between text-white font-black text-sm"><span>Saldo a pagar en el local</span><span className="text-[#FFD700]">{AppFormatters.formatClp(balance, false)}</span></div>
+                </div>
+                <label className="block text-zinc-400">Propina
+                  <input type="number" min="0" value={tip} onChange={e => setTip(e.target.value)} className={inputCls + ' mt-1'} />
+                </label>
+                {balance + (Number(tip) || 0) > 0 && (
+                  <select value={payMethod} onChange={e => setPayMethod(e.target.value)} className={inputCls}>
+                    <option value="EFECTIVO">Efectivo</option><option value="DEBITO">Débito</option>
+                    <option value="CREDITO">Crédito</option><option value="TRANSFERENCIA">Transferencia</option>
+                  </select>
+                )}
+              </>
+            )}
+            {msg && <div className="p-2.5 rounded-xl bg-zinc-800 text-[#FFD700]">{msg}</div>}
+            <div className="flex gap-2">
+              <button type="button" onClick={onClose} className="flex-1 py-2 bg-zinc-800 text-zinc-300 font-bold rounded-xl">Cancelar</button>
+              <button type="submit" disabled={!info || busy} className="flex-1 py-2 bg-emerald-600 disabled:opacity-50 text-white font-black rounded-xl">Registrar cobro</button>
+            </div>
+          </form>
+        </div>
+      );
+    }
+
+    // Tras el cobro la reserva queda «Completada» también en la copia local
+    function markSettled(appointment, r) {
+      store.updateAppointmentStatusAdmin(appointment.id, 'Completada');
+      store.refreshAppointmentsFromCloud();
+      const medios = { EFECTIVO: 'efectivo', DEBITO: 'débito', CREDITO: 'crédito', TRANSFERENCIA: 'transferencia' };
+      return `✓ ${appointment.customerName}: saldo de ${AppFormatters.formatClp(r.saldo, false)} cobrado${r.medio_pago ? ` (${medios[r.medio_pago]})` : ''}.`;
+    }
+
     // ---------- Cuentas del personal (solo el Dueño) ----------
     function StaffManager({ staff, locations }) {
       const [list, setList] = useState([]);
@@ -8721,7 +8849,7 @@
                   <span className="text-zinc-400"> · {p.email} · {ROLE_LABELS[p.role]} · {locName(p.location_id)}</span>
                   <span className={`ml-2 font-bold ${p.estado === 'ACTIVO' ? 'text-emerald-400' : 'text-red-400'}`}>{p.estado}</span>
                   {p.must_change_password && <span className="ml-2 text-amber-300">(debe cambiar su clave)</span>}
-                  <span className="block text-[10px] text-zinc-500">Último acceso: {p.ultimo_acceso || 'nunca'}</span>
+                  <span className="block text-[10px] text-zinc-500">Último acceso: {AppFormatters.fecha(p.ultimo_acceso) || 'nunca'}</span>
                 </div>
                 {p.estado === 'ACTIVO'
                   ? <button onClick={() => toggle(p, false)} className="px-3 py-1.5 bg-zinc-800 text-red-400 font-bold rounded-lg">Bloquear acceso</button>
@@ -8757,7 +8885,7 @@
             <div key={d.id} className={cardCls + ' text-xs space-y-2'}>
               <div className="flex flex-wrap justify-between gap-2">
                 <span><strong className="text-white font-mono">{d.codigo}</strong> · {d.tipo} · {d.titular} ({d.email || 'sin correo'})</span>
-                <span className="text-zinc-400">Ingreso {d.ingreso} · vence {d.fecha_limite} · <strong className="text-[#FFD700]">{d.estado}</strong></span>
+                <span className="text-zinc-400">Ingreso {AppFormatters.fecha(d.ingreso)} · vence {AppFormatters.fecha(d.fecha_limite)} · <strong className="text-[#FFD700]">{d.estado}</strong></span>
               </div>
               {d.detalle && <p className="text-zinc-300">“{d.detalle}”</p>}
               {d.respuesta && <p className="text-emerald-300">Respuesta: {d.respuesta}</p>}
@@ -8778,6 +8906,8 @@
     // ---------- Panel del cajero/a: fila de su sucursal y reservas del día ----------
     function CashierDashboard({ staff, locations, barbers, appointments, onLogout }) {
       const [tab, setTab] = useState('fila');
+      const [settling, setSettling] = useState(null);
+      const [settleMsg, setSettleMsg] = useState('');
       const locationId = staff.locationId || (locations[0] && locations[0].id);
       const loc = locations.find(l => Number(l.id) === Number(locationId));
       const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Santiago' });
@@ -8799,6 +8929,7 @@
           {tab === 'fila' && <QueueManager staff={staff} locations={locations} barbers={barbers} fixedLocationId={locationId} />}
           {tab === 'reservas' && (
             <div className="space-y-2">
+              {settleMsg && <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-xs text-emerald-200">{settleMsg}</div>}
               {todays.length === 0 && <p className="text-xs text-zinc-500 text-center py-4">No hay reservas para hoy en esta sucursal.</p>}
               {todays.sort((a, b) => a.dateTime.localeCompare(b.dateTime)).map(a => {
                 const b = barbers.find(x => Number(x.id) === Number(a.barberId));
@@ -8809,7 +8940,7 @@
                       <span className="text-[#FFD700] font-bold">{a.status}</span>
                       {a.status === 'Confirmada' && (
                         <>
-                          <button onClick={() => store.updateAppointmentStatusAdmin(a.id, 'Completada')} className="px-2 py-1 bg-emerald-700 text-white rounded-lg">Atendida</button>
+                          <button onClick={() => { setSettleMsg(''); setSettling(a); }} className="px-2 py-1 bg-emerald-700 text-white rounded-lg">💵 Cobrar saldo</button>
                           <button onClick={() => store.updateAppointmentStatusAdmin(a.id, 'No-Show (Inasistencia)')} className="px-2 py-1 bg-zinc-800 text-red-400 rounded-lg">No llegó</button>
                         </>
                       )}
@@ -8818,6 +8949,10 @@
                 );
               })}
             </div>
+          )}
+          {settling && (
+            <SettleBalanceModal appointment={settling} onClose={() => setSettling(null)}
+              onDone={(r) => { setSettleMsg(markSettled(settling, r)); setSettling(null); }} />
           )}
         </div>
       );
@@ -8896,7 +9031,7 @@
         setMsg('');
         try {
           const r = await callApi('api_solicitud_derecho', { ...creds, p_tipo: requestType, p_detalle: detail });
-          setMsg(`✓ Solicitud ${r.codigo} recibida. Te responderemos a más tardar el ${r.fecha_limite}.`);
+          setMsg(`✓ Solicitud ${r.codigo} recibida. Te responderemos a más tardar el ${AppFormatters.fecha(r.fecha_limite)}.`);
           setDetail('');
           if (data) view('ACCESO');
         } catch (err) { setMsg('⚠️ ' + err.message); }
