@@ -1,0 +1,13 @@
+Pruebas de la anticipación mínima · Proyecto Barbería Big-Boys · 02-11-2026 (≈11:13 hora de Chile)
+Base: Supabase «Big Boys Project» (PostgreSQL 17). Script: 12_pruebas_anticipacion.sql (migración 11_anticipacion_minima.sql)
+Las pruebas corren en una transacción que se deshace al final (no dejan datos).
+
+1 OK | A-01 Hora pasada rechazada | ANTICIPACION_MINIMA: 90
+2 OK | A-02 Menos de 90 min rechazada | ANTICIPACION_MINIMA: 90
+3 OK | A-03 Regla aplica al Dueño | ANTICIPACION_MINIMA: 90
+4 OK | A-04 Con 100 min se permite | 02-11-2026 12:53 Pendiente
+5 OK | A-05 Atención LOCAL sin restricción | Completada
+6 OK | A-06 Reagendar a menos de 90 min rechazado | ANTICIPACION_MINIMA: 90
+7 OK | A-07 Cambio de estado sin restricción | Cancelada
+
+Resultado: 7/7 OK
