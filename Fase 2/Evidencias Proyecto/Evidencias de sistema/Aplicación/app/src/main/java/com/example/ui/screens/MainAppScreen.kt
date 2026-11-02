@@ -1588,7 +1588,7 @@ fun RescheduleDialog(
                     hourRows.forEach { row ->
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             row.forEach { hour ->
-                                val isTaken = takenHours.contains(hour)
+                                val isTaken = takenHours.contains(hour) || !AppFormatters.isSlotBookable(selectedDate, hour)
                                 val isSelected = selectedHour == hour
                                 Card(
                                     onClick = { if (!isTaken) selectedHour = hour },
@@ -1644,6 +1644,11 @@ fun RescheduleDialog(
                         onClick = {
                             if (selectedHour.isBlank()) {
                                 errorMessage = "Por favor selecciona un horario disponible."
+                                return@Button
+                            }
+                            if (!AppFormatters.isSlotBookable(selectedDate, selectedHour)) {
+                                selectedHour = ""
+                                errorMessage = "Esa hora ya no está disponible: se reserva con al menos ${AppFormatters.MIN_BOOKING_LEAD_MIN} minutos de anticipación."
                                 return@Button
                             }
                             isSubmitting = true
@@ -2808,6 +2813,11 @@ fun BookingWizardDialog(
                                     }
                                     Spacer(modifier = Modifier.height(6.dp))
 
+                                    Text(
+                                        "🔒 = hora ocupada, ya pasada o con menos de ${AppFormatters.MIN_BOOKING_LEAD_MIN} min de anticipación.",
+                                        fontSize = 10.sp, color = TextMuted
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
                                     val hourRows = remember(hoursAvailable) { hoursAvailable.chunked(3) }
                                     Column(
                                         modifier = Modifier.fillMaxWidth(),
@@ -2819,7 +2829,9 @@ fun BookingWizardDialog(
                                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                                             ) {
                                                 rowHours.forEach { hour ->
-                                                    val isTaken = takenHours.contains(hour)
+                                                    // Ocupada, ya pasó o falta menos de 90 min: no se puede elegir
+                                                    val isBooked = takenHours.contains(hour)
+                                                    val isTaken = isBooked || !AppFormatters.isSlotBookable(bookingDate, hour)
                                                     val isSelected = bookingHour == hour
                                                     Card(
                                                         onClick = {
@@ -2862,7 +2874,7 @@ fun BookingWizardDialog(
                                                                 )
                                                                 if (isTaken) {
                                                                     Text(
-                                                                        text = "Ocupado",
+                                                                        text = if (isBooked) "Ocupado" else "No disponible",
                                                                         fontSize = 8.sp,
                                                                         color = RedCancel,
                                                                         fontWeight = FontWeight.Bold
@@ -3047,12 +3059,12 @@ fun BookingWizardDialog(
                                     if (step == 1 && bookingLocation != null) step++
                                     else if (step == 2 && bookingBarber != null) step++
                                     else if (step == 3 && bookingService.isNotBlank()) step++
-                                    else if (step == 4 && bookingDate.isNotBlank() && bookingHour.isNotBlank()) step++
+                                    else if (step == 4 && AppFormatters.isSlotBookable(bookingDate, bookingHour)) step++
                                 },
                                 enabled = (step == 1 && bookingLocation != null) ||
                                         (step == 2 && bookingBarber != null) ||
                                         (step == 3 && bookingService.isNotBlank()) ||
-                                        (step == 4 && bookingDate.isNotBlank() && bookingHour.isNotBlank()),
+                                        (step == 4 && AppFormatters.isSlotBookable(bookingDate, bookingHour)),
                                 colors = ButtonDefaults.buttonColors(containerColor = GoldPrimary)
                             ) {
                                 Text("Continuar", color = DarkBackground, fontWeight = FontWeight.Bold)
@@ -4071,6 +4083,7 @@ fun AppointmentsManagerView(viewModel: BarberiaViewModel) {
 
     var appointmentToModify by remember { mutableStateOf<Appointment?>(null) }
     var appointmentToCancel by remember { mutableStateOf<Triple<Appointment, String, String>?>(null) }
+    var appointmentToSettle by remember { mutableStateOf<Appointment?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     var statusFilter by remember { mutableStateOf("TODAS") } // "TODAS", "Confirmada", "Pendiente", "Completada", "Cancelada"
     var viewMode by remember { mutableStateOf("CARDS") } // "CARDS" or "TABLE"
@@ -4099,6 +4112,10 @@ fun AppointmentsManagerView(viewModel: BarberiaViewModel) {
             viewModel = viewModel,
             onDismiss = { appointmentToModify = null }
         )
+    }
+
+    appointmentToSettle?.let { appt ->
+        SettleBalanceDialog(viewModel = viewModel, appointment = appt, onDismiss = { appointmentToSettle = null })
     }
 
     if (appointmentToCancel != null) {
@@ -4246,7 +4263,6 @@ fun AppointmentsManagerView(viewModel: BarberiaViewModel) {
         }
     }
 
-    val sdfDateTime = remember { SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault()) }
     val filteredAppointments = remember(appointments, searchQuery, statusFilter, selectedCalendarDate, sortAscending) {
         appointments.filter { appt ->
             val matchesStatus = if (statusFilter == "TODAS") true else appt.status.equals(statusFilter, ignoreCase = true)
@@ -4259,8 +4275,8 @@ fun AppointmentsManagerView(viewModel: BarberiaViewModel) {
             val matchesDate = selectedCalendarDate == null || AppFormatters.isSameDay(appt.dateTime, selectedCalendarDate!!)
             matchesStatus && matchesSearch && matchesDate
         }.sortedWith { a, b ->
-            val timeA = try { sdfDateTime.parse(a.dateTime)?.time ?: 0L } catch (_: Exception) { 0L }
-            val timeB = try { sdfDateTime.parse(b.dateTime)?.time ?: 0L } catch (_: Exception) { 0L }
+            val timeA = AppFormatters.parseAppointmentDate(a.dateTime)?.time ?: 0L
+            val timeB = AppFormatters.parseAppointmentDate(b.dateTime)?.time ?: 0L
             if (sortAscending) timeA.compareTo(timeB) else timeB.compareTo(timeA)
         }
     }
@@ -4818,7 +4834,7 @@ fun AppointmentsManagerView(viewModel: BarberiaViewModel) {
                                     }
                                     if (appt.status != "Cancelada" && appt.status != "Completada") {
                                         IconButton(
-                                            onClick = { viewModel.updateAppointmentStatusAdmin(appt.id, "Completada") },
+                                            onClick = { appointmentToSettle = appt },
                                             modifier = Modifier.size(24.dp)
                                         ) {
                                             Icon(Icons.Filled.CheckCircle, null, tint = GreenConfirm, modifier = Modifier.size(14.dp))
@@ -4992,7 +5008,7 @@ fun AppointmentsManagerView(viewModel: BarberiaViewModel) {
                                     }
 
                                     Button(
-                                        onClick = { viewModel.updateAppointmentStatusAdmin(appt.id, "Completada") },
+                                        onClick = { appointmentToSettle = appt },
                                         modifier = Modifier.weight(0.9f).height(36.dp),
                                         colors = ButtonDefaults.buttonColors(containerColor = GreenConfirm),
                                         shape = RoundedCornerShape(8.dp),
@@ -5000,7 +5016,7 @@ fun AppointmentsManagerView(viewModel: BarberiaViewModel) {
                                     ) {
                                         Icon(Icons.Filled.CheckCircle, null, tint = DarkBackground, modifier = Modifier.size(12.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Completar", color = DarkBackground, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                                        Text("Cobrar saldo", color = DarkBackground, fontWeight = FontWeight.Bold, fontSize = 11.sp)
                                     }
                                 }
                             }

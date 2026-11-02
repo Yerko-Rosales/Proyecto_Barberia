@@ -778,6 +778,11 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
             return
         }
 
+        if (!AppFormatters.isSlotBookable(newDate, newHour)) {
+            callback(false, "Esa hora ya no está disponible: se reserva con al menos ${AppFormatters.MIN_BOOKING_LEAD_MIN} minutos de anticipación.")
+            return
+        }
+
         val newDateTime = "$newDate $newHour"
         viewModelScope.launch {
             // Check if slot is taken in all appointments
@@ -1120,6 +1125,10 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
     fun startWebpayPayment(onOpenUrl: (String) -> Unit) {
         val location = _bookingLocation.value ?: return
         val barber = _bookingBarber.value ?: return
+        if (!AppFormatters.isSlotBookable(_bookingDate.value, _bookingHour.value)) {
+            _webpay.value = WebpayUiState(stage = "ERROR", message = "Esa hora ya no está disponible: se reserva con al menos ${AppFormatters.MIN_BOOKING_LEAD_MIN} minutos de anticipación. Vuelve y elige otra.")
+            return
+        }
         val user = _loggedInUser.value
         val draft = Appointment(
             locationId = location.id,
@@ -1206,6 +1215,35 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    /** Saldo de una reserva: precio, abono pagado con Webpay y lo que falta por pagar en el local. */
+    fun loadBalance(appointment: Appointment, amount: Int?, callback: (JsonObject?, String?) -> Unit) {
+        viewModelScope.launch {
+            try {
+                callback(SupabaseManager.fetchBalance(appointment, amount), null)
+            } catch (e: Exception) {
+                callback(null, SupabaseManager.friendlyError(e))
+            }
+        }
+    }
+
+    /** Cobra el saldo en la base y deja la reserva «Completada» también en la copia local. */
+    fun settleBalance(appointment: Appointment, amount: Int, tip: Int, paymentMethod: String?, callback: (JsonObject?, String?) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val r = SupabaseManager.settleBalance(appointment, amount, tip, paymentMethod)
+                repository.updateAppointmentStatus(appointment.id, "Completada")
+                SupabaseManager.triggerCloudRefresh()
+                addNotification(
+                    title = "Saldo cobrado 💵",
+                    message = "${appointment.customerName}: saldo de ${AppFormatters.formatClp(r?.text("saldo")?.toDoubleOrNull() ?: 0.0)} registrado."
+                )
+                callback(r, null)
+            } catch (e: Exception) {
+                callback(null, SupabaseManager.friendlyError(e))
+            }
+        }
+    }
+
     fun loadMyData(type: String, callback: (JsonObject?, String?) -> Unit) {
         viewModelScope.launch {
             try {
@@ -1220,7 +1258,7 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             try {
                 val r = SupabaseManager.requestRight(type, detail)
-                callback("Solicitud ${r?.text("codigo")} recibida. Respuesta a más tardar el ${r?.text("fecha_limite")}.", null)
+                callback("Solicitud ${r?.text("codigo")} recibida. Respuesta a más tardar el ${AppFormatters.isoDatesToDisplay(r?.text("fecha_limite"))}.", null)
             } catch (e: Exception) {
                 callback(null, SupabaseManager.friendlyError(e))
             }

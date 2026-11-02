@@ -152,26 +152,10 @@ class AppRepository(private val appDao: AppDao) {
             appDao.insertProduct(Product(name = "Aftershave de Sándalo Madera", description = "Loción astringente ideal para rehidratar la piel tras afeitados de navaja tradicionales. Alivia inmediatamente irritaciones, previene micro-infecciones y deja un distinguido aroma amaderado.", category = "Cuidado de Barba", price = 9500.0, stock = 12, imageUrl = "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&auto=format&fit=crop&q=80"))
             appDao.insertProduct(Product(name = "Cera Brillo Clásico Retro", description = "Aporta fijación media-alta con efecto húmedo retro para peinados con gomina impecables. Diseñada para lucir peinados elegantes con raya al lado con excelente flexibilidad y tacto suave.", category = "Fijación", price = 11000.0, stock = 15, imageUrl = "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?w=400&auto=format&fit=crop&q=80"))
         }
-        // 4. Populate some Completed Appointments to generate immediate reports if empty
-        if (appDao.getAllAppointments().isEmpty()) {
-            val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-            val cal = Calendar.getInstance()
-
-            // Yesterday
-            cal.add(Calendar.DAY_OF_YEAR, -1)
-            val d1 = sdf.format(cal.time)
-            appDao.insertAppointment(Appointment(locationId = 1, barberId = 1, customerName = "Juan Pérez", customerPhone = "+56911223344", dateTime = "$d1 10:00", serviceName = "Corte de Pelo Degrado", servicePrice = 15000.0, prepayAmount = 5000.0, status = "Completada"))
-            appDao.insertAppointment(Appointment(locationId = 1, barberId = 2, customerName = "Diego Muñoz", customerPhone = "+56922334455", dateTime = "$d1 11:00", serviceName = "Arreglo de Barba Royale", servicePrice = 12000.0, prepayAmount = 5000.0, status = "Completada"))
-            appDao.insertAppointment(Appointment(locationId = 2, barberId = 3, customerName = "Cristóbal Solís", customerPhone = "+56933445566", dateTime = "$d1 15:30", serviceName = "Corte Clásico Militar", servicePrice = 13500.0, prepayAmount = 5000.0, status = "Completada"))
-            appDao.insertAppointment(Appointment(locationId = 3, barberId = 4, customerName = "Gonzalo Silva", customerPhone = "+56944556677", dateTime = "$d1 16:00", serviceName = "Ritual de Barba & Barbería", servicePrice = 22000.0, prepayAmount = 8000.0, status = "Completada"))
-
-            // Two days ago
-            cal.add(Calendar.DAY_OF_YEAR, -1)
-            val d2 = sdf.format(cal.time)
-            appDao.insertAppointment(Appointment(locationId = 1, barberId = 1, customerName = "Alexis Varas", customerPhone = "+56955667788", dateTime = "$d2 12:00", serviceName = "Corte Clásico Tradicional", servicePrice = 14000.0, prepayAmount = 5000.0, status = "Completada"))
-            appDao.insertAppointment(Appointment(locationId = 2, barberId = 3, customerName = "Nicolás Ibáñez", customerPhone = "+56966778899", dateTime = "$d2 14:00", serviceName = "Perfilado de Barba", servicePrice = 10000.0, prepayAmount = 4000.0, status = "Completada"))
-            appDao.insertAppointment(Appointment(locationId = 3, barberId = 4, customerName = "Andrés Bello", customerPhone = "+56977889900", dateTime = "$d2 17:00", serviceName = "Corte & Ritual de Afeitado VIP", servicePrice = 30000.0, prepayAmount = 10000.0, status = "Completada"))
-        }
+        // 4. Citas de demostración: antes se creaban citas ficticias (ayer, anteayer y hoy) solo en este
+        //    teléfono. Bloqueaban horas libres al agendar y mostraban clientes inventados en los paneles.
+        //    Las reservas reales vienen de Supabase; aquí se borran las que quedaron de versiones anteriores.
+        appDao.deleteAppointmentsByNameAndPhone(DEMO_APPOINTMENTS.map { (name, phone) -> "$name|$phone" })
 
         // 6. Prepopulate Reviews for Branches and Services if empty
         if (appDao.getAllReviews().isEmpty()) {
@@ -283,102 +267,23 @@ class AppRepository(private val appDao: AppDao) {
                 createdAt = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date())
             ))
         }
-
-        // --- Today's Appointments for Barber Dashboard & Customer Testing ---
-        val todayStr = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date())
-        val existingTodayAppts = appDao.getAllAppointments().filter { it.dateTime.startsWith(todayStr) }
-        if (existingTodayAppts.isEmpty()) {
-            // Appointments for Mateo Silva (Barber 1, Talagante)
-            appDao.insertAppointment(Appointment(
-                locationId = 1,
-                barberId = 1,
-                customerName = "Usuario de Pruebas",
-                customerPhone = "+56 9 8765 4321",
-                customerEmail = "cliente@bigboys.cl",
-                dateTime = "$todayStr 10:00",
-                serviceName = "Corte Moderno & Fade",
-                servicePrice = 15000.0,
-                prepayAmount = 5000.0,
-                status = "Confirmada",
-                userId = testUserId
-            ))
-            appDao.insertAppointment(Appointment(
-                locationId = 1,
-                barberId = 1,
-                customerName = "Rodrigo Morales",
-                customerPhone = "+56 9 4433 2211",
-                customerEmail = "rodrigo.m@gmail.com",
-                dateTime = "$todayStr 11:30",
-                serviceName = "Perfilado de Barba Premium",
-                servicePrice = 12000.0,
-                prepayAmount = 5000.0,
-                status = "Confirmada"
-            ))
-            appDao.insertAppointment(Appointment(
-                locationId = 1,
-                barberId = 1,
-                customerName = "Felipe Carrasco",
-                customerPhone = "+56 9 5566 7788",
-                customerEmail = "felipe.c@gmail.com",
-                dateTime = "$todayStr 14:00",
-                serviceName = "Corte y Lavado VIP",
-                servicePrice = 18000.0,
-                prepayAmount = 5000.0,
-                status = "Pendiente"
-            ))
-            appDao.insertAppointment(Appointment(
-                locationId = 1,
-                barberId = 1,
-                customerName = "Ignacio Valdés",
-                customerPhone = "+56 9 6677 8899",
-                customerEmail = "ignacio.v@gmail.com",
-                dateTime = "$todayStr 16:30",
-                serviceName = "Ritual de Barba a Navaja",
-                servicePrice = 14000.0,
-                prepayAmount = 5000.0,
-                status = "Confirmada"
-            ))
-            appDao.insertAppointment(Appointment(
-                locationId = 1,
-                barberId = 1,
-                customerName = "Cristóbal Solís",
-                customerPhone = "+56 9 3344 5566",
-                customerEmail = "cristobal.s@gmail.com",
-                dateTime = "$todayStr 09:00",
-                serviceName = "Corte Clásico Militar",
-                servicePrice = 13500.0,
-                prepayAmount = 5000.0,
-                status = "Completada"
-            ))
-
-            // Appointments for Carlos Mendoza (Barber 2, Talagante)
-            appDao.insertAppointment(Appointment(
-                locationId = 1,
-                barberId = 2,
-                customerName = "Gabriel Osorio",
-                customerPhone = "+56 9 7788 9900",
-                customerEmail = "gabriel.o@gmail.com",
-                dateTime = "$todayStr 10:30",
-                serviceName = "Perfilado de Barba Premium",
-                servicePrice = 12000.0,
-                prepayAmount = 5000.0,
-                status = "Confirmada"
-            ))
-
-            // Appointments for Joaquín Guzmán (Barber 9, Peñaflor 2)
-            appDao.insertAppointment(Appointment(
-                locationId = 3,
-                barberId = 9,
-                customerName = "Matías Concha",
-                customerPhone = "+56 9 8899 0011",
-                customerEmail = "matias.c@gmail.com",
-                dateTime = "$todayStr 15:00",
-                serviceName = "Corte & Barba VIP",
-                servicePrice = 25000.0,
-                prepayAmount = 8000.0,
-                status = "Confirmada"
-            ))
-        }
     }
 }
 
+/** Nombre y teléfono de las citas ficticias que creaban las versiones anteriores. */
+private val DEMO_APPOINTMENTS = listOf(
+    "Juan Pérez" to "+56911223344",
+    "Diego Muñoz" to "+56922334455",
+    "Cristóbal Solís" to "+56933445566",
+    "Gonzalo Silva" to "+56944556677",
+    "Alexis Varas" to "+56955667788",
+    "Nicolás Ibáñez" to "+56966778899",
+    "Andrés Bello" to "+56977889900",
+    "Usuario de Pruebas" to "+56 9 8765 4321",
+    "Rodrigo Morales" to "+56 9 4433 2211",
+    "Felipe Carrasco" to "+56 9 5566 7788",
+    "Ignacio Valdés" to "+56 9 6677 8899",
+    "Cristóbal Solís" to "+56 9 3344 5566",
+    "Gabriel Osorio" to "+56 9 7788 9900",
+    "Matías Concha" to "+56 9 8899 0011"
+)

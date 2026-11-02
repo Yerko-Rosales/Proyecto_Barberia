@@ -4,6 +4,7 @@ import com.example.data.model.Appointment
 import com.example.data.model.Barber
 import com.example.data.model.Location
 import com.example.data.model.User
+import com.example.ui.util.AppFormatters
 import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
@@ -104,7 +105,8 @@ data class AppointmentDto(
         customerName = customerName ?: "",
         customerPhone = customerPhone ?: "",
         customerEmail = customerEmail ?: "",
-        dateTime = dateTime ?: "",
+        // La API entrega "yyyy-MM-dd HH:mm"; en la app las fechas se usan y se muestran como "dd-MM-yyyy HH:mm"
+        dateTime = AppFormatters.toDisplayDateTime(dateTime ?: ""),
         serviceName = serviceName ?: "Corte",
         servicePrice = (servicePrice ?: 0).toDouble(),
         prepayAmount = (prepayAmount ?: 0).toDouble(),
