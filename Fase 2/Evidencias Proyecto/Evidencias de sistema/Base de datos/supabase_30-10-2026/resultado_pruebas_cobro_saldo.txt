@@ -1,0 +1,21 @@
+Pruebas del cobro del saldo · Proyecto Barbería Big-Boys · 30-10-2026
+Base: Supabase «Big Boys Project» (PostgreSQL 17). Script: 10_pruebas_cobro_saldo.sql (migración 09_cobro_saldo_reserva.sql)
+Las pruebas corren en una transacción que se deshace al final (no dejan datos).
+
+1 OK | C-01 Saldo = precio - abono pagado | 11900 - 3000 = 8900
+2 OK | C-02 Medio de pago obligatorio con saldo | MEDIO_PAGO_REQUERIDO
+3 OK | C-03 Cobro del saldo registrado | saldo 8900 en DEBITO, reserva ATENDIDA
+4 OK | C-04 Cobro auditado | 1 registro(s) ADMIN_SUCURSAL
+5 OK | C-05 Atención en lo ganado por el barbero | total del día 11900
+6 OK | C-06 Sin doble cobro | RESERVA_YA_COBRADA
+7 OK | C-07 Sin abono: saldo = precio | saldo 11900
+8 OK | C-08 Abono cubre el servicio | abono aplicado 2380, saldo 0
+9 OK | C-09 Monto distinto al reservado | 20230 - 3000 = 17230
+10 OK | C-10 Barbero sin acceso al cobro | SIN_PERMISO
+11 OK | C-11 Cajero/a limitado a su sucursal | SIN_PERMISO
+12 OK | C-12 No-show no se cobra | RESERVA_NO_COBRABLE: NO_SHOW
+13 OK | C-13 Cobro sin credenciales rechazado | CREDENCIALES_INVALIDAS
+14 OK | C-14 Webpay: abono aplicado sigue aprobado | APLICADO
+
+Resultado: 14/14 OK
+Verificado después: 0 pagos, 0 reservas y 0 atenciones de prueba en la base; 34 funciones api_* (32 + api_reserva_saldo y api_reserva_cobrar_saldo).
