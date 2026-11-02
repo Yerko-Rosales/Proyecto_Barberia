@@ -3,6 +3,7 @@ package com.example.ui.screens
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.data.model.Appointment
 import com.example.data.model.Barber
 import com.example.data.supabase.text
 import com.example.ui.theme.*
@@ -235,8 +237,10 @@ fun BarberEarningsScreen(viewModel: BarberiaViewModel, barber: Barber, onLogout:
         }
     }
 
+    // Pantalla completa propia (no va dentro del Scaffold): necesita su fondo oscuro y los márgenes de las
+    // barras del sistema; sin fondo quedaba blanca y los textos claros no se veían
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier.fillMaxSize().background(DarkBackground).systemBarsPadding().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -294,6 +298,105 @@ fun BarberEarningsScreen(viewModel: BarberiaViewModel, barber: Barber, onLogout:
         }
         Text("Por privacidad no se muestran datos de contacto de los clientes.", color = TextMuted, fontSize = 10.sp)
     }
+}
+
+// ---------------------------------------------------------------------
+// Cobro del saldo de una reserva atendida (Dueño o cajero/a)
+// El abono pagado con Webpay se descuenta del precio; el resto se paga en el local
+// ---------------------------------------------------------------------
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettleBalanceDialog(viewModel: BarberiaViewModel, appointment: Appointment, onDismiss: () -> Unit) {
+    var info by remember { mutableStateOf<JsonObject?>(null) }
+    var amount by remember { mutableStateOf("") }
+    var tip by remember { mutableStateOf("0") }
+    var method by remember { mutableStateOf("EFECTIVO") }
+    var error by remember { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
+
+    LaunchedEffect(appointment.id) {
+        viewModel.loadBalance(appointment, null) { r, e ->
+            info = r; error = e
+            r?.text("precio")?.let { amount = it.substringBefore(".") }
+        }
+    }
+
+    val total = amount.toIntOrNull() ?: 0
+    val paid = info?.text("abono_pagado")?.toDoubleOrNull()?.toInt() ?: 0
+    val applied = minOf(paid, total)
+    val balance = total - applied
+    val tipValue = tip.toIntOrNull() ?: 0
+    val methods = listOf("EFECTIVO" to "Efectivo", "DEBITO" to "Débito", "CREDITO" to "Crédito", "TRANSFERENCIA" to "Transferencia")
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = CardBackground,
+        title = { Text("Cobrar saldo · ${appointment.customerName}", color = TextIvory, fontWeight = FontWeight.Bold, fontSize = 16.sp) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(appointment.serviceName, color = TextMuted, fontSize = 12.sp)
+                if (info == null && error == null) Text("Calculando saldo…", color = TextMuted, fontSize = 12.sp)
+                if (info != null) {
+                    OutlinedTextField(
+                        value = amount, onValueChange = { amount = it.filter(Char::isDigit) },
+                        label = { Text("Monto del servicio") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true, modifier = Modifier.fillMaxWidth().testTag("settle_amount")
+                    )
+                    Row(Modifier.fillMaxWidth()) {
+                        Text("Abono pagado con Webpay", color = TextMuted, fontSize = 12.sp, modifier = Modifier.weight(1f))
+                        Text("− ${clp(applied.toString())}", color = TextIvory, fontSize = 12.sp)
+                    }
+                    Row(Modifier.fillMaxWidth()) {
+                        Text("Saldo a pagar en el local", color = TextIvory, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                        Text(clp(balance.toString()), color = GoldPrimary, fontWeight = FontWeight.Black)
+                    }
+                    OutlinedTextField(
+                        value = tip, onValueChange = { tip = it.filter(Char::isDigit) },
+                        label = { Text("Propina") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true, modifier = Modifier.fillMaxWidth().testTag("settle_tip")
+                    )
+                    if (balance + tipValue > 0) {
+                        // Dos filas de dos: en una sola fila «Transferencia» no cabía en el diálogo
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            methods.chunked(2).forEach { row ->
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    row.forEach { (code, label) ->
+                                        FilterChip(
+                                            selected = method == code,
+                                            onClick = { method = code },
+                                            label = {
+                                                Text(label, fontSize = 12.sp, maxLines = 1,
+                                                    textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                                            },
+                                            modifier = Modifier.weight(1f).testTag("settle_method_$code")
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                error?.let { Text("⚠️ $it", color = RedCancel, fontSize = 12.sp) }
+            }
+        },
+        confirmButton = {
+            Button(
+                enabled = info != null && !busy,
+                onClick = {
+                    busy = true; error = null
+                    viewModel.settleBalance(appointment, total, tipValue, if (balance + tipValue > 0) method else null) { r, e ->
+                        busy = false
+                        if (r != null) onDismiss() else error = e
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = GreenConfirm),
+                modifier = Modifier.testTag("settle_confirm")
+            ) { Text("Registrar cobro", color = DarkBackground, fontWeight = FontWeight.Bold) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar", color = TextMuted) } }
+    )
 }
 
 // ---------------------------------------------------------------------

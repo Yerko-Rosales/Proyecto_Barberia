@@ -328,6 +328,12 @@ object SupabaseManager {
             "CREDENCIALES_INVALIDAS" in msg -> "Correo o contraseña incorrectos."
             "SIN_PERMISO" in msg -> "Tu cuenta no tiene permiso para esta acción."
             "SOLO_CLIENTES" in msg -> "Esta opción es solo para clientes."
+            "RESERVA_NO_ENCONTRADA" in msg -> "No encontramos la reserva."
+            "RESERVA_YA_COBRADA" in msg -> "Esta reserva ya fue cobrada."
+            "RESERVA_NO_COBRABLE" in msg -> "Solo se cobra una reserva confirmada (no un no-show ni una anulación)."
+            "MEDIO_PAGO_REQUERIDO" in msg -> "Selecciona con qué pagó el cliente el saldo."
+            "MONTO_INVALIDO" in msg -> "El monto y la propina no pueden ser negativos."
+            "ANTICIPACION_MINIMA" in msg -> "Esa hora ya no está disponible: se reserva con al menos 90 minutos de anticipación."
             "WEBPAY_ERROR" in msg -> "Webpay no respondió. Intenta nuevamente en unos minutos."
             "PAGO_NO_ENCONTRADO" in msg -> "No encontramos el pago."
             else -> "No se pudo conectar con el servidor. Revisa tu conexión."
@@ -363,6 +369,34 @@ object SupabaseManager {
     /** Confirma el pago con Transbank (lo usa el botón «Ya pagué» si la web no alcanzó a confirmarlo). */
     suspend fun confirmWebpay(token: String): JsonObject? =
         callRpcObject("api_webpay_confirmar", buildJsonObject { put("p_token", token) })
+
+    /** Identifica la reserva igual que updateAppointmentStatusInCloud (id o barbero + fecha). */
+    private fun reservationRef(appointment: Appointment, amount: Int?) = buildJsonObject {
+        put("id", appointment.id)
+        put("barber_id", appointment.barberId)
+        put("date_time", toIsoDateTime(appointment.dateTime))
+        amount?.let { put("monto", it) }
+    }
+
+    /** Precio, abono pagado con Webpay y saldo por cobrar en el local (Dueño o cajero/a). */
+    suspend fun fetchBalance(appointment: Appointment, amount: Int? = null): JsonObject? =
+        callRpcObject("api_reserva_saldo", buildJsonObject {
+            put("p_email", sessionEmail ?: "")
+            put("p_password_sha256", sessionPasswordHash ?: "")
+            put("p", reservationRef(appointment, amount))
+        })
+
+    /** Cobra el saldo: crea la atención con el abono aplicado y deja la reserva ATENDIDA. */
+    suspend fun settleBalance(appointment: Appointment, amount: Int, tip: Int, paymentMethod: String?): JsonObject? =
+        callRpcObject("api_reserva_cobrar_saldo", buildJsonObject {
+            put("p_email", sessionEmail ?: "")
+            put("p_password_sha256", sessionPasswordHash ?: "")
+            put("p", buildJsonObject {
+                reservationRef(appointment, amount).forEach { (k, v) -> put(k, v) }
+                put("propina", tip)
+                paymentMethod?.let { put("medio_pago", it) }
+            })
+        })
 
     /** Fila de hoy de una sucursal: solo números, nombres abreviados y espera estimada. */
     suspend fun fetchQueue(locationId: Int): JsonObject? =

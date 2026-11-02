@@ -94,6 +94,10 @@ interface AppDao {
     @Query("UPDATE appointments SET status = :status WHERE id = :id")
     suspend fun updateAppointmentStatus(id: Int, status: String)
 
+    /** keys = "nombre|teléfono"; borra solo las citas que calzan en ambos datos. */
+    @Query("DELETE FROM appointments WHERE customerName || '|' || customerPhone IN (:keys)")
+    suspend fun deleteAppointmentsByNameAndPhone(keys: List<String>)
+
     // --- Products ---
     @Query("SELECT * FROM products ORDER BY name ASC")
     fun getAllProductsFlow(): Flow<List<Product>>

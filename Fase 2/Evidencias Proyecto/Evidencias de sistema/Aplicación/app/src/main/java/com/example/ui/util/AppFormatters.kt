@@ -2,8 +2,10 @@ package com.example.ui.util
 
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 /**
  * High-performance, centralized formatting utilities.
@@ -97,20 +99,37 @@ object AppFormatters {
     /**
      * Parses an appointment date/time string from any known format into java.util.Date
      */
+    /** Las horas de las citas son de Chile, sin importar la zona horaria del teléfono. */
+    val CHILE_TIME_ZONE: TimeZone = TimeZone.getTimeZone("America/Santiago")
+
     fun parseAppointmentDate(dateTimeString: String): Date? {
         val trimmed = dateTimeString.trim()
         if (trimmed.isEmpty()) return null
-        return try {
-            dateTimeFormatThreadLocal.get()?.parse(trimmed)
-                ?: SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).parse(trimmed)
-                ?: SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).parse(trimmed)
-                ?: SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).parse(trimmed)
-                ?: SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US).parse(trimmed)
-                ?: SimpleDateFormat("dd-MM-yyyy", Locale.US).parse(trimmed)
-                ?: SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(trimmed)
-        } catch (e: Exception) {
-            null
-        }
+        // El formato se reconoce por la posición del año (dd-MM-yyyy o yyyy-MM-dd). Antes se usaba
+        // SimpleDateFormat leniente: «2026-10-31 20:00» se leía como dd-MM-yyyy (año 31) y toda cita
+        // de la nube quedaba en el pasado («Caducada») y fallaba la regla de 24 h.
+        val (y, m, d) = parseDayMonthYear(trimmed) ?: return null
+        if (m !in 1..12 || d !in 1..31) return null
+        // Hora en cualquier parte después de la fecha («20:00», «20:00:00», «20:00 hrs»); sin hora = 00:00
+        val time = Regex("""[ T](\d{1,2}):(\d{2})""").find(trimmed)
+        val hour = time?.groupValues?.get(1)?.toInt() ?: 0
+        val minute = time?.groupValues?.get(2)?.toInt() ?: 0
+        if (hour > 23 || minute > 59) return null
+        return Calendar.getInstance(CHILE_TIME_ZONE).apply {
+            isLenient = false
+            clear()
+            set(y, m - 1, d, hour, minute, 0)
+        }.let { cal -> try { cal.time } catch (e: IllegalArgumentException) { null } }
+    }
+
+    /** Anticipación mínima para reservar (parámetro MINUTOS_ANTICIPACION_RESERVA de la base). */
+    const val MIN_BOOKING_LEAD_MIN = 90
+
+    /** Una hora se puede reservar si empieza al menos 90 minutos después de ahora (hora de Chile). */
+    fun isSlotBookable(date: String, hour: String): Boolean {
+        if (date.isBlank() || hour.isBlank()) return false
+        val start = parseAppointmentDate("${date.trim().substringBefore(' ')} ${hour.trim()}") ?: return false
+        return start.time - System.currentTimeMillis() >= MIN_BOOKING_LEAD_MIN * 60_000L
     }
 
     /**
@@ -223,13 +242,19 @@ object AppFormatters {
     }
 
     /**
-     * Converts an ISO or standard date/time string into display "dd-MM-yyyy HH:mm"
+     * Fecha para mostrar y guardar en la app: siempre "dd-MM-yyyy" o "dd-MM-yyyy HH:mm"
+     * (acepta ISO "yyyy-MM-dd HH:mm", "yyyy-MM-ddTHH:mm:ss" o ya "dd-MM-yyyy").
      */
     fun toDisplayDateTime(dateTimeString: String): String {
         if (dateTimeString.isBlank()) return ""
-        val triple = parseDayMonthYear(dateTimeString) ?: return dateTimeString
-        val hour = extractHourSlot(dateTimeString)
+        val triple = parseDayMonthYear(dateTimeString.trim()) ?: return dateTimeString
         val datePart = String.format(Locale.US, "%02d-%02d-%04d", triple.third, triple.second, triple.first)
-        return if (hour.isNotBlank()) "$datePart $hour" else datePart
+        val time = Regex("""[ T](\d{1,2}):(\d{2})""").find(dateTimeString)
+            ?: return datePart
+        return String.format(Locale.US, "%s %02d:%s", datePart, time.groupValues[1].toInt(), time.groupValues[2])
     }
+
+    /** Reemplaza cada fecha ISO (yyyy-MM-dd) de un texto por dd-MM-yyyy, por ejemplo en mensajes de la API. */
+    fun isoDatesToDisplay(text: String?): String =
+        (text ?: "").replace(Regex("""(?<!\d)(\d{4})-(\d{2})-(\d{2})(?!\d)"""), "$3-$2-$1")
 }
