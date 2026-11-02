@@ -57,7 +57,7 @@ En días de mayor demanda se atienden ~130 clientes y **26 se van sin atención 
 | Acta, Kick-Off, ERS rev. 04.1 (63 RF / 11 RNF), DAS v3.2, RACI | Documentos base del proyecto |
 | KPIs y Costos (xlsx), Política de Privacidad y T&C | Indicadores, costos y textos legales |
 | Diagramas/ | 35 diagramas (PNG, SVG,  y StarUML `.mdj`) |
-| `Evidencias de sistema/Base de datos/` | Script `bigboys_ddl.sql` (27 tablas) validado: 24/24 pruebas; migraciones de Supabase y pruebas de la API en `supabase_2026-10-22/` |
+| `Evidencias de sistema/Base de datos/` | Script `bigboys_ddl.sql` (27 tablas) validado: 24/24 pruebas; migraciones de Supabase y pruebas de la API en `supabase_22-10-2026/` |
 
 ## Estructura del repositorio
 

@@ -3,14 +3,14 @@
 Proyecto Barbería Big-Boys. Pruebas funcionales y de integración de lo construido para el hito H6 (sistema integrado, 30-10):
 pago del abono con Webpay Plus, fila por orden de llegada, «Mis datos» y cuentas del personal.
 
-- **Base de datos:** Supabase «Big Boys Project» (PostgreSQL 17), migración `Base de datos/supabase_2026-10-27/05_pagos_fila_derechos_personal.sql`.
+- **Base de datos:** Supabase «Big Boys Project» (PostgreSQL 17), migración `Base de datos/supabase_27-10-2026/05_pagos_fila_derechos_personal.sql`.
 - **Pago:** Webpay Plus, ambiente de **integración** de Transbank (tarjetas de prueba; no hay cargos reales).
 - **Web:** `barberia_bigboys_web/index.html` servida en local (http://127.0.0.1:3000), Chrome automatizado con Puppeteer (`scripts/e2e_s12.js`).
 - **App:** APK de depuración en el emulador Android 15 (API 35), `scripts/prueba_app_emulador.py`.
 
 ## 1. API (base de datos) · 20/20 OK
 
-Script `Base de datos/supabase_2026-10-27/06_pruebas_api_s12.sql`; resultado en `resultado_pruebas_api_s12.txt`.
+Script `Base de datos/supabase_27-10-2026/06_pruebas_api_s12.sql`; resultado en `resultado_pruebas_api_s12.txt`.
 Cubre reglas (reserva pendiente que vence a los 15 min, horario bloqueado mientras se paga, transiciones de la fila)
 y permisos (solo el Dueño crea personal, el cajero/a opera solo su sucursal, el barbero ve solo lo suyo, la cola de correos exige clave).
 
@@ -57,7 +57,7 @@ Para repetir las pruebas se cargan como variables de entorno: `BB_CLAVE_DUENO`, 
 
 ## 6. Corrección de riesgos de seguridad (28-10-2026)
 
-Migración `Base de datos/supabase_2026-10-27/07_seguridad_reservas.sql`; pruebas `08_pruebas_seguridad.sql` → **16/16 OK**
+Migración `Base de datos/supabase_27-10-2026/07_seguridad_reservas.sql`; pruebas `08_pruebas_seguridad.sql` → **16/16 OK**
 (`resultado_pruebas_seguridad.txt`). La regresión de la API S12 sigue en 20/20.
 
 | Riesgo encontrado | Corrección |
