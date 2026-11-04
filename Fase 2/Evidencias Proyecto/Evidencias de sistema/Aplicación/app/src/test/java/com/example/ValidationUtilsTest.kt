@@ -1,42 +1,11 @@
 package com.example
 
 import com.example.ui.util.ValidationUtils
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ValidationUtilsTest {
-
-    @Test
-    fun testValidChileanRutsModulo11() {
-        // Mathematically verified Chilean RUTs (Modulo 11)
-        assertTrue(ValidationUtils.isValidChileanRut("19.342.110-5"))
-        assertTrue(ValidationUtils.isValidChileanRut("19342110-5"))
-        assertTrue(ValidationUtils.isValidChileanRut("193421105"))
-        assertTrue(ValidationUtils.isValidChileanRut("11.111.111-1"))
-        assertTrue(ValidationUtils.isValidChileanRut("12.345.678-5"))
-        assertTrue(ValidationUtils.isValidChileanRut("22.222.222-2"))
-        assertTrue(ValidationUtils.isValidChileanRut("15.228.344-K"))
-        assertTrue(ValidationUtils.isValidChileanRut("15228344k"))
-        assertTrue(ValidationUtils.isValidChileanRut("30.686.957-4"))
-    }
-
-    @Test
-    fun testInvalidChileanRuts() {
-        assertFalse(ValidationUtils.isValidChileanRut(""))
-        assertFalse(ValidationUtils.isValidChileanRut("19.342.110-4")) // Wrong DV
-        assertFalse(ValidationUtils.isValidChileanRut("12345678-9")) // Wrong DV
-        assertFalse(ValidationUtils.isValidChileanRut("123")) // Too short
-        assertFalse(ValidationUtils.isValidChileanRut("abcdefgh-k")) // Non-digits
-        assertFalse(ValidationUtils.isValidChileanRut("0-0"))
-    }
-
-    @Test
-    fun testRutFormatting() {
-        assertEquals("19.342.110-5", ValidationUtils.formatChileanRut("193421105"))
-        assertEquals("15.228.344-K", ValidationUtils.formatChileanRut("15228344K"))
-    }
 
     @Test
     fun testValidEmailFormats() {

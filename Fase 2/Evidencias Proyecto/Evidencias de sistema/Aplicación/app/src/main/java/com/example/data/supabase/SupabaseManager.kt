@@ -134,38 +134,6 @@ object SupabaseManager {
     }
 
     /**
-     * Creates a reservation (cliente, reserva and notificacion are written by api_crear_reserva).
-     * Returns false if the slot is already taken (HORARIO_OCUPADO) or the call fails.
-     */
-    suspend fun publishAppointmentToCloud(appointment: Appointment): Boolean {
-        return try {
-            val isoDateTime = toIsoDateTime(appointment.dateTime)
-            callRpc("api_crear_reserva", buildJsonObject {
-                put("p", buildJsonObject {
-                    put("id", System.currentTimeMillis())
-                    put("canal", CHANNEL)
-                    put("barber_id", appointment.barberId)
-                    put("location_id", appointment.locationId)
-                    put("service_name", appointment.serviceName.ifBlank { "Corte" })
-                    put("date_time", isoDateTime)
-                    put("status", appointment.status.ifBlank { "Confirmada" })
-                    put("customer_name", appointment.customerName.ifBlank { "Cliente" })
-                    put("customer_phone", appointment.customerPhone)
-                    put("customer_email", appointment.customerEmail)
-                })
-                // Without staff credentials the database only accepts pending (Webpay) bookings
-                putSessionCredentials()
-            })
-            Log.d(TAG, "Reservation inserted into Supabase: $isoDateTime, barberId: ${appointment.barberId}")
-            triggerCloudRefresh()
-            true
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to insert reservation into Supabase: ${e.message}", e)
-            false
-        }
-    }
-
-    /**
      * Updates a reservation status (e.g. "Cancelada", "Completada", "No-Show").
      * The reservation is found by id or, for local copies, by barber and date/time.
      * cancelledBy distinguishes customer cancellations (deposit rule) from staff ones.

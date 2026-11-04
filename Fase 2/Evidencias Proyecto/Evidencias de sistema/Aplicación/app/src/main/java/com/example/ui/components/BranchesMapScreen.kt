@@ -17,8 +17,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -28,14 +26,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import com.example.data.model.Barber
 import com.example.data.model.Location
 import com.example.ui.theme.*
+import androidx.core.net.toUri
 
 // Data representation for branch coordinates and details
 data class BranchMapData(
@@ -104,7 +100,6 @@ fun BranchesMapScreen(
 ) {
     val context = LocalContext.current
     var selectedBranch by remember { mutableStateOf<BranchMapData?>(BIG_BOYS_BRANCHES.first()) }
-    var showDirectMapModal by remember { mutableStateOf(false) }
     var isSatelliteView by remember { mutableStateOf(false) }
 
     Column(
@@ -376,7 +371,7 @@ fun BranchesMapScreen(
                     )
 
                     Spacer(modifier = Modifier.height(14.dp))
-                    Divider(color = GoldPrimary.copy(alpha = 0.15f))
+                    HorizontalDivider(color = GoldPrimary.copy(alpha = 0.15f))
                     Spacer(modifier = Modifier.height(14.dp))
 
                     // Contact & Opening Info Grid
@@ -387,7 +382,7 @@ fun BranchesMapScreen(
                         // Phone contact item
                         Card(
                             onClick = {
-                                val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${branch.phone.replace(" ", "")}"))
+                                val intent = Intent(Intent.ACTION_DIAL, "tel:${branch.phone.replace(" ", "")}".toUri())
                                 context.startActivity(intent)
                             },
                             colors = CardDefaults.cardColors(containerColor = Color(0xFF141311)),
@@ -707,21 +702,21 @@ fun openGoogleMaps(context: Context, lat: Double, lng: Double, label: String) {
     try {
         // Formulate standard Google Maps geo URI with label
         val uriStr = "geo:$lat,$lng?q=$lat,$lng(${Uri.encode(label)})"
-        val mapIntent = Intent(Intent.ACTION_VIEW, Uri.parse(uriStr))
+        val mapIntent = Intent(Intent.ACTION_VIEW, uriStr.toUri())
         mapIntent.setPackage("com.google.android.apps.maps")
 
         if (mapIntent.resolveActivity(context.packageManager) != null) {
             context.startActivity(mapIntent)
         } else {
             // Fallback to official web Google Maps navigation URL
-            val webUri = Uri.parse("https://www.google.com/maps/search/?api=1&query=$lat,$lng")
+            val webUri = "https://www.google.com/maps/search/?api=1&query=$lat,$lng".toUri()
             val browserIntent = Intent(Intent.ACTION_VIEW, webUri)
             context.startActivity(browserIntent)
         }
     } catch (e: Exception) {
         // Fallback browser redirect
         try {
-            val webUri = Uri.parse("https://maps.google.com/?q=$lat,$lng")
+            val webUri = "https://maps.google.com/?q=$lat,$lng".toUri()
             val browserIntent = Intent(Intent.ACTION_VIEW, webUri)
             context.startActivity(browserIntent)
         } catch (ex: Exception) {
