@@ -1,6 +1,5 @@
 const http = require('http');
 const tls = require('tls');
-const https = require('https');
 
 const GMAIL_USER = process.env.GMAIL_USER || 'bigboysbarberia.chile@gmail.com';
 const GMAIL_PASS = process.env.GMAIL_PASS;
@@ -109,7 +108,7 @@ const server = http.createServer(async (req, res) => {
         }
 
         console.log(`[SMTP] Enviando correo a: ${to} | Asunto: ${subject}`);
-        const result = await sendGmailSMTP({ to, subject, body });
+        await sendGmailSMTP({ to, subject, body });
         console.log(`[SMTP] ✓ Despacho exitoso hacia: ${to}`);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, to }));

@@ -10,9 +10,6 @@ interface AppDao {
     @Query("SELECT * FROM users WHERE LOWER(email) = LOWER(:email) LIMIT 1")
     suspend fun getUserByEmail(email: String): User?
 
-    @Query("SELECT * FROM users WHERE (rut != '' AND rut = :rut) OR (rut != '' AND REPLACE(REPLACE(REPLACE(rut, '.', ''), '-', ''), ' ', '') = :cleanRut) LIMIT 1")
-    suspend fun getUserByRut(rut: String, cleanRut: String): User?
-
     @Query("SELECT * FROM users WHERE id = :id LIMIT 1")
     suspend fun getUserById(id: Int): User?
 
@@ -42,9 +39,6 @@ interface AppDao {
     @Query("SELECT * FROM barbers")
     suspend fun getAllBarbers(): List<Barber>
 
-    @Query("SELECT * FROM barbers WHERE locationId = :locationId")
-    fun getBarbersByLocationFlow(locationId: Int): Flow<List<Barber>>
-
     @Query("SELECT * FROM barbers WHERE id = :id LIMIT 1")
     suspend fun getBarberById(id: Int): Barber?
 
@@ -60,24 +54,12 @@ interface AppDao {
     @Query("DELETE FROM barbers WHERE id = :id")
     suspend fun deleteBarberById(id: Int)
 
-    @Query("DELETE FROM barbers")
-    suspend fun deleteAllBarbers()
-
-    @Query("DELETE FROM locations")
-    suspend fun deleteAllLocations()
-
     // --- Appointments ---
     @Query("SELECT * FROM appointments ORDER BY id DESC")
     fun getAllAppointmentsFlow(): Flow<List<Appointment>>
 
     @Query("SELECT * FROM appointments")
     suspend fun getAllAppointments(): List<Appointment>
-
-    @Query("SELECT * FROM appointments WHERE userId = :userId ORDER BY id DESC")
-    fun getAppointmentsByUserFlow(userId: Int): Flow<List<Appointment>>
-
-    @Query("SELECT * FROM appointments WHERE locationId = :locationId ORDER BY id DESC")
-    fun getAppointmentsByLocationFlow(locationId: Int): Flow<List<Appointment>>
 
     @Query("SELECT * FROM appointments WHERE barberId = :barberId ORDER BY id DESC")
     fun getAppointmentsByBarberFlow(barberId: Int): Flow<List<Appointment>>
@@ -99,8 +81,6 @@ interface AppDao {
     suspend fun deleteAppointmentsByNameAndPhone(keys: List<String>)
 
     // --- Products ---
-    @Query("SELECT * FROM products ORDER BY name ASC")
-    fun getAllProductsFlow(): Flow<List<Product>>
 
     @Query("SELECT * FROM products")
     suspend fun getAllProducts(): List<Product>
@@ -120,12 +100,6 @@ interface AppDao {
 
     @Query("SELECT * FROM supplies")
     suspend fun getAllSupplies(): List<Supply>
-
-    @Query("SELECT * FROM supplies WHERE locationId = :locationId ORDER BY name ASC")
-    fun getSuppliesByLocationFlow(locationId: Int): Flow<List<Supply>>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSupply(supply: Supply): Long
 
     @Update
     suspend fun updateSupply(supply: Supply)
@@ -161,12 +135,6 @@ interface AppDao {
 
     @Query("SELECT * FROM reviews")
     suspend fun getAllReviews(): List<Review>
-
-    @Query("SELECT * FROM reviews WHERE locationId = :locationId ORDER BY id DESC")
-    fun getReviewsByLocationFlow(locationId: Int): Flow<List<Review>>
-
-    @Query("SELECT * FROM reviews WHERE barberId = :barberId ORDER BY id DESC")
-    fun getReviewsByBarberFlow(barberId: Int): Flow<List<Review>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReview(review: Review): Long

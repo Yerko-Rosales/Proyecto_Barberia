@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
@@ -72,7 +71,7 @@ fun RealTimeAppointmentCalendar(
     onDateSelected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val localeEs = remember { Locale("es", "CL") }
+    val localeEs = remember { Locale.forLanguageTag("es-CL") }
     val todayCal = remember { Calendar.getInstance() }
     val currentRealYear = todayCal.get(Calendar.YEAR)
     val currentRealMonth = todayCal.get(Calendar.MONTH) // 0-11

@@ -72,28 +72,6 @@ body {
   animation: barberPoleStripes 4s linear infinite;
 }
 
-.gold-gradient-bg {
-  background: linear-gradient(135deg, #FFD700 0%, #D4AF37 50%, #AA7C11 100%);
-}
-
-.gold-gradient-text {
-  background: linear-gradient(135deg, #FFF099 0%, #FFD700 50%, #B8860B 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.gold-glow {
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.25);
-}
-
-.gold-border {
-  border-color: rgba(255, 215, 0, 0.3);
-}
-
-.gold-border:hover {
-  border-color: #FFD700;
-}
-
 /* Custom Luxury Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -115,84 +93,6 @@ body.light-mode ::-webkit-scrollbar-track {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #FFD700;
-}
-
-/* Pulsación suave para badges y citas */
-@keyframes softPulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.85;
-    transform: scale(1.02);
-  }
-}
-
-.pulse-gold {
-  animation: softPulse 2.5s infinite ease-in-out;
-}
-
-/* Leaflet map styling override */
-.leaflet-container {
-  font-family: inherit;
-  background-color: #121212 !important;
-  border-radius: 1rem;
-}
-
-/* Adaptación de modo oscuro / claro para mapa interactivo sin marcas de agua ni API Keys */
-.leaflet-tile-pane {
-  filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(92%);
-}
-
-body.light-mode .leaflet-tile-pane,
-html.light-mode .leaflet-tile-pane {
-  filter: none !important;
-}
-
-/* Popups personalizados de Leaflet */
-.leaflet-popup-content-wrapper, .leaflet-popup-tip {
-  background: #1E1E1E !important;
-  color: #F4F4F5 !important;
-  border: 1.5px solid rgba(255, 215, 0, 0.5) !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
-  border-radius: 14px !important;
-}
-
-body.light-mode .leaflet-popup-content-wrapper,
-body.light-mode .leaflet-popup-tip {
-  background: #FFFFFF !important;
-  color: #18181B !important;
-  border: 1.5px solid #FFD700 !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
-}
-
-.custom-gold-marker {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: #121212;
-  border: 2.5px solid #FFD700;
-  border-radius: 50%;
-  box-shadow: 0 0 14px rgba(255, 215, 0, 0.65);
-  color: #FFD700;
-  font-size: 18px;
-}
-
-.leaflet-control-attribution {
-  background: rgba(18, 18, 18, 0.85) !important;
-  color: #71717a !important;
-  font-size: 9px !important;
-  border-radius: 6px;
-  margin: 4px !important;
-  padding: 2px 6px !important;
-}
-
-.leaflet-control-attribution a {
-  color: #a1a1aa !important;
-  text-decoration: none !important;
 }
 
 /* Impresión para Vouchers Transbank */

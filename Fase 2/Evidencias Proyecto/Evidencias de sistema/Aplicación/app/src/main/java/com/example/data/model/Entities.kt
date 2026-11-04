@@ -9,7 +9,6 @@ data class User(
     val fullName: String,
     val email: String,
     val phone: String,
-    val rut: String = "",
     val passwordHash: String = "",
     val isRegistered: Boolean = true,
     val avatarUrl: String = ""
@@ -89,8 +88,7 @@ data class Supply(
     val locationId: Int,
     val name: String,
     val stock: Int,
-    val unit: String,
-    val minStock: Int
+    val unit: String
 )
 
 @Entity(tableName = "gift_coupons")

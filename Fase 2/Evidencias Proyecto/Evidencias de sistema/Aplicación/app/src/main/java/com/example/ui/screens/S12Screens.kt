@@ -1,7 +1,6 @@
 package com.example.ui.screens
 
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -35,6 +34,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.core.net.toUri
 
 /** Fecha de hoy en Chile (yyyy-MM-dd); minSdk 24 no tiene java.time. */
 private fun todayInChile(): String =
@@ -59,7 +59,7 @@ fun WebpayPaymentPanel(
     val context = LocalContext.current
     val state by viewModel.webpay.collectAsState()
     val openInBrowser: (String) -> Unit = { url ->
-        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
     Column(

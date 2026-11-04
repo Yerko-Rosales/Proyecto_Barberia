@@ -12,7 +12,6 @@ class AppRepository(private val appDao: AppDao) {
     // Users
     val allUsersFlow: Flow<List<User>> = appDao.getAllUsersFlow()
     suspend fun getUserByEmail(email: String) = appDao.getUserByEmail(email)
-    suspend fun getUserByRut(rut: String, cleanRut: String = "") = appDao.getUserByRut(rut, cleanRut.ifBlank { rut.replace(".", "").replace("-", "").replace(" ", "").uppercase() })
     suspend fun getUserById(id: Int) = appDao.getUserById(id)
     suspend fun registerUser(user: User): Int = appDao.insertUser(user).toInt()
     suspend fun updateUser(user: User) = appDao.updateUser(user)
@@ -20,12 +19,10 @@ class AppRepository(private val appDao: AppDao) {
     // Locations
     val allLocationsFlow: Flow<List<Location>> = appDao.getAllLocationsFlow()
     suspend fun getAllLocations() = appDao.getAllLocations()
-    suspend fun saveLocation(location: Location) = appDao.insertLocation(location)
 
     // Barbers
     val allBarbersFlow: Flow<List<Barber>> = appDao.getAllBarbersFlow()
     suspend fun getAllBarbers() = appDao.getAllBarbers()
-    fun getBarbersByLocation(locationId: Int): Flow<List<Barber>> = appDao.getBarbersByLocationFlow(locationId)
     suspend fun getBarberById(id: Int) = appDao.getBarberById(id)
     suspend fun addBarber(barber: Barber): Int = appDao.insertBarber(barber).toInt()
     suspend fun updateBarber(barber: Barber) = appDao.updateBarber(barber)
@@ -35,25 +32,19 @@ class AppRepository(private val appDao: AppDao) {
     // Appointments
     val allAppointmentsFlow: Flow<List<Appointment>> = appDao.getAllAppointmentsFlow()
     suspend fun getAllAppointments(): List<Appointment> = appDao.getAllAppointments()
-    fun getAppointmentsByUser(userId: Int): Flow<List<Appointment>> = appDao.getAppointmentsByUserFlow(userId)
-    fun getAppointmentsByLocation(locationId: Int): Flow<List<Appointment>> = appDao.getAppointmentsByLocationFlow(locationId)
     fun getAppointmentsByBarber(barberId: Int): Flow<List<Appointment>> = appDao.getAppointmentsByBarberFlow(barberId)
     suspend fun insertAppointment(appointment: Appointment): Int = appDao.insertAppointment(appointment).toInt()
     suspend fun updateAppointment(appointment: Appointment) = appDao.updateAppointment(appointment)
     suspend fun updateAppointmentStatus(id: Int, status: String) = appDao.updateAppointmentStatus(id, status)
 
     // Products
-    val allProductsFlow: Flow<List<Product>> = appDao.getAllProductsFlow()
     suspend fun getAllProducts() = appDao.getAllProducts()
-    suspend fun addProduct(product: Product): Int = appDao.insertProduct(product).toInt()
     suspend fun updateProduct(product: Product) = appDao.updateProduct(product)
     suspend fun updateProductStock(id: Int, newStock: Int) = appDao.updateProductStock(id, newStock)
 
     // Supplies
     val allSuppliesFlow: Flow<List<Supply>> = appDao.getAllSuppliesFlow()
     suspend fun getAllSupplies() = appDao.getAllSupplies()
-    fun getSuppliesByLocation(locationId: Int): Flow<List<Supply>> = appDao.getSuppliesByLocationFlow(locationId)
-    suspend fun addSupply(supply: Supply): Int = appDao.insertSupply(supply).toInt()
     suspend fun updateSupply(supply: Supply) = appDao.updateSupply(supply)
 
     // Gift Coupons
@@ -68,8 +59,6 @@ class AppRepository(private val appDao: AppDao) {
     // Reviews
     val allReviewsFlow: Flow<List<Review>> = appDao.getAllReviewsFlow()
     suspend fun getAllReviews() = appDao.getAllReviews()
-    fun getReviewsByLocation(locationId: Int): Flow<List<Review>> = appDao.getReviewsByLocationFlow(locationId)
-    fun getReviewsByBarber(barberId: Int): Flow<List<Review>> = appDao.getReviewsByBarberFlow(barberId)
     suspend fun addReview(review: Review): Int {
         val id = appDao.insertReview(review).toInt()
         review.appointmentId?.let { appDao.markAppointmentReviewed(it) }
@@ -227,17 +216,14 @@ class AppRepository(private val appDao: AppDao) {
         // --- Test Users Initialization ---
         // Ensures test user accounts are permanently registered for testing
         val testUser1 = appDao.getUserByEmail("cliente@bigboys.cl")
-        val testUserId: Int = if (testUser1 == null) {
+        if (testUser1 == null) {
             appDao.insertUser(User(
                 fullName = "Usuario de Pruebas",
                 email = "cliente@bigboys.cl",
                 phone = "+56 9 8765 4321",
-                rut = "19.342.110-3",
                 passwordHash = ValidationUtils.hashPassword("Bigboys2026"),
                 avatarUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80"
-            )).toInt()
-        } else {
-            testUser1.id
+            ))
         }
 
         val testUser2 = appDao.getUserByEmail("test@bigboys.cl")
@@ -246,13 +232,11 @@ class AppRepository(private val appDao: AppDao) {
                 fullName = "Tester Big Boys",
                 email = "test@bigboys.cl",
                 phone = "+56 9 1234 5678",
-                rut = "19.342.110-3",
                 passwordHash = ValidationUtils.hashPassword("123"),
                 avatarUrl = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80"
             ))
         } else {
             appDao.updateUser(testUser2.copy(
-                rut = "19.342.110-3",
                 passwordHash = ValidationUtils.hashPassword("123")
             ))
         }

@@ -63,7 +63,6 @@ data class UserDto(
     @SerialName("full_name") val fullName: String = "",
     @SerialName("email") val email: String = "",
     @SerialName("phone") val phone: String = "",
-    @SerialName("rut") val rut: String = "",
     @SerialName("password_hash") val passwordHash: String = ""
 ) {
     fun toUser(): User = User(
@@ -71,7 +70,6 @@ data class UserDto(
         fullName = fullName,
         email = email,
         phone = phone,
-        rut = rut,
         passwordHash = passwordHash,
         isRegistered = true
     )
@@ -139,25 +137,5 @@ fun User.toDto(): UserDto = UserDto(
     fullName = fullName,
     email = email,
     phone = phone,
-    rut = rut,
     passwordHash = passwordHash
-)
-
-@Serializable
-data class CouponDto(
-    @SerialName("id") val id: Int? = null,
-    @SerialName("user_email") val userEmail: String,
-    @SerialName("code") val code: String,
-    @SerialName("discount_label") val discountLabel: String,
-    @SerialName("is_used") val isUsed: Boolean = false
-)
-
-@Serializable
-data class ReviewDto(
-    @SerialName("id") val id: Int? = null,
-    @SerialName("location_id") val locationId: Int,
-    @SerialName("barber_id") val barberId: Int? = null,
-    @SerialName("user_id") val userId: Int? = null,
-    @SerialName("rating") val rating: Int,
-    @SerialName("comment") val comment: String
 )

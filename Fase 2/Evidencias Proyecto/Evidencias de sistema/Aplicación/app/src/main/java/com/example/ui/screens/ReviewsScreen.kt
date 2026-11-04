@@ -4,7 +4,6 @@ import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -137,7 +136,7 @@ fun ReviewsScreen(
                             }
                         }
 
-                        Divider(
+                        HorizontalDivider(
                             modifier = Modifier.padding(vertical = 12.dp),
                             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
                         )
@@ -538,7 +537,7 @@ fun ReviewCard(
             // Admin Review Management Controls
             if (isAdmin) {
                 Spacer(modifier = Modifier.height(12.dp))
-                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),

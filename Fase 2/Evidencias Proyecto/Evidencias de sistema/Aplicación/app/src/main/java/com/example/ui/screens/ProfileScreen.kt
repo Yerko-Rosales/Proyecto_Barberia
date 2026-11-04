@@ -38,7 +38,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.example.data.model.User
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.BarberiaViewModel
 
@@ -554,23 +553,6 @@ fun ProfileScreenContent(
                         )
 
                         if (!isAdmin) {
-                            if (!loggedInUser?.rut.isNullOrBlank()) {
-                                Spacer(modifier = Modifier.height(12.dp))
-                                OutlinedTextField(
-                                    value = loggedInUser?.rut ?: "",
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    label = { Text("RUT Registrado (Verificado)") },
-                                    leadingIcon = { Icon(Icons.Filled.Badge, null, tint = MaterialTheme.colorScheme.primary) },
-                                    trailingIcon = { Icon(Icons.Filled.VerifiedUser, "RUT Verificado", tint = GreenConfirm) },
-                                    singleLine = true,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .testTag("profile_rut_display"),
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                            }
-
                             Spacer(modifier = Modifier.height(12.dp))
                             OutlinedTextField(
                                 value = phoneInput,

@@ -12,7 +12,6 @@ import com.example.ui.util.AppFormatters
 import com.example.ui.util.ValidationUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
@@ -84,10 +83,6 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
 
     fun toggleDarkMode() {
         _isDarkMode.value = !_isDarkMode.value
-    }
-
-    fun setDarkMode(enabled: Boolean) {
-        _isDarkMode.value = enabled
     }
 
     // Admin Customization State
@@ -404,32 +399,10 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun loginBarberByCredentials(identifier: String, pinOrPass: String, callback: (Boolean, String?) -> Unit) {
-        val cleanId = identifier.trim().lowercase()
-        if (cleanId.isBlank() || pinOrPass.isBlank()) {
-            callback(false, "Ingresa tu correo y tu contraseña de barbero.")
-            return
-        }
-        viewModelScope.launch {
-            val hash = hashPassword(pinOrPass.trim())
-            val profile = try { SupabaseManager.loginStaff(cleanId, hash) } catch (e: Exception) { null }
-            val barberId = profile?.get("barber_id")?.toString()?.trim('"')?.toIntOrNull()
-            val barbers = allBarbersFlow.value.ifEmpty { repository.getAllBarbers() }
-            val matchedBarber = barbers.firstOrNull { it.id == barberId }
-            if (profile == null || matchedBarber == null) {
-                callback(false, "Correo o contraseña incorrectos, o la cuenta no es de barbero.")
-                return@launch
-            }
-            startBarberSession(matchedBarber, profile, hash)
-            callback(true, null)
-        }
-    }
-
     fun register(
         fullName: String,
         email: String,
         phone: String,
-        rut: String,
         password: String,
         avatarUrl: String = "",
         callback: (Boolean, String?) -> Unit
@@ -437,16 +410,11 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
         val cleanName = fullName.trim()
         val cleanEmail = email.trim().lowercase()
         val cleanPhone = phone.trim()
-        val cleanRut = ValidationUtils.cleanChileanRut(rut)
         val cleanPass = password.trim()
         val cleanAvatar = avatarUrl.trim()
 
         if (cleanName.isBlank() || cleanName.length < 3) {
             callback(false, "Por favor ingresa tu nombre completo (mínimo 3 caracteres).")
-            return
-        }
-        if (!ValidationUtils.isValidChileanRut(cleanRut)) {
-            callback(false, "El RUT ingresado no es válido. Debe tener formato chileno con dígito verificador Módulo 11 (Ej: 19.342.110-3).")
             return
         }
         if (!ValidationUtils.isValidEmail(cleanEmail)) {
@@ -464,18 +432,10 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
             return
         }
 
-        val formattedRut = ValidationUtils.formatChileanRut(cleanRut)
-
         viewModelScope.launch {
             val existingByEmail = repository.getUserByEmail(cleanEmail)
             if (existingByEmail != null) {
                 callback(false, "El correo '$cleanEmail' ya se encuentra registrado. Ingresa con tu contraseña o utiliza otro correo.")
-                return@launch
-            }
-
-            val existingByRut = repository.getUserByRut(formattedRut, cleanRut)
-            if (existingByRut != null) {
-                callback(false, "El RUT '$formattedRut' ya se encuentra registrado con otra cuenta. Inicia sesión con tus credenciales.")
                 return@launch
             }
 
@@ -491,7 +451,6 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
                 fullName = cleanName,
                 email = cleanEmail,
                 phone = cleanPhone,
-                rut = formattedRut,
                 passwordHash = pHash,
                 avatarUrl = cleanAvatar
             )
@@ -500,7 +459,7 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
             _loggedInUser.value = newUser.copy(id = generatedId)
             _isAdmin.value = false
 
-            // Register the account in Supabase (usuario + cliente + consentimiento); RUT is not stored
+            // Register the account in Supabase (usuario + cliente + consentimiento)
             viewModelScope.launch {
                 SupabaseManager.syncUserToCloud(
                     email = cleanEmail,
@@ -595,152 +554,6 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
     fun logoutBarber() {
         _loggedInBarber.value = null
         _barberAccount.value = null
-    }
-
-    fun cancelAppointmentByBarber(
-        appointment: Appointment,
-        barberName: String,
-        locationName: String,
-        emergencyReason: String,
-        callback: (Boolean) -> Unit = {}
-    ) {
-        viewModelScope.launch {
-            val updated = appointment.copy(status = "Cancelada")
-            repository.updateAppointment(updated)
-
-            // Update in Supabase in background so slot is released immediately
-            viewModelScope.launch {
-                SupabaseManager.updateAppointmentStatusInCloud(updated, "Cancelada", cancelledBy = "Barbero (Emergencia)")
-            }
-
-            val clientEmail = if (appointment.customerEmail.isBlank()) "contacto@caballero.cl" else appointment.customerEmail
-            val clientName = appointment.customerName
-            val formattedPrepay = AppFormatters.formatClp(appointment.prepayAmount)
-            val reasonText = if (emergencyReason.isNotBlank()) emergencyReason else "Emergencia médica / fuerza mayor imprevista del barbero"
-
-            val emergencyHtml = """
-                <div style="font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #0d0d11; color: #fdfbf7; padding: 30px; border-radius: 12px; max-width: 600px; margin: auto; border: 1px solid #d4af37;">
-                    <div style="text-align: center; margin-bottom: 24px;">
-                        <h1 style="color: #d4af37; margin: 0; font-size: 28px; letter-spacing: 2px;">BIG BOYS</h1>
-                        <p style="color: #a1a1aa; margin: 4px 0 0 0; font-size: 12px; letter-spacing: 3px;">BARBERSHOP · CHILE</p>
-                    </div>
-                    <div style="background-color: #7f1d1d; border-left: 4px solid #ef4444; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px;">
-                        <h3 style="color: #fecaca; margin: 0; font-size: 16px;">🚨 SUSPENSIÓN DE HORA POR EMERGENCIA DE BARBERO</h3>
-                    </div>
-                    <p style="color: #d1d5db; font-size: 15px; line-height: 1.6;">
-                        Estimado/a <strong>$clientName</strong>:
-                    </p>
-                    <p style="color: #d1d5db; font-size: 14px; line-height: 1.6;">
-                        Le informamos que lamentablemente su barbero <strong>$barberName</strong> ha debido activar el protocolo de emergencia en <strong>$locationName</strong> debido a:
-                    </p>
-                    <div style="background-color: #27272a; padding: 12px 16px; border-radius: 8px; border-left: 3px solid #d4af37; margin: 12px 0;">
-                        <p style="color: #fef08a; margin: 0; font-size: 14px; font-weight: bold;">Motivo informado: $reasonText</p>
-                    </div>
-                    <p style="color: #d1d5db; font-size: 14px; line-height: 1.6;">
-                        Por esta razón su reserva para el <strong>${appointment.dateTime}</strong> ha sido suspendida.
-                    </p>
-                    <div style="background-color: #18181b; border: 1px solid #d4af37; border-radius: 10px; padding: 20px; margin: 20px 0;">
-                        <h3 style="color: #d4af37; margin-top: 0; font-size: 16px;">💳 DEVOLUCIÓN DEL 100% DE SU ABONO ($$formattedPrepay CLP)</h3>
-                        <p style="color: #d1d5db; font-size: 13px; line-height: 1.5; margin-bottom: 12px;">
-                            Para efectuar la transferencia bancaria inmediata de su abono por <strong>$$formattedPrepay CLP</strong>, responda directamente a este correo indicando sus datos bancarios:
-                        </p>
-                        <table style="width: 100%; font-size: 13px; color: #fdfbf7; border-collapse: collapse; background-color: #0d0d11; padding: 12px; border-radius: 6px;">
-                            <tr><td style="padding: 6px 10px; color: #9ca3af;">• Nombre Titular:</td><td style="padding: 6px 10px; color: #e4e4e7;">$clientName</td></tr>
-                            <tr><td style="padding: 6px 10px; color: #9ca3af;">• Banco:</td><td style="padding: 6px 10px; color: #e4e4e7;">(Banco de preferencia)</td></tr>
-                            <tr><td style="padding: 6px 10px; color: #9ca3af;">• Tipo de Cuenta:</td><td style="padding: 6px 10px; color: #e4e4e7;">(Cuenta RUT / Vista / Corriente)</td></tr>
-                            <tr><td style="padding: 6px 10px; color: #9ca3af;">• N° de Cuenta:</td><td style="padding: 6px 10px; color: #e4e4e7;">(Número de cuenta)</td></tr>
-                        </table>
-                    </div>
-                    <p style="color: #9ca3af; font-size: 12px; line-height: 1.5;">
-                        Agradecemos profundamente su comprensión y le invitamos a reagendar cuando lo estime conveniente con un descuento especial en su próxima visita.
-                    </p>
-                    <hr style="border: none; border-top: 1px solid #27272a; margin: 20px 0;" />
-                    <p style="color: #6b7280; font-size: 11px; text-align: center; margin: 0;">
-                        Barbero: $barberName · Big boys Barberías Chile 🇨🇱
-                    </p>
-                </div>
-            """.trimIndent()
-
-            if (com.example.data.mail.DirectGmailSender.senderAppPassword.isNotBlank()) {
-                viewModelScope.launch {
-                    com.example.data.mail.DirectGmailSender.sendRealEmail(
-                        recipientEmail = clientEmail,
-                        subject = "🚨 Emergencia de Barbero: Cita suspendida y devolución de abono - Big Boys",
-                        htmlBody = emergencyHtml
-                    )
-                }
-            }
-
-            addNotification(
-                title = "🚨 Cita Cancelada por Emergencia",
-                message = "Cita de las ${appointment.dateTime.substringAfter(" ")} con ${appointment.customerName} cancelada por: $reasonText. Se notificó al cliente para devolución de su abono."
-            )
-            callback(true)
-        }
-    }
-
-    fun cancelAllTodayAppointmentsByBarber(
-        barberId: Int,
-        date: String,
-        barberName: String,
-        locationName: String,
-        reason: String,
-        callback: (Int) -> Unit
-    ) {
-        viewModelScope.launch {
-            val allAppts = repository.getAllAppointments()
-            val toCancel = allAppts.filter { 
-                it.barberId == barberId && 
-                AppFormatters.isSameDay(it.dateTime, date) && 
-                (it.status == "Pendiente" || it.status == "Confirmada")
-            }
-
-            toCancel.forEach { appt ->
-                cancelAppointmentByBarber(appt, barberName, locationName, reason)
-            }
-
-            addNotification(
-                title = "⚠️ Turno Suspendido por Emergencia",
-                message = "Se cancelaron ${toCancel.size} cita(s) de hoy por fuerza mayor. Clientes notificados vía correo para devolución de abonos."
-            )
-            callback(toCancel.size)
-        }
-    }
-
-    fun completeAppointmentByBarber(appointment: Appointment) {
-        viewModelScope.launch {
-            val updated = appointment.copy(status = "Completada")
-            repository.updateAppointment(updated)
-            viewModelScope.launch {
-                SupabaseManager.updateAppointmentStatusInCloud(updated, "Completada")
-            }
-            addNotification(
-                title = "¡Cita Completada! ✨",
-                message = "Servicio con ${appointment.customerName} finalizado exitosamente."
-            )
-        }
-    }
-
-    /**
-     * Marks an appointment as No-Show (Client absence).
-     * The $3.000 CLP deposit is retained for lost barber time slot.
-     */
-    fun markAppointmentNoShow(appointment: Appointment, callback: (Boolean) -> Unit = {}) {
-        viewModelScope.launch {
-            val updated = appointment.copy(
-                status = "No-Show",
-                depositRetained = true
-            )
-            repository.updateAppointment(updated)
-            viewModelScope.launch {
-                SupabaseManager.updateAppointmentStatusInCloud(updated, "No-Show")
-            }
-            addNotification(
-                title = "🚫 Cita Marcada como No-Show",
-                message = "Cliente ${appointment.customerName} no se presentó. Abono de $3.000 retenido según política de agenda."
-            )
-            callback(true)
-        }
     }
 
     /**
@@ -907,149 +720,6 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
         _guestName.value = ""
         _guestPhone.value = ""
         _guestEmail.value = ""
-    }
-
-    // --- Make Appointment Bookings ---
-    fun confirmAndBook(onCompleted: () -> Unit) {
-        viewModelScope.launch {
-            val location = _bookingLocation.value ?: return@launch
-            val barber = _bookingBarber.value ?: return@launch
-            val date = _bookingDate.value
-            val hour = _bookingHour.value
-            val service = _bookingService.value
-            val price = _bookingPrice.value
-            val user = _loggedInUser.value
-
-            val isGuestMode = user == null
-            val clientName = if (user != null) user.fullName else _guestName.value
-            val clientPhone = if (user != null) user.phone else _guestPhone.value
-            val clientEmail = if (user != null) user.email else _guestEmail.value
-
-            val prepay = _prepaymentAmount.value // typical virtual CLP reservation prepay
-
-            val newAppointment = Appointment(
-                locationId = location.id,
-                barberId = barber.id,
-                customerName = clientName,
-                customerPhone = clientPhone,
-                customerEmail = clientEmail,
-                dateTime = "$date $hour",
-                serviceName = service,
-                servicePrice = price,
-                prepayAmount = prepay,
-                status = "Confirmada", // auto confirms post fake prepay
-                isGuest = isGuestMode,
-                userId = user?.id
-            )
-
-            val generatedId = repository.insertAppointment(newAppointment)
-            val finalAppointment = newAppointment.copy(id = generatedId)
-
-            // Publish to Supabase PostgreSQL for real-time slot locking across all devices & web
-            val cloudPublished = SupabaseManager.publishAppointmentToCloud(finalAppointment)
-
-            if (cloudPublished) {
-                addNotification(
-                    title = "¡Cita Bloqueada en la Web y App! 💈",
-                    message = "Tu reserva para el $date a las $hour con ${barber.name} en ${location.name} quedó registrada en la base de datos central de Supabase."
-                )
-            } else {
-                addNotification(
-                    title = "¡Cita Registrada!",
-                    message = "Tu reserva para el $date a las $hour con ${barber.name} en ${location.name} ha sido agendada con éxito."
-                )
-            }
-
-            // Send real booking confirmation email via Gmail SMTP
-            if (clientEmail.isBlank() || !clientEmail.contains("@")) {
-                addNotification(
-                    title = "ℹ️ Correo no registrado",
-                    message = "No se envió comprobante digital porque la reserva no tiene un correo electrónico válido."
-                )
-            } else if (com.example.data.mail.DirectGmailSender.senderAppPassword.isBlank()) {
-                addNotification(
-                    title = "⚠️ Correo no enviado (Falta Configurar)",
-                    message = "Para que los correos automáticos se envíen a $clientEmail, el Administrador debe ingresar la 'Contraseña de Aplicación' de Gmail en la pestaña '✉️ Correo Gmail Real' del Panel Admin."
-                )
-            } else {
-                val bookingHtml = """
-                    <div style="font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #0d0d11; color: #fdfbf7; padding: 30px; border-radius: 12px; max-width: 600px; margin: auto; border: 1px solid #d4af37;">
-                        <div style="text-align: center; margin-bottom: 20px;">
-                            <h1 style="color: #d4af37; margin: 0; font-size: 26px;">BIG BOYS</h1>
-                            <p style="color: #a1a1aa; margin: 2px 0 0 0; font-size: 11px; letter-spacing: 2px;">COMPROBANTE OFICIAL DE RESERVA</p>
-                        </div>
-                        <h3 style="color: #fdfbf7; margin-bottom: 8px;">¡Tu reserva ha sido confirmada, $clientName! 💈</h3>
-                        <p style="color: #d1d5db; font-size: 14px; line-height: 1.5;">
-                            Tu atención ha quedado agendada en nuestro sistema. A continuación encontrarás el detalle de tu cita:
-                        </p>
-                        <div style="background-color: #18181b; border: 1px solid #27272a; border-radius: 8px; padding: 18px; margin: 20px 0;">
-                            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                                <tr>
-                                    <td style="color: #9ca3af; padding: 6px 0;">📅 Fecha y Hora:</td>
-                                    <td style="color: #fdfbf7; font-weight: bold; text-align: right; padding: 6px 0;">$date · $hour hrs</td>
-                                </tr>
-                                <tr>
-                                    <td style="color: #9ca3af; padding: 6px 0;">📍 Sucursal:</td>
-                                    <td style="color: #fdfbf7; font-weight: bold; text-align: right; padding: 6px 0;">${location.name} (${location.address})</td>
-                                </tr>
-                                <tr>
-                                    <td style="color: #9ca3af; padding: 6px 0;">✂️ Barbero:</td>
-                                    <td style="color: #fdfbf7; font-weight: bold; text-align: right; padding: 6px 0;">${barber.name}</td>
-                                </tr>
-                                <tr>
-                                    <td style="color: #9ca3af; padding: 6px 0;">💈 Servicio:</td>
-                                    <td style="color: #fdfbf7; font-weight: bold; text-align: right; padding: 6px 0;">$service</td>
-                                </tr>
-                                <tr>
-                                    <td style="color: #9ca3af; padding: 6px 0;">💵 Total Servicio:</td>
-                                    <td style="color: #d4af37; font-weight: bold; text-align: right; padding: 6px 0;">${AppFormatters.formatClpPrice(price)}</td>
-                                </tr>
-                                <tr>
-                                    <td style="color: #9ca3af; padding: 6px 0;">🔒 Abono Anticipado:</td>
-                                    <td style="color: #10b981; font-weight: bold; text-align: right; padding: 6px 0;">${AppFormatters.formatClpPrice(prepay)} (Garantizado)</td>
-                                </tr>
-                            </table>
-                        </div>
-                        <p style="color: #9ca3af; font-size: 12px; line-height: 1.5;">
-                            Te recomendamos llegar 5 minutos antes de tu hora. ¡Te esperamos para darte el mejor corte y estilo de Santiago!
-                        </p>
-                        <hr style="border: none; border-top: 1px solid #27272a; margin: 20px 0;" />
-                        <p style="color: #6b7280; font-size: 11px; text-align: center; margin: 0;">
-                            Big boys Barberías Chile 🇨🇱 · Santiago, Chile
-                        </p>
-                    </div>
-                """.trimIndent()
-
-                viewModelScope.launch {
-                    val emailResult = com.example.data.mail.DirectGmailSender.sendRealEmail(
-                        recipientEmail = clientEmail,
-                        subject = "✂️ Big boys - Comprobante de Reserva Confirmada ($date $hour)",
-                        htmlBody = bookingHtml
-                    )
-                    if (emailResult.isSuccess) {
-                        addNotification(
-                            title = "📧 Correo Enviado con Éxito",
-                            message = "Se envió el comprobante oficial a $clientEmail"
-                        )
-                    } else {
-                        val errMsg = emailResult.exceptionOrNull()?.message ?: "Error desconocido"
-                        addNotification(
-                            title = "❌ Fallo al enviar correo",
-                            message = "No se pudo entregar a $clientEmail: $errMsg"
-                        )
-                    }
-                }
-            }
-
-            // Reset booking screen inputs
-            _bookingDate.value = ""
-            _bookingHour.value = ""
-            _guestName.value = ""
-            _guestPhone.value = ""
-            _guestEmail.value = ""
-
-            onCompleted()
-        }
     }
 
     // --- Notification Helpers ---
@@ -1276,15 +946,6 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
     }
 
     // --- Administrative Actions ---
-    fun updateAppointmentStatusAdmin(appointmentId: Int, newStatus: String) {
-        viewModelScope.launch {
-            repository.updateAppointmentStatus(appointmentId, newStatus)
-            addNotification(
-                title = "Estado Actualizado (Admin)",
-                message = "Cita #$appointmentId ha sido marcada como '$newStatus'"
-            )
-        }
-    }
 
     fun updateAppointmentAdmin(appointment: Appointment) {
         viewModelScope.launch {

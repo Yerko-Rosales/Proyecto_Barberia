@@ -12,7 +12,7 @@ import java.util.TimeZone
  * Thread-safe formatters avoiding expensive repeated allocations during UI recompositions and background flows.
  */
 object AppFormatters {
-    val CHILE_LOCALE = Locale("es", "CL")
+    val CHILE_LOCALE = Locale.forLanguageTag("es-CL")
 
     private val numberFormatThreadLocal = ThreadLocal.withInitial {
         NumberFormat.getNumberInstance(CHILE_LOCALE)
@@ -30,28 +30,12 @@ object AppFormatters {
         SimpleDateFormat("HH:mm", Locale.US)
     }
 
-    private val fullSpanishDateFormatThreadLocal = ThreadLocal.withInitial {
-        SimpleDateFormat("EEEE, d 'de' MMMM 'de' yyyy", CHILE_LOCALE)
-    }
-
-    private val monthYearFormatThreadLocal = ThreadLocal.withInitial {
-        SimpleDateFormat("MMMM yyyy", CHILE_LOCALE)
-    }
-
     /**
      * Formats an integer / long / double amount as standard Chilean Peso string without decimals.
      * Example: formatClp(12000) -> "12.000"
      */
     fun formatClp(amount: Number): String {
         return numberFormatThreadLocal.get()?.format(amount) ?: amount.toString()
-    }
-
-    /**
-     * Formats an amount with full currency label.
-     * Example: formatClpPrice(12000) -> "$12.000 CLP"
-     */
-    fun formatClpPrice(amount: Number): String {
-        return "$${formatClp(amount)} CLP"
     }
 
     /**
@@ -73,27 +57,6 @@ object AppFormatters {
      */
     fun currentTimeString(): String {
         return timeFormatThreadLocal.get()?.format(Date()) ?: ""
-    }
-
-    /**
-     * Formats a date string (dd-MM-yyyy) into full human-friendly Spanish.
-     */
-    fun formatSpanishFullDate(dateString: String): String {
-        return try {
-            val date = dateFormatThreadLocal.get()?.parse(dateString) ?: return dateString
-            val formatted = fullSpanishDateFormatThreadLocal.get()?.format(date) ?: dateString
-            formatted.replaceFirstChar { if (it.isLowerCase()) it.titlecase(CHILE_LOCALE) else it.toString() }
-        } catch (e: Exception) {
-            dateString
-        }
-    }
-
-    /**
-     * Formats month and year for calendar header.
-     */
-    fun formatMonthYear(date: Date): String {
-        val formatted = monthYearFormatThreadLocal.get()?.format(date) ?: ""
-        return formatted.replaceFirstChar { if (it.isLowerCase()) it.titlecase(CHILE_LOCALE) else it.toString() }
     }
 
     /**

@@ -19,6 +19,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.EventNote
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.automirrored.outlined.Login
+import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -26,14 +36,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -59,8 +67,9 @@ import coil.request.ImageRequest
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.core.net.toUri
 
-private val chileLocale = Locale("es", "CL")
+private val chileLocale = Locale.forLanguageTag("es-CL")
 private val clpFormatter: ThreadLocal<NumberFormat> = ThreadLocal.withInitial {
     NumberFormat.getNumberInstance(chileLocale)
 }
@@ -450,7 +459,7 @@ fun MainAppScreen(
                                     Text("Limpiar", color = GoldPrimary, fontSize = 12.sp)
                                 }
                             }
-                            Divider(modifier = Modifier.padding(vertical = 8.dp), color = GoldPrimary.copy(alpha = 0.3f))
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = GoldPrimary.copy(alpha = 0.3f))
 
                             if (notifications.isEmpty()) {
                                 Spacer(modifier = Modifier.height(16.dp))
@@ -789,14 +798,14 @@ fun UserStatusChip(
                     },
                     leadingIcon = { Icon(Icons.Outlined.ManageAccounts, null, tint = MaterialTheme.colorScheme.primary) }
                 )
-                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                 DropdownMenuItem(
                     text = { Text("Cerrar Sesión", color = RedCancel) },
                     onClick = {
                         showMenu = false
                         onLogout()
                     },
-                    leadingIcon = { Icon(Icons.Outlined.Logout, null, tint = RedCancel) }
+                    leadingIcon = { Icon(Icons.AutoMirrored.Outlined.Logout, null, tint = RedCancel) }
                 )
             } else {
                 DropdownMenuItem(
@@ -805,7 +814,7 @@ fun UserStatusChip(
                         showMenu = false
                         onLogout()
                     },
-                    leadingIcon = { Icon(Icons.Outlined.Login, null, tint = MaterialTheme.colorScheme.primary) }
+                    leadingIcon = { Icon(Icons.AutoMirrored.Outlined.Login, null, tint = MaterialTheme.colorScheme.primary) }
                 )
             }
         }
@@ -966,7 +975,7 @@ fun HomeScreen(
                         }
 
                         Spacer(modifier = Modifier.height(12.dp))
-                        Divider(color = GoldPrimary.copy(alpha = 0.1f))
+                        HorizontalDivider(color = GoldPrimary.copy(alpha = 0.1f))
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Row(
@@ -1255,7 +1264,7 @@ fun AppointmentRowItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                    Icon(Icons.Filled.ReceiptLong, null, tint = GoldPrimary, modifier = Modifier.size(16.dp))
+                    Icon(Icons.AutoMirrored.Filled.ReceiptLong, null, tint = GoldPrimary, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(appt.serviceName, fontWeight = FontWeight.Bold, color = TextIvory, fontSize = 14.sp)
                 }
@@ -1873,7 +1882,7 @@ fun BarberDetailsDialog(
                     modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
                 )
 
-                Divider(color = GoldPrimary.copy(alpha = 0.2f), modifier = Modifier.padding(bottom = 12.dp))
+                HorizontalDivider(color = GoldPrimary.copy(alpha = 0.2f), modifier = Modifier.padding(bottom = 12.dp))
 
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -2223,7 +2232,7 @@ fun HistoryScreen(
                                 Text("Perfil", fontSize = 11.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                             }
                         }
-                        Divider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                         Text("📞 Contacto: ${user.phone.ifBlank { "Sin número registrado" }}", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
                         Text("✉️ Correo: ${user.email}", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
                         Spacer(modifier = Modifier.height(4.dp))
@@ -2346,7 +2355,7 @@ fun HistoryScreen(
                             }
 
                             Spacer(modifier = Modifier.height(10.dp))
-                            Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
                             Spacer(modifier = Modifier.height(8.dp))
 
                             // Review Section for completed appointments
@@ -2909,7 +2918,7 @@ fun BookingWizardDialog(
                                         Column(modifier = Modifier.padding(14.dp)) {
                                             Row(verticalAlignment = Alignment.CenterVertically) {
                                                 Icon(
-                                                    imageVector = Icons.Filled.List,
+                                                    imageVector = Icons.AutoMirrored.Filled.List,
                                                     contentDescription = "Resumen",
                                                     tint = GoldAccent,
                                                     modifier = Modifier.size(18.dp)
@@ -3122,7 +3131,6 @@ fun AdminDashboardScreen(
     val allBarbers by viewModel.allBarbersFlow.collectAsState()
     val gmailPass by viewModel.gmailAppPassword.collectAsState()
 
-    val totalAppointmentsCount = remember(allAppointments) { allAppointments.size }
     val pendingOrConfirmedCount = remember(allAppointments) {
         allAppointments.count { it.status == "Confirmada" || it.status == "Pendiente" }
     }
@@ -3150,7 +3158,7 @@ fun AdminDashboardScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            Icons.Filled.Logout,
+                            Icons.AutoMirrored.Filled.Logout,
                             contentDescription = "Cerrar sesión",
                             tint = RedCancel,
                             modifier = Modifier.size(26.dp)
@@ -3286,7 +3294,7 @@ fun AdminDashboardScreen(
                             .padding(end = 8.dp)
                     ) {
                         Icon(
-                            Icons.Filled.Logout,
+                            Icons.AutoMirrored.Filled.Logout,
                             contentDescription = "Cerrar sesión",
                             tint = RedCancel,
                             modifier = Modifier.size(16.dp)
@@ -3379,7 +3387,7 @@ fun AdminDashboardScreen(
                 SubTabChip("Mi Perfil & PIN", adminSubTab == "perfil") { adminSubTab = "perfil" }
             }
 
-            Divider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), modifier = Modifier.padding(bottom = 8.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), modifier = Modifier.padding(bottom = 8.dp))
 
             Box(modifier = Modifier.weight(1f)) {
                 when (adminSubTab) {
@@ -3566,7 +3574,7 @@ fun BigBoysDonutPieChart(
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
-                Divider(color = GoldPrimary.copy(alpha = 0.15f))
+                HorizontalDivider(color = GoldPrimary.copy(alpha = 0.15f))
                 Spacer(modifier = Modifier.height(10.dp))
 
                 // Breakdown Legend Cards
@@ -3765,7 +3773,7 @@ fun SalesReportsView(
                                 .background(GoldPrimary, CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Filled.EventNote, null, tint = DarkBackground, modifier = Modifier.size(22.dp))
+                            Icon(Icons.AutoMirrored.Filled.EventNote, null, tint = DarkBackground, modifier = Modifier.size(22.dp))
                         }
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
@@ -4044,35 +4052,6 @@ fun SalesReportsView(
     }
 }
 
-@Composable
-fun PerformanceBarRow(title: String, sales: Double, totalSales: Double) {
-    val percentage = if (totalSales > 0f) (sales / totalSales).toFloat() else 0f
-
-    Column {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(title, color = TextIvory, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-            Text("$${formatClp(sales)} CLP", color = GoldAccent, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(10.dp)
-                .background(DarkBackground, RoundedCornerShape(4.dp))
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth((if (percentage > 0.1f) percentage else 0.1f).coerceIn(0f, 1f))
-                    .background(GoldPrimary, RoundedCornerShape(4.dp))
-            )
-        }
-    }
-}
-
 // 2. Manage Appointments view with Direct Editing & Filtering
 // 2. Manage Appointments view with Direct Editing, Filtering, Monthly Calendar, Chronological Sorting, KPIs & Table/Cards Switch
 @Composable
@@ -4209,7 +4188,7 @@ fun AppointmentsManagerView(viewModel: BarberiaViewModel) {
                                 Text(locationName, fontSize = 12.sp, color = TextIvory)
                             }
                             if (apptToCancel.prepayAmount > 0) {
-                                Divider(color = Color(0xFF334155), modifier = Modifier.padding(vertical = 2.dp))
+                                HorizontalDivider(color = Color(0xFF334155), modifier = Modifier.padding(vertical = 2.dp))
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
@@ -4299,7 +4278,7 @@ fun AppointmentsManagerView(viewModel: BarberiaViewModel) {
             ) {
                 Column(modifier = Modifier.padding(10.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Filled.EventNote, null, tint = GoldPrimary, modifier = Modifier.size(16.dp))
+                        Icon(Icons.AutoMirrored.Filled.EventNote, null, tint = GoldPrimary, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("Agendamientos", fontSize = 10.sp, color = TextMuted, maxLines = 1)
                     }
@@ -4611,7 +4590,7 @@ fun AppointmentsManagerView(viewModel: BarberiaViewModel) {
                             }
                         }
                         val monthName = remember(cal) {
-                            SimpleDateFormat("MMMM yyyy", Locale("es", "CL")).format(cal.time).replaceFirstChar { it.uppercase() }
+                            SimpleDateFormat("MMMM yyyy", Locale.forLanguageTag("es-CL")).format(cal.time).replaceFirstChar { it.uppercase() }
                         }
                         val daysInMonth = remember(cal) { cal.getActualMaximum(Calendar.DAY_OF_MONTH) }
                         val firstDayOfWeek = remember(cal) {
@@ -4756,7 +4735,7 @@ fun AppointmentsManagerView(viewModel: BarberiaViewModel) {
                         Text("ACCIONES", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = GoldAccent, modifier = Modifier.weight(1.1f), textAlign = TextAlign.End)
                     }
 
-                    Divider(color = GoldPrimary.copy(alpha = 0.2f), modifier = Modifier.padding(vertical = 4.dp))
+                    HorizontalDivider(color = GoldPrimary.copy(alpha = 0.2f), modifier = Modifier.padding(vertical = 4.dp))
 
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
@@ -4940,7 +4919,7 @@ fun AppointmentsManagerView(viewModel: BarberiaViewModel) {
                                 }
                             }
 
-                            Divider(modifier = Modifier.padding(vertical = 10.dp), color = GoldPrimary.copy(alpha = 0.12f))
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp), color = GoldPrimary.copy(alpha = 0.12f))
 
                             // Appointment Details Grid
                             Row(
@@ -5040,7 +5019,6 @@ fun ClientsManagerView(viewModel: BarberiaViewModel) {
             users.filter {
                 it.fullName.contains(searchQuery, ignoreCase = true) ||
                 it.email.contains(searchQuery, ignoreCase = true) ||
-                it.rut.contains(searchQuery, ignoreCase = true) ||
                 it.phone.contains(searchQuery, ignoreCase = true)
             }
         }
@@ -5081,7 +5059,7 @@ fun ClientsManagerView(viewModel: BarberiaViewModel) {
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
-                        placeholder = { Text("Buscar cliente por nombre, RUT, email o teléfono...", fontSize = 12.sp) },
+                        placeholder = { Text("Buscar cliente por nombre, email o teléfono...", fontSize = 12.sp) },
                         leadingIcon = { Icon(Icons.Filled.Search, null, tint = GoldPrimary, modifier = Modifier.size(18.dp)) },
                         trailingIcon = {
                             if (searchQuery.isNotEmpty()) {
@@ -5148,9 +5126,6 @@ fun ClientsManagerView(viewModel: BarberiaViewModel) {
                                 modifier = Modifier.padding(top = 2.dp),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                if (user.rut.isNotBlank()) {
-                                    Text("RUT: ${user.rut}", color = GoldPrimary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
-                                }
                                 if (user.phone.isNotBlank()) {
                                     Text("📞 ${user.phone}", color = TextMuted, fontSize = 11.sp)
                                 }
@@ -5171,107 +5146,6 @@ fun ClientsManagerView(viewModel: BarberiaViewModel) {
     }
 }
 // 4. Add new barber view
-@Composable
-fun AddNewBarberView(viewModel: BarberiaViewModel) {
-    val locations by viewModel.locationsFlow.collectAsState()
-
-    var bName by remember { mutableStateOf("") }
-    var bSpecialty by remember { mutableStateOf("") }
-    var bHours by remember { mutableStateOf("09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00") }
-    var bLocationId by remember { mutableIntStateOf(1) }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = CardBackground),
-        border = BorderStroke(1.dp, GoldPrimary.copy(alpha = 0.2f))
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Text("Ingresar Nuevo Barbero al Equipo", fontWeight = FontWeight.Bold, color = GoldAccent, fontSize = 14.sp)
-            Spacer(modifier = Modifier.height(10.dp))
-
-            OutlinedTextField(
-                value = bName,
-                onValueChange = { bName = it },
-                label = { Text("Nombre del Barbero") },
-                colors = TextFieldDefaults.colors(focusedIndicatorColor = GoldPrimary, focusedContainerColor = DarkBackground),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("admin_add_barber_name")
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = bSpecialty,
-                onValueChange = { bSpecialty = it },
-                label = { Text("Especialidad (Ej: Experto en Degradados)") },
-                colors = TextFieldDefaults.colors(focusedIndicatorColor = GoldPrimary, focusedContainerColor = DarkBackground),
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text("Asignar Sucursal de Trabajo:", fontSize = 11.sp, color = GoldAccent)
-            locations.forEach { loc ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { bLocationId = loc.id }
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    RadioButton(
-                        selected = bLocationId == loc.id,
-                        onClick = { bLocationId = loc.id },
-                        colors = RadioButtonDefaults.colors(selectedColor = GoldPrimary)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(loc.name, fontSize = 13.sp, color = TextIvory)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = bHours,
-                onValueChange = { bHours = it },
-                label = { Text("Horarios Disponibles (Separados por coma)") },
-                colors = TextFieldDefaults.colors(focusedIndicatorColor = GoldPrimary, focusedContainerColor = DarkBackground),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    if (bName.isNotBlank() && bSpecialty.isNotBlank()) {
-                        viewModel.addBarberAdmin(
-                            name = bName,
-                            locationId = bLocationId,
-                            specialty = bSpecialty,
-                            initialHours = bHours
-                        ) {
-                            bName = ""
-                            bSpecialty = ""
-                            bLocationId = 1
-                        }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .testTag("admin_add_barber_submit"),
-                colors = ButtonDefaults.buttonColors(containerColor = GoldPrimary)
-            ) {
-                Text("CONTRATAR BARBERO 💈", color = DarkBackground, fontWeight = FontWeight.Bold)
-            }
-        }
-    }
-}
 
 @Composable
 fun ManualAppointmentWalkInView(viewModel: BarberiaViewModel) {
@@ -5683,7 +5557,7 @@ fun BarberManagerView(viewModel: BarberiaViewModel) {
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))
-                            Divider(color = Color(0xFF27272A))
+                            HorizontalDivider(color = Color(0xFF27272A))
                             Spacer(modifier = Modifier.height(6.dp))
 
                             Row(
@@ -5776,7 +5650,7 @@ fun BarberManagerView(viewModel: BarberiaViewModel) {
                             Icon(Icons.Filled.Close, null, tint = TextMuted)
                         }
                     }
-                    Divider(modifier = Modifier.padding(vertical = 8.dp), color = GoldPrimary.copy(alpha = 0.3f))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = GoldPrimary.copy(alpha = 0.3f))
 
                     // Sucursal Assignment (MANDATORY SELECTION)
                     Text(
@@ -5979,7 +5853,7 @@ fun BarberManagerView(viewModel: BarberiaViewModel) {
                             Icon(Icons.Filled.Close, null, tint = TextMuted)
                         }
                     }
-                    Divider(modifier = Modifier.padding(vertical = 8.dp), color = GoldPrimary.copy(alpha = 0.2f))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = GoldPrimary.copy(alpha = 0.2f))
 
                     // Sucursal Reassignment
                     Text("Sucursal Asignada:", fontSize = 12.sp, color = GoldAccent, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.Start))
@@ -6692,7 +6566,7 @@ fun DataSincView(viewModel: BarberiaViewModel) {
                 Text("Descargar Planilla Excel de Movimientos", color = DarkBackground, fontWeight = FontWeight.Bold, fontSize = 12.sp)
             }
 
-            Divider(color = GoldPrimary.copy(alpha = 0.1f), modifier = Modifier.padding(vertical = 12.dp))
+            HorizontalDivider(color = GoldPrimary.copy(alpha = 0.1f), modifier = Modifier.padding(vertical = 12.dp))
             Text("📂 BASE DE DATOS Y ENLACE EXCEL RÁPIDO", fontSize = 11.sp, color = GoldPrimary, fontWeight = FontWeight.Bold)
             Text("Descarga el listado de clientes en formato Excel o copia y pega filas directamente de tu Excel o Google Sheets.", fontSize = 10.sp, color = TextMuted)
 
@@ -6896,7 +6770,7 @@ fun GmailSenderConfigView(viewModel: BarberiaViewModel) {
                     OutlinedButton(
                         onClick = {
                             try {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://myaccount.google.com/apppasswords"))
+                                val intent = Intent(Intent.ACTION_VIEW, "https://myaccount.google.com/apppasswords".toUri())
                                 context.startActivity(intent)
                             } catch (e: Exception) {
                                 // fallback
@@ -6909,7 +6783,7 @@ fun GmailSenderConfigView(viewModel: BarberiaViewModel) {
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(Icons.Filled.OpenInNew, null, modifier = Modifier.size(16.dp))
+                        Icon(Icons.AutoMirrored.Filled.OpenInNew, null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             "Abrir 'Contraseñas de Aplicaciones' de Google ↗️",
@@ -6977,7 +6851,7 @@ fun GmailSenderConfigView(viewModel: BarberiaViewModel) {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
             Spacer(modifier = Modifier.height(14.dp))
 
             Text(
@@ -6999,7 +6873,7 @@ fun GmailSenderConfigView(viewModel: BarberiaViewModel) {
                 onValueChange = { testRecipientInput = it },
                 label = { Text("Enviar correo de prueba a...") },
                 placeholder = { Text("tu.correo.personal@gmail.com") },
-                leadingIcon = { Icon(Icons.Outlined.Send, null, tint = MaterialTheme.colorScheme.primary) },
+                leadingIcon = { Icon(Icons.AutoMirrored.Outlined.Send, null, tint = MaterialTheme.colorScheme.primary) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -7029,7 +6903,7 @@ fun GmailSenderConfigView(viewModel: BarberiaViewModel) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Enviando Correo Real...", fontSize = 12.sp)
                 } else {
-                    Icon(Icons.Filled.Send, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+                    Icon(Icons.AutoMirrored.Filled.Send, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
                     Spacer(modifier = Modifier.width(6.dp))
                     Text("Enviar Correo de Prueba Real 🚀", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
@@ -7466,7 +7340,6 @@ fun LoginRegisterScreen(
 
     // Register form state
     var userFullnameInput by remember { mutableStateOf("") }
-    var userRutInput by remember { mutableStateOf("") }
     var userPhoneInput by remember { mutableStateOf("") }
     var userEmailRegisterInput by remember { mutableStateOf("") }
     var userPasswordRegisterInput by remember { mutableStateOf("") }
@@ -7494,7 +7367,6 @@ fun LoginRegisterScreen(
     var pinError by remember { mutableStateOf(false) }
 
     // Security and identity validation calculations for registration
-    val isRutValid = ValidationUtils.isValidChileanRut(userRutInput)
     val isEmailValid = ValidationUtils.isValidEmail(userEmailRegisterInput)
     val hasMinLength = userPasswordRegisterInput.length >= 6
     val hasLetter = userPasswordRegisterInput.any { it.isLetter() }
@@ -7873,48 +7745,6 @@ fun LoginRegisterScreen(
 
                 item {
                     OutlinedTextField(
-                        value = userRutInput,
-                        onValueChange = { input ->
-                            // Allow digits, k, K, dots, hyphens and spaces
-                            val filtered = input.filter { it.isDigit() || it == 'k' || it == 'K' || it == '-' || it == '.' || it == ' ' }
-                            userRutInput = filtered
-                            registerErrorMessage = null
-                        },
-                        label = { Text("RUT Chileno (Ej: 19.342.110-3)") },
-                        leadingIcon = { Icon(Icons.Filled.Badge, null, tint = GoldPrimary) },
-                        trailingIcon = {
-                            if (userRutInput.isNotBlank()) {
-                                Icon(
-                                    imageVector = if (isRutValid) Icons.Filled.CheckCircle else Icons.Filled.Cancel,
-                                    contentDescription = if (isRutValid) "RUT Válido" else "RUT Inválido",
-                                    tint = if (isRutValid) GreenConfirm else RedCancel
-                                )
-                            }
-                        },
-                        supportingText = {
-                            if (userRutInput.isNotBlank()) {
-                                if (isRutValid) {
-                                    Text("✓ RUT válido (Módulo 11: ${ValidationUtils.formatChileanRut(userRutInput)})", color = GreenConfirm, fontSize = 11.sp)
-                                } else {
-                                    Text("✕ RUT inválido (debe cumplir Módulo 11, ej: 19.342.110-3)", color = RedCancel, fontSize = 11.sp)
-                                }
-                            } else {
-                                Text("Requerido para verificación de cliente y reservas", color = TextMuted, fontSize = 11.sp)
-                            }
-                        },
-                        colors = TextFieldDefaults.colors(
-                            focusedIndicatorColor = if (userRutInput.isNotBlank() && !isRutValid) RedCancel else GoldPrimary,
-                            focusedContainerColor = CardBackground,
-                            unfocusedContainerColor = CardBackground
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("register_rut")
-                    )
-                }
-
-                item {
-                    OutlinedTextField(
                         value = userEmailRegisterInput,
                         onValueChange = { 
                             userEmailRegisterInput = it
@@ -8025,7 +7855,7 @@ fun LoginRegisterScreen(
 
                 // Identity & Security Requirements Checklist Box
                 item {
-                    val allRequirementsMet = isRutValid && isEmailValid && isPasswordValid
+                    val allRequirementsMet = isEmailValid && isPasswordValid
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = CardBackground),
@@ -8043,10 +7873,6 @@ fun LoginRegisterScreen(
                                 )
                             }
 
-                            SecurityRequirementRow(
-                                title = "RUT chileno válido (Módulo 11)",
-                                isMet = isRutValid
-                            )
                             SecurityRequirementRow(
                                 title = "Correo electrónico válido y único",
                                 isMet = isEmailValid
@@ -8097,14 +7923,6 @@ fun LoginRegisterScreen(
                                 registerErrorMessage = "Por favor ingresa tu nombre completo (mínimo 3 caracteres)"
                                 return@Button
                             }
-                            if (userRutInput.isBlank()) {
-                                registerErrorMessage = "Por favor ingresa tu RUT chileno"
-                                return@Button
-                            }
-                            if (!isRutValid) {
-                                registerErrorMessage = "El RUT ingresado no es válido (debe cumplir verificación Módulo 11, ej: 19.342.110-3)"
-                                return@Button
-                            }
                             if (userEmailRegisterInput.isBlank()) {
                                 registerErrorMessage = "Por favor ingresa tu correo electrónico"
                                 return@Button
@@ -8140,7 +7958,6 @@ fun LoginRegisterScreen(
                                 fullName = userFullnameInput,
                                 email = userEmailRegisterInput,
                                 phone = userPhoneInput,
-                                rut = userRutInput,
                                 password = userPasswordRegisterInput,
                                 avatarUrl = userAvatarUri ?: ""
                             ) { success, errorMsg ->
@@ -8373,7 +8190,7 @@ fun LoginRegisterScreen(
                             CircularProgressIndicator(modifier = Modifier.size(20.dp), color = DarkBackground, strokeWidth = 2.dp)
                         } else {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Filled.Login, null, tint = DarkBackground, modifier = Modifier.size(18.dp))
+                                Icon(Icons.AutoMirrored.Filled.Login, null, tint = DarkBackground, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("INICIAR SESIÓN", color = DarkBackground, fontWeight = FontWeight.Bold)
                             }
@@ -8421,7 +8238,7 @@ fun LoginRegisterScreen(
             }
 
             item {
-                Divider(color = GoldPrimary.copy(alpha = 0.2f), modifier = Modifier.padding(vertical = 12.dp))
+                HorizontalDivider(color = GoldPrimary.copy(alpha = 0.2f), modifier = Modifier.padding(vertical = 12.dp))
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = CardBackground),
@@ -8763,7 +8580,7 @@ fun ModifyAppointmentDialog(
                         Icon(Icons.Filled.Close, null, tint = TextMuted)
                     }
                 }
-                Divider(modifier = Modifier.padding(vertical = 10.dp), color = GoldPrimary.copy(alpha = 0.2f))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp), color = GoldPrimary.copy(alpha = 0.2f))
 
                 // Customer Fields
                 OutlinedTextField(
