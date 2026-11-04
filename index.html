@@ -44,10 +44,6 @@
     }
   </script>
 
-  <!-- Leaflet CSS & JS para Mapa Interactivo de Sucursales -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-
   <!-- React 18, ReactDOM 18 & Babel Standalone (Redes CDN de Alta Disponibilidad) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -229,27 +225,6 @@
     body.light-mode .from-amber-950.via-zinc-900.to-amber-950 .text-\[\#FFD700\] {
       color: #92400E !important;
     }
-    .leaflet-tile-pane {
-      filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(92%);
-    }
-    body.light-mode .leaflet-tile-pane,
-    html.light-mode .leaflet-tile-pane {
-      filter: none !important;
-    }
-    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-      background: #1E1E1E !important;
-      color: #F4F4F5 !important;
-      border: 1.5px solid rgba(255, 215, 0, 0.5) !important;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
-      border-radius: 14px !important;
-    }
-    body.light-mode .leaflet-popup-content-wrapper,
-    body.light-mode .leaflet-popup-tip {
-      background: #FFFFFF !important;
-      color: #18181B !important;
-      border: 1.5px solid #FFD700 !important;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
-    }
   </style>
 </head>
 <body class="bg-[#121212] text-zinc-100 min-h-screen">
@@ -277,7 +252,7 @@
 
   <!-- APLICACIÓN REACT AUTO-CONTENIDA (COMPATIBLE DIRECTA CON DOBLE CLIC Y SERVIDOR LOCAL) -->
   <script type="text/babel">
-    const { useState, useEffect, useMemo, useRef } = React;
+    const { useState, useEffect, useMemo } = React;
 
     // ==========================================
     // CONFIGURACIÓN OFICIAL SUPABASE (POSTGRESQL RELACIONAL)
@@ -315,48 +290,6 @@
     // 1. UTILITARIOS DE VALIDACIÓN Y FORMATEO
     // ==========================================
     const ValidationUtils = {
-      cleanChileanRut(rawRut) {
-        if (!rawRut) return '';
-        return rawRut.toString().toUpperCase().replace(/\./g, '').replace(/-/g, '').replace(/\s+/g, '').trim();
-      },
-
-      isValidChileanRut(rawRut) {
-        const clean = this.cleanChileanRut(rawRut);
-        if (clean.length < 8 || clean.length > 9) return false;
-
-        const body = clean.slice(0, -1);
-        const dv = clean.slice(-1);
-
-        if (!/^\d+$/.test(body)) return false;
-        if (!/^[\dK]$/.test(dv)) return false;
-
-        let sum = 0;
-        let multiplier = 2;
-        for (let i = body.length - 1; i >= 0; i--) {
-          sum += parseInt(body[i], 10) * multiplier;
-          multiplier = multiplier >= 7 ? 2 : multiplier + 1;
-        }
-
-        const remainder = sum % 11;
-        const calculatedDvValue = 11 - remainder;
-
-        let expectedDv = '0';
-        if (calculatedDvValue === 11) expectedDv = '0';
-        else if (calculatedDvValue === 10) expectedDv = 'K';
-        else expectedDv = calculatedDvValue.toString();
-
-        return dv === expectedDv;
-      },
-
-      formatChileanRut(rawRut) {
-        const clean = this.cleanChileanRut(rawRut);
-        if (clean.length < 2) return clean;
-        const body = clean.slice(0, -1);
-        const dv = clean.slice(-1);
-        const formattedBody = new Intl.NumberFormat('es-CL').format(parseInt(body, 10));
-        return `${formattedBody}-${dv}`;
-      },
-
       isValidEmail(email) {
         if (!email) return false;
         const clean = email.trim();
@@ -696,18 +629,6 @@
       }
     ];
 
-    const CHILEAN_BANKS = [
-      { name: 'BancoEstado', color: '#003366', factorName: 'BE Pass / Clave de Transferencias' },
-      { name: 'Banco de Chile / Edwards', color: '#0E1E38', factorName: 'Dispositivo Mi Pass / Digipass' },
-      { name: 'Santander Chile', color: '#CC0000', factorName: 'SuperClave Dinámica Santander' },
-      { name: 'BCI / TBanc', color: '#1E351A', factorName: 'BCI Pass / Clave Internet' },
-      { name: 'Itaú Corpbanca', color: '#EC7000', factorName: 'Itaú Pass SMS' },
-      { name: 'Banco Falabella', color: '#6A9E19', factorName: 'Clave Dinámica Falabella' },
-      { name: 'Scotiabank Chile', color: '#E51D24', factorName: 'KeyPass Scotiabank' },
-      { name: 'Banco BICE', color: '#121824', factorName: 'BICE Pass' },
-      { name: 'Coopeuch', color: '#007FA3', factorName: 'Clave Digital Coopeuch' }
-    ];
-
     const QUICK_TAGS = [
       'Puntualidad 10/10',
       'Corte Impecable',
@@ -761,7 +682,6 @@
             fullName: 'Usuario de Prueba Big Boys',
             email: 'test@bigboys.cl',
             phone: '+56 9 8765 4321',
-            rut: '19.342.110-3',
             password: '123',
             createdAt: '01-09-2026 10:00'
           });
@@ -778,7 +698,6 @@
             userEmail: 'test@bigboys.cl',
             userName: 'Usuario de Prueba Big Boys',
             userPhone: '+56 9 8765 4321',
-            userRut: '19.342.110-3',
             benefit: '1x Perfilado de Cejas Profesional Gratis',
             isRedeemed: false,
             issuedAt: '01-09-2026 10:00'
@@ -999,40 +918,6 @@
         this.notify();
       }
 
-      async publishAppointmentToCloud(appointment) {
-        const sb = this.getCloudClient();
-        if (!sb) return false;
-        try {
-          // Una atención presencial sin abono se registra con canal LOCAL
-          const isWalkIn = Number(appointment.prepayAmount) === 0 && appointment.status === 'Completada';
-          const { data, error } = await sb.rpc('api_crear_reserva', {
-            p: {
-              id: Number(appointment.id) || Date.now(),
-              canal: isWalkIn ? 'LOCAL' : 'WEB',
-              barber_id: Number(appointment.barberId) || 1,
-              location_id: Number(appointment.locationId) || 1,
-              service_name: appointment.serviceName || 'Corte',
-              date_time: appointment.dateTime || '',
-              status: appointment.status || 'Confirmada',
-              customer_name: appointment.customerName || '',
-              customer_phone: appointment.customerPhone || '',
-              customer_email: appointment.customerEmail || ''
-            },
-            // Sin cuenta del personal la base solo acepta reservas pendientes de pago (Webpay)
-            ...this.getCloudCredentials()
-          });
-          if (error) {
-            console.warn('Aviso publicando en Supabase:', error.message);
-            return false;
-          }
-          console.log('✓ Reserva guardada en Supabase (tabla reserva):', data && data.codigo);
-          return true;
-        } catch (e) {
-          console.warn('Error publicando en Supabase:', e);
-          return false;
-        }
-      }
-
       async updateAppointmentStatusInCloud(appointment, newStatus) {
         const sb = this.getCloudClient();
         if (!sb || !appointment) return false;
@@ -1207,14 +1092,13 @@
       }
 
       // 1. Correo Automático: Registro Exitoso & Regalo de Bienvenida
-      sendWelcomeEmail(cleanName, cleanEmail, cleanPhone, cleanRut, couponPin) {
+      sendWelcomeEmail(cleanName, cleanEmail, cleanPhone, couponPin) {
         const fromEmail = this.getGmailConfig().senderEmail || 'bigboysbarberia.chile@gmail.com';
         const subject = `💈 ¡Bienvenido al Club Big Boys! Tu Regalo de Bienvenida (PIN: ${couponPin})`;
         const body = `¡Hola ${cleanName}!\n\n` +
           `Te damos la más cordial bienvenida al Club Oficial de Big Boys Barberías Chile.\n\n` +
           `Tu cuenta de socio ha sido registrada exitosamente con los siguientes datos:\n` +
           `• Nombre: ${cleanName}\n` +
-          `• RUT: ${cleanRut || 'Registrado'}\n` +
           `• Teléfono: ${cleanPhone}\n` +
           `• Correo: ${cleanEmail}\n\n` +
           `🎁 REGALO EXCLUSIVO DE BIENVENIDA:\n` +
@@ -1243,61 +1127,6 @@
 
         // Despacho real automático vía Gmail SMTP / Supabase PostgreSQL
         this.sendRealEmail({ to: cleanEmail, subject, body });
-      }
-
-      // 2. Correo Automático: Confirmación de Cita & Comprobante de Abono Webpay
-      sendBookingConfirmationEmail(appt, bName, locName) {
-        if (!appt || !appt.customerEmail) return;
-        const fromEmail = this.getGmailConfig().senderEmail || 'bigboysbarberia.chile@gmail.com';
-        const prepay = Number(appt.prepayAmount) || 3000;
-        const saldo = Math.max(0, (appt.servicePrice || 0) - prepay);
-        const subject = `✂️ Confirmación de Cita #${appt.id} y Comprobante de Abono ($3.000) - Big Boys Barbershop`;
-        const body = `Estimado/a ${appt.customerName}:\n\n` +
-          `¡Tu reserva ha sido confirmada con éxito en Big Boys Barberías! A continuación te entregamos el comprobante y los detalles oficiales de tu atención:\n\n` +
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-          `📋 DETALLES DE LA RESERVA:\n` +
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-          `• Código de Cita: #${appt.id}\n` +
-          `• Fecha y Hora: ${AppFormatters.fecha(appt.dateTime)} hrs\n` +
-          `• Sucursal: ${locName}\n` +
-          `• Barbero Asignado: ${bName}\n` +
-          `• Servicio Reservado: ${appt.serviceName}\n` +
-          `• Tipo de Cliente: ${appt.isGuest ? 'Invitado' : 'Socio Registrado Big Boys'}\n\n` +
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-          `💳 DETALLE FINANCIERO Y ABONO WEBPAY:\n` +
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-          `• Total Servicio: ${AppFormatters.formatClp(appt.servicePrice)}\n` +
-          `• Abono Pagado (Webpay Plus): ${AppFormatters.formatClp(prepay)} [PAGADO ONLINE ✓]\n` +
-          `• Saldo Pendiente en Local: ${AppFormatters.formatClp(saldo)} [A PAGAR EN RECEPCIÓN]\n` +
-          `• Método de Abono: Tarjeta de Débito / Crédito vía Webpay Plus Transbank\n` +
-          `• Estado: Confirmada y Garantizada\n\n` +
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-          `⚠️ POLÍTICA DE REAGENDAMIENTO Y NO-SHOW (IMPORTANTE):\n` +
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-          `1. REAGENDAMIENTOS: Podrás reagendar tu cita únicamente con al menos 24 HORAS DE ANTICIPACIÓN al servicio para liberar la agenda del barbero. Puedes reutilizar este mismo abono de $3.000 para reagendar hasta un MÁXIMO DE 2 VECES.\n` +
-          `2. CANCELACIÓN TARDÍA / NO-SHOW: Si anulas tu atención con menos de 24 horas de anticipación o no te presentas a tu cita (no-show), PERDERÁS tu abono o bonificación de $3.000 sin derecho a reembolso ni saldo a favor.\n` +
-          `3. CANCELACIÓN OPORTUNA: Si anulas con más de 24 horas de anticipación, se gestionará la devolución íntegra del 100% de tu abono de $3.000 a tu cuenta bancaria.\n\n` +
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-          `💈 RECOMENDACIONES PARA TU ATENCIÓN:\n` +
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-          `1. Te sugerimos presentarte entre 5 y 10 minutos antes de tu hora fijada para asegurar una experiencia puntual y relajada.\n` +
-          `2. Puedes presentar este correo directamente desde tu celular al ingresar al local.\n\n` +
-          `¡Muchas gracias por confiar en Big Boys! Te esperamos para entregarte la mejor experiencia y distinción en barbería.\n\n` +
-          `Atentamente,\n` +
-          `Big Boys Barberías Chile\n` +
-          `Contacto: ${fromEmail}`;
-
-        this.logSentEmail({
-          fromEmail,
-          toEmail: appt.customerEmail,
-          toName: appt.customerName,
-          subject,
-          body,
-          status: 'Enviado con Éxito ✓'
-        });
-
-        // Despacho real automático vía Gmail SMTP / Supabase PostgreSQL
-        this.sendRealEmail({ to: appt.customerEmail, subject, body });
       }
 
       // Correo Automático: Reagendamiento Exitoso de Cita
@@ -1515,7 +1344,6 @@
               fullName: 'Usuario de Prueba Big Boys',
               email: 'test@bigboys.cl',
               phone: '+56 9 8765 4321',
-              rut: '19.342.110-3',
               password: '123',
               createdAt: '01-09-2026 10:00'
             };
@@ -1563,25 +1391,22 @@
         return { success: false, message: 'PIN de Administrador incorrecto (El PIN por defecto es 1234).' };
       }
 
-      async register({ fullName, email, phone, rut, password, avatarUrl = '' }) {
+      async register({ fullName, email, phone, password, avatarUrl = '' }) {
         const cleanName = (fullName || '').trim();
         const cleanEmail = (email || '').trim().toLowerCase();
         const cleanPhone = (phone || '').trim();
-        const cleanRut = ValidationUtils.cleanChileanRut(rut);
         const cleanPass = (password || '').trim();
 
         if (!cleanName || cleanName.length < 3) return { success: false, message: 'Ingresa tu nombre completo (mínimo 3 caracteres).' };
-        if (!ValidationUtils.isValidChileanRut(cleanRut)) return { success: false, message: 'RUT chileno inválido (fórmula Módulo 11).' };
         if (!ValidationUtils.isValidEmail(cleanEmail)) return { success: false, message: 'Ingresa un correo electrónico válido.' };
         if (!cleanPhone) return { success: false, message: 'Ingresa tu teléfono de contacto.' };
 
         const passErrors = ValidationUtils.validatePasswordRequirements(cleanPass);
         if (passErrors.length > 0) return { success: false, message: `Contraseña: ${passErrors.join(', ')}` };
 
-        const formattedRut = ValidationUtils.formatChileanRut(cleanRut);
         let users = this.getUsers();
 
-        // --- VERIFICACIÓN PREVIA EN SUPABASE (tabla usuario; el RUT no se almacena por minimización) ---
+        // --- VERIFICACIÓN PREVIA EN SUPABASE (tabla usuario) ---
         const sb = this.getCloudClient();
         if (sb) {
           try {
@@ -1608,10 +1433,6 @@
             alert("Este correo ya está registrado en la app de Big Boys. Por favor inicia sesión.");
             return { success: false, message: "Este correo ya está registrado en la app de Big Boys. Por favor inicia sesión." };
           }
-          if (users.some(u => ValidationUtils.cleanChileanRut(u.rut) === cleanRut)) {
-            alert("Este RUT ya está registrado en la app de Big Boys. Por favor inicia sesión.");
-            return { success: false, message: "Este RUT ya está registrado en la app de Big Boys. Por favor inicia sesión." };
-          }
         }
 
         const passwordHash = await ValidationUtils.hashPassword(cleanPass);
@@ -1620,7 +1441,6 @@
           fullName: cleanName,
           email: cleanEmail,
           phone: cleanPhone,
-          rut: formattedRut,
           passwordHash,
           avatarUrl: avatarUrl.trim(),
           createdAt: AppFormatters.currentDateTimeString()
@@ -1674,7 +1494,7 @@
         this.saveEmailToDatabase(cleanEmail, cleanName, cleanPhone, 'Registro Oficial', 'Cliente registrado con cuenta');
         
         // Envío Automático de Correo de Bienvenida con Regalo PIN
-        this.sendWelcomeEmail(cleanName, cleanEmail, cleanPhone, cleanRut, couponPin);
+        this.sendWelcomeEmail(cleanName, cleanEmail, cleanPhone, couponPin);
 
         this.notify();
         return { success: true, user: newUser, couponPin };
@@ -1687,26 +1507,6 @@
           sessionStorage.removeItem('bigboys_session_active');
         }
         this.notify();
-      }
-
-      // --- Métodos de Gestión y Turnos de Barberos ---
-      loginAsBarber(barberId, pin = '1234') {
-        const barbers = this.getBarbers();
-        const barber = barbers.find(b => b.id === Number(barberId));
-        if (!barber) {
-          return { success: false, message: 'Barbero no encontrado.' };
-        }
-        if (String(pin).trim() !== '1234') {
-          return { success: false, message: 'PIN de barbero incorrecto. (Predeterminado: 1234)' };
-        }
-        localStorage.setItem('bigboys_logged_barber', JSON.stringify(barber));
-        localStorage.setItem('bigboys_is_admin', 'false');
-        if (typeof sessionStorage !== 'undefined') {
-          sessionStorage.setItem('bigboys_session_active', 'true');
-        }
-        this.addNotification('Turno Iniciado 💈', `¡Bienvenido ${barber.name}! Tu agenda de hoy está sincronizada.`);
-        this.notify();
-        return { success: true, barber };
       }
 
       getLoggedInBarber() {
@@ -1954,66 +1754,6 @@
         this.notify();
       }
 
-      confirmAndBook({ locationId, barberId, serviceName, servicePrice, prepayAmount = 3000, dateTime, customerName, customerPhone, customerEmail, isGuest = false }) {
-        const appointments = this.getAppointments();
-        const user = this.getLoggedInUser();
-
-        // Normalizar formato de fecha a 'YYYY-MM-DD HH:mm'
-        const normalizedDateTime = AppFormatters.normalizeDateTimeString(dateTime);
-
-        const newAppointment = {
-          id: Date.now(),
-          locationId: Number(locationId),
-          barberId: Number(barberId),
-          serviceName,
-          servicePrice: Number(servicePrice),
-          prepayAmount: Number(prepayAmount) || 3000,
-          rescheduleCount: 0,
-          rescheduledAt: null,
-          prepayForfeited: false,
-          dateTime: normalizedDateTime,
-          customerName: user ? user.fullName : customerName,
-          customerPhone: user ? user.phone : customerPhone,
-          customerEmail: user ? user.email : customerEmail,
-          status: 'Confirmada',
-          isGuest: !user || isGuest,
-          userId: user ? user.id : null,
-          hasReview: false,
-          createdAt: AppFormatters.currentDateTimeString()
-        };
-
-        // Generar docId idéntico al estándar Android
-        const safeDateKey = normalizedDateTime.replace(/ /g, '_').replace(/:/g, '-');
-        newAppointment.docId = `loc${newAppointment.locationId}_barber${newAppointment.barberId}_${safeDateKey}`;
-
-        appointments.unshift(newAppointment);
-        localStorage.setItem('bigboys_appointments', JSON.stringify(appointments));
-
-        // Sincronizar en tiempo real con Supabase PostgreSQL
-        this.publishAppointmentToCloud(newAppointment);
-
-        const locName = this.getLocations().find(l => l.id === locationId)?.name || 'Big Boys';
-        const bName = this.getBarbers().find(b => b.id === barberId)?.name || 'Barbero';
-
-        // Guardar correo en la Base de Datos y despachar correo automático de confirmación con comprobante Webpay
-        if (newAppointment.customerEmail) {
-          this.saveEmailToDatabase(
-            newAppointment.customerEmail,
-            newAppointment.customerName,
-            newAppointment.customerPhone,
-            newAppointment.isGuest ? 'Reserva Invitado' : 'Reserva Cliente',
-            `Cita agendada: ${serviceName} para el ${AppFormatters.fecha(normalizedDateTime)}`
-          );
-
-          // Envío Automático de Confirmación y Comprobante
-          this.sendBookingConfirmationEmail(newAppointment, bName, locName);
-        }
-
-        this.addNotification('¡Cita Confirmada! ✂️', `Tu reserva para el ${AppFormatters.fecha(normalizedDateTime)} con ${bName} en ${locName} fue agendada con éxito.`);
-        this.notify();
-        return newAppointment;
-      }
-
       updateAppointmentStatusAdmin(appointmentId, newStatus) {
         const appointments = this.getAppointments();
         const appt = appointments.find(a => a.id === appointmentId || a.docId === appointmentId);
@@ -2068,52 +1808,6 @@
 
           this.notify();
         }
-      }
-
-      registerManualWalkIn({ locationId, barberId, clientName, clientPhone, clientEmail, dateTime, serviceName, servicePrice }) {
-        const appointments = this.getAppointments();
-        const normalizedDateTime = AppFormatters.normalizeDateTimeString(dateTime);
-
-        const newAppt = {
-          id: Date.now(),
-          locationId: Number(locationId),
-          barberId: Number(barberId),
-          customerName: clientName,
-          customerPhone: clientPhone,
-          customerEmail: clientEmail,
-          dateTime: normalizedDateTime,
-          serviceName,
-          servicePrice: Number(servicePrice),
-          prepayAmount: 0,
-          status: 'Completada',
-          isGuest: true,
-          userId: null,
-          hasReview: false,
-          createdAt: AppFormatters.currentDateTimeString(),
-          updatedAt: Date.now()
-        };
-
-        const safeDateKey = normalizedDateTime.replace(/ /g, '_').replace(/:/g, '-');
-        newAppt.docId = `loc${newAppt.locationId}_barber${newAppt.barberId}_${safeDateKey}`;
-
-        appointments.unshift(newAppt);
-        localStorage.setItem('bigboys_appointments', JSON.stringify(appointments));
-
-        this.publishAppointmentToCloud(newAppt);
-
-        if (clientEmail) {
-          this.saveEmailToDatabase(
-            clientEmail,
-            clientName,
-            clientPhone,
-            'Corte Presencial (Walk-in)',
-            `Atención presencial: ${serviceName}`
-          );
-        }
-
-        this.addNotification('Corte Manual (Walk-in)', `Servicio de ${clientName} registrado con éxito.`);
-        this.notify();
-        return newAppt;
       }
 
       addBarberAdmin({ name, locationId, specialty, bio, avatarUrl, initialHours = '09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00' }) {
@@ -2217,13 +1911,6 @@
         return newRev;
       }
 
-      deleteReviewAdmin(reviewId) {
-        let reviews = this.getReviews().filter(r => r.id !== reviewId);
-        localStorage.setItem('bigboys_reviews', JSON.stringify(reviews));
-        this.addNotification('Reseña Eliminada 🗑️', 'La reseña fue removida por administración.');
-        this.notify();
-      }
-
       redeemCoupon(pin) {
         const coupons = this.getCoupons();
         const coupon = coupons.find(c => c.pin === pin.trim());
@@ -2234,28 +1921,6 @@
         this.addNotification('Regalo Entregado 🎁', `Canjeado perfilado de cejas para: ${coupon.userName}`);
         this.notify();
         return { success: true, message: `¡Cupón canjeado con éxito para ${coupon.userName}!` };
-      }
-
-      updateAdminProfile(name, currentPin, newPin, avatarUrl) {
-        const config = this.getAdminConfig();
-        if (currentPin !== config.pin) return { success: false, message: 'PIN actual incorrecto.' };
-        if (!name.trim()) return { success: false, message: 'El nombre no puede estar vacío.' };
-        if (newPin && newPin.length < 4) return { success: false, message: 'El nuevo PIN debe tener al menos 4 dígitos.' };
-
-        config.name = name.trim();
-        if (newPin) config.pin = newPin.trim();
-        if (avatarUrl) config.avatarUrl = avatarUrl.trim();
-        localStorage.setItem('bigboys_admin_config', JSON.stringify(config));
-
-        const user = this.getLoggedInUser();
-        if (user && user.id === -99) {
-          user.fullName = config.name;
-          user.avatarUrl = config.avatarUrl;
-          localStorage.setItem('bigboys_logged_user', JSON.stringify(user));
-        }
-        this.addNotification('Perfil Administrador Actualizado', 'Cambios guardados con éxito.');
-        this.notify();
-        return { success: true, message: 'Perfil actualizado con éxito.' };
       }
 
       async updateUserProfile(name, phone, currentPassword, newPassword, avatarUrl) {
@@ -2295,14 +1960,6 @@
         return { success: true, message: 'Perfil actualizado con éxito.' };
       }
 
-      updateGmailConfig(senderEmail, appPassword) {
-        const config = { senderEmail: senderEmail.trim(), appPassword: appPassword.replace(/\s+/g, '').trim() };
-        localStorage.setItem('bigboys_gmail_config', JSON.stringify(config));
-        this.addNotification('Configuración Gmail Guardada ✉️', 'Credenciales actualizadas.');
-        this.notify();
-        return { success: true };
-      }
-
       addNotification(title, message) {
         const notifications = this.getNotifications();
         notifications.unshift({
@@ -2315,10 +1972,6 @@
         this.notify();
       }
 
-      clearNotifications() {
-        localStorage.setItem('bigboys_notifications', JSON.stringify([]));
-        this.notify();
-      }
     }
 
     const store = new BarberiaStore();
@@ -3021,7 +2674,7 @@
     }
 
     // Branches & Map Screen con Integración Exclusiva de Google Maps API Oficial
-    function BranchesMapScreen({ locations, barbers, onSelectBranchForBooking, isDarkMode = true }) {
+    function BranchesMapScreen({ locations, barbers, onSelectBranchForBooking }) {
       const [activeLocId, setActiveLocId] = useState(1);
       const [copiedAddressId, setCopiedAddressId] = useState(null);
 
@@ -3042,12 +2695,6 @@
         const dest = encodeURIComponent(`${loc.address}, Chile`);
         const name = encodeURIComponent(loc.name);
         window.open(`https://www.google.com/maps/dir/?api=1&destination=${dest}&destination_place_id=${name}`, '_blank');
-      };
-
-      // API Google Maps: Vista de Lugar / Búsqueda
-      const openGoogleMapsSearch = (loc) => {
-        const query = encodeURIComponent(`${loc.name}, ${loc.address}`);
-        window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
       };
 
       // Waze Navigation Link
@@ -3238,17 +2885,17 @@
     }
 
     // Reviews Screen
-    function ReviewsScreen({ reviews, locations, barbers, onNavigateToBooking }) {
+    function ReviewsScreen({ reviews, locations }) {
       const [filterType, setFilterType] = useState('all');
       const [showModal, setShowModal] = useState(false);
 
       const [newRating, setNewRating] = useState(5);
       const [newComment, setNewComment] = useState('');
       const [newSelectedTags, setNewSelectedTags] = useState([]);
-      const [newReviewType, setNewReviewType] = useState('SERVICE');
-      const [newSubject, setNewSubject] = useState('Corte Moderno & Fade');
+      const newReviewType = 'SERVICE';
+      const newSubject = 'Corte Moderno & Fade';
       const [newLocationId, setNewLocationId] = useState(1);
-      const [newBarberId, setNewBarberId] = useState(1);
+      const newBarberId = 1;
       const [errorMsg, setErrorMsg] = useState('');
 
       const filteredReviews = useMemo(() => {
@@ -3437,7 +3084,7 @@
 
     // History Screen
     // History Screen con Reagendamiento y Políticas de Abono
-    function HistoryScreen({ user, appointments, locations, barbers, onOpenProfile, onOpenBooking }) {
+    function HistoryScreen({ user, appointments, barbers, onOpenProfile, onOpenBooking }) {
       const [reviewingAppt, setReviewingAppt] = useState(null);
       const [rating, setRating] = useState(5);
       const [comment, setComment] = useState('');
@@ -3579,7 +3226,7 @@
                 <div>
                   <h2 className="text-xl font-black text-white">{user.fullName}</h2>
                   <span className="text-xs text-[#FFD700] font-extrabold block">⭐ Cliente Exclusivo Big Boys Chile</span>
-                  <p className="text-xs text-zinc-400 mt-0.5">{user.email} · Tel: {user.phone} {user.rut ? `· RUT: ${user.rut}` : ''}</p>
+                  <p className="text-xs text-zinc-400 mt-0.5">{user.email} · Tel: {user.phone}</p>
                 </div>
               </div>
               <button onClick={onOpenProfile} className="px-4 py-2 border border-[#FFD700] hover:bg-[#FFD700] hover:text-black text-[#FFD700] text-xs font-bold rounded-xl transition-all">
@@ -3818,7 +3465,7 @@
       const [formError, setFormError] = useState('');
 
       const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
-      const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
+      const calendarYear = new Date().getFullYear();
 
       useEffect(() => {
         if (preselectedBarber) {
@@ -4155,7 +3802,6 @@
       const [regName, setRegName] = useState('');
       const [regEmail, setRegEmail] = useState('');
       const [regPhone, setRegPhone] = useState('');
-      const [regRut, setRegRut] = useState('');
       const [regPass, setRegPass] = useState('');
       const [adminPin, setAdminPin] = useState('');
       const [couponPin, setCouponPin] = useState(null);
@@ -4179,7 +3825,7 @@
       const handleRegister = async (e) => {
         e.preventDefault();
         setErrorMsg('');
-        const res = await store.register({ fullName: regName, email: regEmail, phone: regPhone, rut: regRut, password: regPass });
+        const res = await store.register({ fullName: regName, email: regEmail, phone: regPhone, password: regPass });
         if (res.success) {
           setCouponPin(res.couponPin);
           setTimeout(() => onClose(), 2500);
@@ -4268,7 +3914,6 @@
             {mode === 'register' && (
               <form onSubmit={handleRegister} className="space-y-3">
                 <input type="text" required value={regName} onChange={e => setRegName(e.target.value)} placeholder="Nombre completo *" className="w-full px-3.5 py-2 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs" />
-                <input type="text" required value={regRut} onChange={e => setRegRut(e.target.value)} onBlur={() => setRegRut(ValidationUtils.formatChileanRut(regRut))} placeholder="RUT (ej: 19.342.110-3) *" className="w-full px-3.5 py-2 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs" />
                 <input type="email" required value={regEmail} onChange={e => setRegEmail(e.target.value)} placeholder="Correo electrónico *" className="w-full px-3.5 py-2 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs" />
                 <input type="tel" required value={regPhone} onChange={e => setRegPhone(e.target.value)} placeholder="Teléfono celular *" className="w-full px-3.5 py-2 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs" />
                 <input type="password" required value={regPass} onChange={e => setRegPass(e.target.value)} placeholder="Contraseña (mínimo 6 car.) *" className="w-full px-3.5 py-2 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs" />
@@ -4296,7 +3941,7 @@
     // ==========================================
     // PORTAL DE ACCESO / LOGIN OBLIGATORIO
     // ==========================================
-    function LoginPortalScreen({ onLoginSuccess, onBarberSuccess, onAdminSuccess, onRegisterSuccess, onGuestContinue, barbers = [], locations = [], isDarkMode = true, onToggleTheme = null }) {
+    function LoginPortalScreen({ onLoginSuccess, onBarberSuccess, onAdminSuccess, onRegisterSuccess, onGuestContinue, isDarkMode = true, onToggleTheme = null }) {
       const [mode, setMode] = useState('login'); // 'login' | 'barbero' | 'admin'
       const [errorMsg, setErrorMsg] = useState('');
       const [loginEmail, setLoginEmail] = useState('');
@@ -4307,17 +3952,9 @@
       const [regName, setRegName] = useState('');
       const [regEmail, setRegEmail] = useState('');
       const [regPhone, setRegPhone] = useState('');
-      const [regRut, setRegRut] = useState('');
       const [regPass, setRegPass] = useState('');
-      const [adminPin, setAdminPin] = useState('');
       const [couponPin, setCouponPin] = useState(null);
       const [loading, setLoading] = useState(false);
-
-      // Estado para login de Barberos
-      const availableBarbers = barbers.length > 0 ? barbers : store.getBarbers();
-      const availableLocations = locations.length > 0 ? locations : store.getLocations();
-      const [selectedBarberId, setSelectedBarberId] = useState(() => (availableBarbers && availableBarbers[0] ? availableBarbers[0].id : 1));
-      const [barberPin, setBarberPin] = useState('');
 
       const handleLoginSubmit = async (e) => {
         e.preventDefault();
@@ -4327,17 +3964,6 @@
         setLoading(false);
         if (res.success) {
           onLoginSuccess(res.user);
-        } else {
-          setErrorMsg(res.message);
-        }
-      };
-
-      const handleBarberSubmit = (e) => {
-        e.preventDefault();
-        setErrorMsg('');
-        const res = store.loginAsBarber(selectedBarberId, barberPin);
-        if (res.success) {
-          if (onBarberSuccess) onBarberSuccess(res.barber);
         } else {
           setErrorMsg(res.message);
         }
@@ -4353,7 +3979,6 @@
           fullName: regName,
           email: regEmail,
           phone: regPhone,
-          rut: regRut,
           password: regPass
         });
         setRegisterLoading(false);
@@ -4366,17 +3991,6 @@
           }, 2400);
         } else {
           setRegisterErrorMsg(res.message);
-          setErrorMsg(res.message);
-        }
-      };
-
-      const handleAdminSubmit = (e) => {
-        e.preventDefault();
-        setErrorMsg('');
-        const res = store.loginAsAdmin(adminPin);
-        if (res.success) {
-          onAdminSuccess();
-        } else {
           setErrorMsg(res.message);
         }
       };
@@ -4599,19 +4213,7 @@
                       className="w-full px-3 py-2 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs focus:border-[#FFD700] focus:outline-none"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-[11px] font-bold text-zinc-400 mb-0.5">RUT Chileno *</label>
-                      <input
-                        type="text"
-                        required
-                        value={regRut}
-                        onChange={e => setRegRut(e.target.value)}
-                        onBlur={() => setRegRut(ValidationUtils.formatChileanRut(regRut))}
-                        placeholder="19.342.110-3"
-                        className="w-full px-3 py-2 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs focus:border-[#FFD700] focus:outline-none"
-                      />
-                    </div>
+                  <div className="grid grid-cols-1 gap-2">
                     <div>
                       <label className="block text-[11px] font-bold text-zinc-400 mb-0.5">Teléfono *</label>
                       <input
@@ -4737,19 +4339,7 @@
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <div>
-                        <label className="block text-[11px] font-bold text-zinc-300 mb-1">RUT Chileno *</label>
-                        <input
-                          type="text"
-                          required
-                          value={regRut}
-                          onChange={e => setRegRut(e.target.value)}
-                          onBlur={() => setRegRut(ValidationUtils.formatChileanRut(regRut))}
-                          placeholder="19.342.110-3"
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs focus:border-[#FFD700] focus:outline-none"
-                        />
-                      </div>
+                    <div className="grid grid-cols-1 gap-2.5">
                       <div>
                         <label className="block text-[11px] font-bold text-zinc-300 mb-1">Teléfono Móvil *</label>
                         <input
@@ -4814,7 +4404,7 @@
     }
 
     // Admin Dashboard
-    function AdminDashboard({ locations, barbers, appointments, reviews, coupons, users, emailDatabase = [], sentEmailsLog = [], adminConfig, gmailConfig, onLogout }) {
+    function AdminDashboard({ locations, barbers, appointments, users, emailDatabase = [], sentEmailsLog = [], onLogout }) {
       const [subTab, setSubTab] = useState('agenda');
 
       // Estado de Base de Correos
@@ -5443,23 +5033,6 @@
       const completedAppts = appointments.filter(a => a.status === 'Completada');
       const totalRevenue = completedAppts.reduce((sum, a) => sum + (a.servicePrice || 0), 0);
       const totalPrepay = completedAppts.reduce((sum, a) => sum + (a.prepayAmount || 0), 0);
-
-      // Exportar TSV de citas para Excel
-      const handleExportAppointmentsCsv = () => {
-        const header = "ID_Cita\tFecha_Corte\tSucursal\tBarbero\tCliente\tCelular\tServicio\tTotal_Cobrado\tPrepago_Online\tEstado\n";
-        const rows = appointments.map(a => {
-          const b = barbers.find(x => x.id === a.barberId)?.name || `Barbero #${a.barberId}`;
-          const loc = locations.find(x => x.id === a.locationId)?.name || 'Chile';
-          return `${a.id}\t${AppFormatters.fecha(a.dateTime)}\t${loc}\t${b}\t${a.customerName}\t${a.customerPhone}\t${a.serviceName}\t${a.servicePrice}\t${a.prepayAmount}\t${a.status}`;
-        }).join('\n');
-
-        const blob = new Blob([header + rows], { type: 'text/tab-separated-values;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `BigBoys_Movimientos_${AppFormatters.currentDateString()}.tsv`;
-        link.click();
-      };
 
       // Exportar Base de Correos (.csv compatible con Excel)
       const handleExportEmailsCsv = () => {
@@ -7442,7 +7015,7 @@
                   </div>
                   <input
                     type="text"
-                    placeholder="Buscar por nombre, correo o RUT..."
+                    placeholder="Buscar por nombre, correo o teléfono..."
                     value={userSearch}
                     onChange={e => setUserSearch(e.target.value)}
                     className="w-full sm:w-64 px-3 py-2 rounded-xl bg-[#121212] border border-zinc-700 text-xs text-white placeholder-zinc-500 focus:border-[#FFD700] focus:outline-none"
@@ -7454,7 +7027,6 @@
                   const filtered = (users || []).filter(u => {
                     return (u.fullName || '').toLowerCase().includes(query) ||
                       (u.email || '').toLowerCase().includes(query) ||
-                      (u.rut || '').toLowerCase().includes(query) ||
                       (u.phone || '').includes(query);
                   });
 
@@ -7474,7 +7046,6 @@
                           <tr className="border-b border-zinc-800 text-zinc-400 font-bold uppercase text-[10px]">
                             <th className="p-3">Cliente</th>
                             <th className="p-3">Correo Electrónico</th>
-                            <th className="p-3">RUT Chileno</th>
                             <th className="p-3">Teléfono</th>
                             <th className="p-3">Fecha Registro</th>
                             <th className="p-3 text-right">Acción</th>
@@ -7491,9 +7062,6 @@
                               </td>
                               <td className="p-3 text-zinc-300 font-mono whitespace-nowrap">
                                 {u.email}
-                              </td>
-                              <td className="p-3 text-zinc-300 font-mono whitespace-nowrap">
-                                {u.rut || 'N/A'}
                               </td>
                               <td className="p-3 text-zinc-400 whitespace-nowrap">
                                 {u.phone || 'N/A'}
@@ -7671,7 +7239,7 @@
                     </div>
                     <div className="p-2.5 rounded-xl bg-[#121212] border border-zinc-800 text-zinc-300">
                       <strong className="text-white block">👥 users</strong>
-                      Email y RUT únicos
+                      Email único
                     </div>
                     <div className="p-2.5 rounded-xl bg-[#121212] border border-zinc-800 text-zinc-300">
                       <strong className="text-white block">📅 appointments</strong>
@@ -7697,7 +7265,7 @@
     // ==========================================
     // BARBER DASHBOARD: PANEL DIARIO DEL BARBERO 💈
     // ==========================================
-    function BarberDashboard({ barber, locations, barbers, appointments, onLogout }) {
+    function BarberDashboard({ barber, locations, appointments, onLogout }) {
       const todayIso = new Date().toISOString().split('T')[0];
       const [selectedDate, setSelectedDate] = useState(todayIso);
       const [cancelingAppt, setCancelingAppt] = useState(null);
@@ -7730,7 +7298,6 @@
       const totalApptsCount = barberAppts.length;
       const pendingCount = barberAppts.filter(a => a.status === 'Confirmada').length;
       const completedCount = barberAppts.filter(a => a.status === 'Completada').length;
-      const canceledCount = barberAppts.filter(a => a.status === 'Cancelada').length;
       const totalRevenueDay = barberAppts
         .filter(a => a.status !== 'Cancelada')
         .reduce((sum, a) => sum + (Number(a.servicePrice) || 0), 0);
@@ -8114,7 +7681,7 @@
         </div>
       );
     }
-    function NotificationsModal({ isOpen, onClose, notifications }) {
+    function NotificationsModal({ onClose, notifications }) {
 
       return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
@@ -8456,7 +8023,7 @@
       const ok = result && result.aprobado && !result.sin_cupo;
       return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-md animate-fade-in overflow-y-auto">
-          <div className="bg-[#121212] border border-zinc-700 rounded-3xl w-full max-w-md p-5 sm:p-6 shadow-2xl my-6 space-y-4 text-center">
+          <div id="transbank-receipt-voucher" className="bg-[#121212] border border-zinc-700 rounded-3xl w-full max-w-md p-5 sm:p-6 shadow-2xl my-6 space-y-4 text-center">
             {!result && !error && (
               <div className="py-10 space-y-3">
                 <div className="w-12 h-12 border-4 border-[#FFD700] border-t-transparent rounded-full animate-spin mx-auto"></div>
@@ -8496,7 +8063,7 @@
                 )}
               </>
             )}
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 print:hidden">
               {ok && <button onClick={() => window.print()} className="flex-1 py-2.5 bg-zinc-800 text-zinc-300 text-xs font-bold rounded-xl">🖨️ Imprimir</button>}
               <button onClick={onClose} disabled={!result && !error} className="flex-1 py-2.5 bg-[#FFD700] text-black font-black text-xs uppercase rounded-xl">{ok ? 'Ver mis citas →' : 'Volver'}</button>
             </div>
@@ -9226,7 +8793,7 @@
       if (!sessionUnlocked) {
         return (
           <LoginPortalScreen
-            onLoginSuccess={(loggedUser) => {
+            onLoginSuccess={() => {
               if (typeof sessionStorage !== 'undefined') {
                 sessionStorage.setItem('bigboys_session_active', 'true');
               }
@@ -9255,7 +8822,7 @@
               setSessionUnlocked(true);
               setPreviewAsClient(false);
             }}
-            onRegisterSuccess={(newUser) => {
+            onRegisterSuccess={() => {
               if (typeof sessionStorage !== 'undefined') {
                 sessionStorage.setItem('bigboys_session_active', 'true');
               }
@@ -9270,8 +8837,6 @@
               setSessionUnlocked(true);
               setActiveTab('inicio');
             }}
-            barbers={storeState.barbers}
-            locations={storeState.locations}
             isDarkMode={storeState.isDarkMode}
             onToggleTheme={() => store.toggleDarkMode()}
           />
@@ -9336,7 +8901,6 @@
               <BarberDashboard
                 barber={storeState.barber}
                 locations={storeState.locations}
-                barbers={storeState.barbers}
                 appointments={storeState.appointments}
                 onLogout={handleLogout}
               />
@@ -9345,13 +8909,9 @@
                 locations={storeState.locations}
                 barbers={storeState.barbers}
                 appointments={storeState.appointments}
-                reviews={storeState.reviews}
-                coupons={storeState.coupons}
                 users={storeState.users}
                 emailDatabase={storeState.emailDatabase}
                 sentEmailsLog={storeState.sentEmailsLog}
-                adminConfig={storeState.adminConfig}
-                gmailConfig={storeState.gmailConfig}
                 onLogout={handleLogout}
               />
             ) : (
@@ -9381,7 +8941,6 @@
                     locations={storeState.locations}
                     barbers={storeState.barbers}
                     onSelectBranchForBooking={handleSelectBranchForBooking}
-                    isDarkMode={storeState.isDarkMode}
                   />
                 )}
 
@@ -9393,8 +8952,6 @@
                   <ReviewsScreen
                     reviews={storeState.reviews}
                     locations={storeState.locations}
-                    barbers={storeState.barbers}
-                    onNavigateToBooking={handleOpenBooking}
                   />
                 )}
 
@@ -9402,7 +8959,6 @@
                   <HistoryScreen
                     user={storeState.user}
                     appointments={storeState.appointments}
-                    locations={storeState.locations}
                     barbers={storeState.barbers}
                     onOpenProfile={() => setProfileModalOpen(true)}
                     onOpenBooking={handleOpenBooking}
@@ -9414,13 +8970,9 @@
                     locations={storeState.locations}
                     barbers={storeState.barbers}
                     appointments={storeState.appointments}
-                    reviews={storeState.reviews}
-                    coupons={storeState.coupons}
                     users={storeState.users}
                     emailDatabase={storeState.emailDatabase}
                     sentEmailsLog={storeState.sentEmailsLog}
-                    adminConfig={storeState.adminConfig}
-                    gmailConfig={storeState.gmailConfig}
                     onLogout={() => { store.logout(); setPreviewAsClient(false); setActiveTab('inicio'); }}
                   />
                 )}
@@ -9476,7 +9028,6 @@
 
           {notificationsModalOpen && (
             <NotificationsModal
-              isOpen={notificationsModalOpen}
               onClose={() => setNotificationsModalOpen(false)}
               notifications={storeState.notifications}
             />
