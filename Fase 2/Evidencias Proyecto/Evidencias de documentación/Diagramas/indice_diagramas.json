@@ -11,7 +11,7 @@
  ],
  "DIAG-03": [
   "Vista de procesos: secuencia de reserva con abono",
-  "Flujo crítico de agendamiento: la reserva se crea en estado PENDIENTE_PAGO, la base de datos impide traslapes, la pasarela autoriza el abono de $3.000 y recién entonces la cita queda CONFIRMADA y se notifica.",
+  "Flujo crítico de agendamiento: la reserva se crea en estado PENDIENTE_PAGO, la base de datos impide traslapes y exige al menos 90 minutos de anticipación (SC-28), la pasarela autoriza el abono de $3.000 y recién entonces la cita queda CONFIRMADA y se notifica.",
   "DIAG-03_Vista_de_procesos_secuencia_de_reserva_con_abono"
  ],
  "DIAG-04": [
@@ -61,7 +61,7 @@
  ],
  "DIAG-13": [
   "Vista física: despliegue actual (3 sucursales)",
-  "Arquitectura de puesta en marcha: la base de datos PostgreSQL 17 opera en Supabase (región us-west-2, Oregón, EE. UU.; transferencia internacional declarada, SC-18), con 27 tablas, RLS cerrado y respaldo diario cifrado. La API REST la publica Supabase (PostgREST) mediante las funciones api_* (SC-20); el sitio web se aloja como archivos estáticos en un proveedor por definir. Las tres sucursales, la web y la app acceden por HTTPS.",
+  "Arquitectura de puesta en marcha: la base de datos PostgreSQL 17 opera en Supabase (región us-west-2, Oregón, EE. UU.; transferencia internacional declarada, SC-18), con 27 tablas y RLS cerrado. La API REST la publica Supabase (PostgREST) mediante 34 funciones api_* (SC-20), que llaman a Webpay Plus en el ambiente de integración (SC-22). El sitio web del ambiente UAT se aloja en GitHub Pages (SC-25; producción por definir). Un servidor de correo lee la cola de notificaciones y envía por Gmail SMTP, y el respaldo diario se obtiene con pg_dump (R-08). Las tres sucursales, la web y la app acceden por HTTPS.",
   "DIAG-13_Vista_fisica_despliegue_actual_3_sucursales"
  ],
  "DIAG-14": [
