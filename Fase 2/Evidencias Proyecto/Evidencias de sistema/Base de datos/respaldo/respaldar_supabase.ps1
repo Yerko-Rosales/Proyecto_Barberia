@@ -5,8 +5,8 @@
 #
 # Requisitos (una sola vez):
 #   1. Cliente de PostgreSQL 17 (pg_dump). Ej.: winget install PostgreSQL.PostgreSQL.17
-#   2. Variable de entorno SUPABASE_DB_URL con la cadena de conexión
-#      (Supabase > Project Settings > Database > Connection string > URI, modo «Session pooler»).
+#   2. Variable de entorno SUPABASE_DB_URL con la cadena de conexión («Session pooler»). Se usa el usuario de
+#      solo lectura respaldo_bigboys (pg_read_all_data + BYPASSRLS), no la clave de postgres.
 #      Nunca escribirla en este archivo ni subirla a GitHub.
 #
 # Uso:   powershell -ExecutionPolicy Bypass -File respaldar_supabase.ps1
@@ -14,6 +14,14 @@
 #   pg_restore --no-owner --no-privileges -d "<URL_BASE_DE_PRUEBA>" <archivo.dump>
 # =====================================================================
 $ErrorActionPreference = 'Stop'
+
+# La tarea programada no siempre hereda las variables del usuario: se leen también desde el registro
+if (-not $env:SUPABASE_DB_URL) { $env:SUPABASE_DB_URL = [Environment]::GetEnvironmentVariable('SUPABASE_DB_URL', 'User') }
+
+# pg_dump desde el PATH o desde la carpeta de herramientas del usuario
+$pgDump = (Get-Command pg_dump -ErrorAction SilentlyContinue).Source
+if (-not $pgDump) { $pgDump = Join-Path $env:USERPROFILE 'Tools\pgsql17\bin\pg_dump.exe' }
+if (-not (Test-Path $pgDump)) { Write-Error 'No se encontró pg_dump (cliente de PostgreSQL 17).' }
 
 if (-not $env:SUPABASE_DB_URL) {
     Write-Error 'Falta la variable de entorno SUPABASE_DB_URL (ver instrucciones al inicio del script).'
@@ -23,10 +31,10 @@ if (-not $env:SUPABASE_DB_URL) {
 $destino = Join-Path $env:USERPROFILE 'Documents\Respaldos_BigBoys'
 New-Item -ItemType Directory -Force -Path $destino | Out-Null
 
-$fecha = Get-Date -Format 'yyyy-MM-dd_HHmm'
+$fecha = Get-Date -Format 'dd-MM-yyyy_HHmm'
 $archivo = Join-Path $destino "bigboys_$fecha.dump"
 
-pg_dump --format=custom --no-owner --no-privileges --schema=public --file="$archivo" "$env:SUPABASE_DB_URL"
+& $pgDump --format=custom --no-owner --no-privileges --schema=public --file="$archivo" "$env:SUPABASE_DB_URL"
 if ($LASTEXITCODE -ne 0) { Write-Error 'pg_dump terminó con error.' }
 
 # Se conservan los últimos 30 respaldos (RNF-09: 30 días)

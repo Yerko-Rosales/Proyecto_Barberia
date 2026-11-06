@@ -3,7 +3,6 @@ package com.example.data.mail
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
-import com.example.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Properties
@@ -23,9 +22,10 @@ object DirectGmailSender {
     private const val KEY_APP_PASSWORD = "key_app_password"
     private const val KEY_DISPLAY_NAME = "key_display_name"
 
-    // Default Gmail credentials; the app password comes from .env (Secrets Gradle Plugin → BuildConfig)
+    // La contraseña de aplicación NUNCA se compila en la APK (riesgo R-03): solo la ingresa el Dueño en Ajustes
+    // y queda guardada en el dispositivo. Los correos del sistema los envía el servidor de correo (cola en Supabase).
     var senderGmail: String = "bigboysbarberia.chile@gmail.com"
-    var senderAppPassword: String = BuildConfig.GMAIL_APP_PASSWORD
+    var senderAppPassword: String = ""
     var senderDisplayName: String = "Big boys Barbershop Chile 💈"
 
     fun loadCredentials(context: Context) {
@@ -36,7 +36,7 @@ object DirectGmailSender {
             val savedName = prefs.getString(KEY_DISPLAY_NAME, null)
 
             senderGmail = if (!savedEmail.isNullOrBlank()) savedEmail.trim() else "bigboysbarberia.chile@gmail.com"
-            senderAppPassword = if (!savedPass.isNullOrBlank() && savedPass.length >= 10) savedPass.trim() else BuildConfig.GMAIL_APP_PASSWORD
+            senderAppPassword = if (!savedPass.isNullOrBlank() && savedPass.length >= 10) savedPass.trim() else ""
             senderDisplayName = if (!savedName.isNullOrBlank()) savedName.trim() else "Big boys Barbershop Chile 💈"
             Log.d(TAG, "Loaded credentials from persistent storage: email=$senderGmail, hasPassword=${senderAppPassword.isNotBlank()}")
         } catch (e: Exception) {
