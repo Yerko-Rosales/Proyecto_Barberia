@@ -145,7 +145,7 @@ fun MainAppScreen(
                 title = {
                     Column(modifier = Modifier.padding(vertical = 4.dp)) {
                         Text(
-                            text = "CHILE · SUCURSAL PROVIDENCIA",
+                            text = "CHILE · TALAGANTE & PEÑAFLOR",
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 10.sp,
@@ -1070,30 +1070,17 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.horizontalScroll(rememberScrollState())
                 ) {
-                    LocationBannerCard(
-                        name = "TALAGANTE",
-                        address = "Av. Libertador 450",
-                        phone = "+56 2 2489 1234",
-                        lat = -33.6635,
-                        lng = -70.9272,
-                        onClickCard = { onNavigateToMap() }
-                    )
-                    LocationBannerCard(
-                        name = "PEÑAFLOR 1",
-                        address = "Av. 21 de Mayo 1282",
-                        phone = "+56 2 2631 5678",
-                        lat = -33.6062,
-                        lng = -70.8765,
-                        onClickCard = { onNavigateToMap() }
-                    )
-                    LocationBannerCard(
-                        name = "PEÑAFLOR 2",
-                        address = "Miraflores 3560",
-                        phone = "+56 2 2912 3456",
-                        lat = -33.5980,
-                        lng = -70.8920,
-                        onClickCard = { onNavigateToMap() }
-                    )
+                    // Sucursales reales (las mismas del mapa); antes eran datos de ejemplo
+                    com.example.ui.components.BIG_BOYS_BRANCHES.forEach { b ->
+                        LocationBannerCard(
+                            name = b.name.removePrefix("Big Boys - ").uppercase(),
+                            address = b.address,
+                            phone = "",
+                            lat = b.lat,
+                            lng = b.lng,
+                            onClickCard = { onNavigateToMap() }
+                        )
+                    }
                 }
             }
         }
@@ -1217,7 +1204,7 @@ fun LocationBannerCard(
             }
             Spacer(modifier = Modifier.height(6.dp))
             Text(address, color = TextMuted, fontSize = 11.sp, maxLines = 1)
-            Text("Tel: $phone", color = TextIvory, fontSize = 11.sp)
+            if (phone.isNotBlank()) Text("Tel: $phone", color = TextIvory, fontSize = 11.sp)
             Spacer(modifier = Modifier.height(6.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),

@@ -517,7 +517,7 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
                         </div>
                         """ else ""}
                         <p style="color: #9ca3af; font-size: 13px; line-height: 1.5;">
-                            Ya puedes ingresar a la app para seleccionar tu sucursal favorita (Providencia, Las Condes, Santiago Centro, Viña del Mar, Talagante), elegir a tu barbero de confianza y reservar tu horario.
+                            Ya puedes ingresar a la app para seleccionar tu sucursal favorita (Talagante, Peñaflor 21 de Mayo o Peñaflor Alcalde Luis Araya Cereceda), elegir a tu barbero de confianza y reservar tu horario.
                         </p>
                         <hr style="border: none; border-top: 1px solid #27272a; margin: 24px 0;" />
                         <p style="color: #6b7280; font-size: 12px; text-align: center;">
