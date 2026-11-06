@@ -48,16 +48,16 @@ En días de mayor demanda se atienden ~130 clientes y **26 se van sin atención 
 
 | Documento | Descripción |
 | --- | --- |
-| 00 Inventario y Resumen de Cambios | Qué se actualizó el 06-10-2026 y supuestos por validar |
+| 00 Inventario y Resumen de Cambios | Qué se actualizó desde el 06-10-2026 (sección 10: seguimiento del 06-11-2026) y supuestos por validar |
 | 02 a 15 | Planes de gestión (interesados, dirección, requerimientos, alcance, EDT, Gantt, costos, calidad, recursos, cambios, avance, cierre, riesgos) |
 | 16 Diseño de Base de Datos | MER, modelo relacional, diccionario y DDL |
 | 17 Especificación de Casos de Uso | 41 casos de uso (CU-01 a CU-41) |
-| 18 Plan y Casos de Prueba | 77 casos funcionales, 24 pruebas automatizadas de BD, 11 no funcionales y 6 escenarios de aceptación |
+| 18 Plan y Casos de Prueba | 77 casos funcionales, 11 no funcionales, 6 escenarios de aceptación y el registro de pruebas automatizadas (BD, API, web y app) |
 | Anexo A | Cumplimiento normativo y gobierno de datos |
-| Acta, Kick-Off, ERS rev. 04.1 (63 RF / 11 RNF), DAS v3.2, RACI | Documentos base del proyecto |
+| Acta, Kick-Off, ERS rev. 04.2 (63 RF / 11 RNF), DAS v3.3, RACI | Documentos base del proyecto |
 | KPIs y Costos (xlsx), Política de Privacidad y T&C | Indicadores, costos y textos legales |
-| Diagramas/ | 35 diagramas (PNG, SVG,  y StarUML `.mdj`) |
-| `Evidencias de sistema/Base de datos/` | Script `bigboys_ddl.sql` (27 tablas) validado: 24/24 pruebas; migraciones de Supabase y pruebas de la API en `supabase_22-10-2026/` |
+| Diagramas/ | 35 diagramas (PNG y StarUML `.mdj`) |
+| `Evidencias de sistema/Base de datos/` | Script `bigboys_ddl.sql` (27 tablas) validado: 24/24 pruebas; migraciones de Supabase y pruebas de la API por fecha en `supabase_DD-MM-AAAA/`; script de respaldo en `respaldo/` |
 
 ## Estructura del repositorio
 
@@ -76,10 +76,11 @@ En días de mayor demanda se atienden ~130 clientes y **26 se van sin atención 
 └── Fase 3/ (Presentación final y diarios 3.1)
 ```
 
-## Estado del proyecto (22-10-2026, semana 11 de 16)
+## Estado del proyecto (06-11-2026, semana 13 de 16)
 
-- **Fase 2 cerrada (H4, 18-10-2026):** documentación de diseño completa (4+1, modelo relacional, cumplimiento Ley N° 21.719, KPIs y costos, plan y casos de prueba).
-- **Fase 3 en curso:** próximo hito H5, presentación de avance (viernes 23-10-2026); luego H6 sistema integrado, H7 UAT, H8 entrega final (13-11) y H9 defensa (27-11).
-- **Base de datos:** el 20-10-2026 se implementó el modelo relacional en Supabase (PostgreSQL 17, región us-west-2, EE. UU.), con RLS activo. La transferencia internacional quedó declarada (SC-18). El 22-10-2026 se agregó la tabla `resena` (modelo v1.2, SC-21): 27 tablas y 24/24 pruebas.
-- **Desarrollo:** desde el 22-10-2026 la web y la app usan el modelo relacional a través de 13 funciones `api_*` que Supabase publica como API REST (SC-20). Las tablas siguen cerradas a la clave pública y las tablas del prototipo se eliminaron. Se probaron la API (17/17), la web de punta a punta y la compilación de la app. El código está en el repositorio sin secretos: la clave de correo se lee desde archivos `.env` locales excluidos de git (ver `.env.example`). Cuenta de prueba: `test@bigboys.cl` / `123`.
-- **Documentación:** el 22-10-2026 se alinearon todos los documentos con este estado (detalle en la sección 8 del documento 00): DAS 3.2, ERS rev. 04.1, DIAG-13, DIAG-27, DIAG-28 y DIAG-31 actualizados, 17 riesgos (R-14 cerrado; R-15 a R-17 agregados el 23-10-2026) y 21 solicitudes de cambio.
+- **Hitos cumplidos:** H4 cierre de la Fase 2 (18-10), H5 presentación de avance (23-10) y H6 sistema integrado (30-10). Próximos: H7 paso al ambiente UAT (10-11), H8 entrega final (13-11) y H9 defensa (27-11).
+- **Base de datos:** PostgreSQL 17 en Supabase (región us-west-2, EE. UU.; transferencia internacional declarada, SC-18), 27 tablas con RLS cerrado. La web y la app usan solo la API: 34 funciones `api_*` (SC-20).
+- **Funciones:** reserva con pago del abono en Webpay Plus (ambiente de integración de Transbank), reagendamiento y anulación con sus reglas, anticipación mínima de 90 minutos, fila por orden de llegada, «Mis datos», cuentas del personal, cobro del saldo en caja y reseñas. Sin RUT en los formularios (04-11).
+- **Pruebas:** BD 24/24, API 20/20, seguridad 16/16, cobro del saldo 14/14, anticipación 7/7, web 13/13 y app 10/10; app probada en un teléfono Android real (06-11). Ciclos 1 y 2 de casos funcionales y UAT, pendientes.
+- **Ambiente UAT:** la web se publica en GitHub Pages (rama `gh-pages`). Pendiente antes del H7: correos (R-17), respaldo diario con pg_dump (R-08) y limpieza de los datos de prueba (R-18).
+- **Documentación:** al 06-11-2026: 29 solicitudes de cambio, 18 riesgos (16 activos), DAS 3.3, ERS rev. 04.2 y documentos 00, 04, 07, 11, 12, 15, 16, 17 y 18 actualizados (detalle en la sección 10 del documento 00). El código está sin secretos: las claves se leen desde archivos `.env` locales excluidos de git.
