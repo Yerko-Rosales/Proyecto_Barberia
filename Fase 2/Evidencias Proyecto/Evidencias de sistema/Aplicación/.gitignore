@@ -19,3 +19,6 @@ debug.keystore
 
 # Paquetes .zip para Drive (no se versionan)
 *.zip
+
+# APK de depuración (solo local; la release sí se versiona)
+BigBoys_app-debug_*.apk
