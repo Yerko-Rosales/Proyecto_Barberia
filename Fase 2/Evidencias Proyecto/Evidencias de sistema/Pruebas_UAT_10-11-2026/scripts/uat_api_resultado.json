@@ -1,0 +1,74 @@
+[
+ {
+  "uat": "UAT-02",
+  "paso": "Registro de llegadas",
+  "ok": true,
+  "det": "turnos 1, 2, 3, 4"
+ },
+ {
+  "uat": "UAT-02",
+  "paso": "Todos los turnos cierran en ATENDIDO o ABANDONO",
+  "ok": true,
+  "det": "KPI del día: 4 llegadas, 3 atendidos, 1 abandonos (25%)"
+ },
+ {
+  "uat": "UAT-02",
+  "paso": "Atenciones con monto y medio de pago (sin Excel)",
+  "ok": true,
+  "det": "3 atenciones: $11.900 EFECTIVO (+$1.000 propina), $20.230 DÉBITO, $8.330 CRÉDITO"
+ },
+ {
+  "uat": "UAT-03",
+  "paso": "Reprogramar con más de 24 h (Wmwb711jm)",
+  "ok": true,
+  "det": "nuevo horario 2026-11-24 10:00"
+ },
+ {
+  "uat": "UAT-03",
+  "paso": "Reprogramar con menos de 24 h se rechaza",
+  "ok": true,
+  "det": "REAGENDAR_MENOS_DE_24H"
+ },
+ {
+  "uat": "UAT-03",
+  "paso": "Cancelar con menos de 24 h",
+  "ok": true,
+  "det": "Wmwb73u4f cancelada; el abono no cambia de estado (DEF-009, diferido)"
+ },
+ {
+  "uat": "UAT-03",
+  "paso": "El cajero/a marca no-show",
+  "ok": true,
+  "det": "Wmwb73vjz → No-Show (Inasistencia)"
+ },
+ {
+  "uat": "UAT-05",
+  "paso": "El Dueño crea el perfil con clave temporal",
+  "ok": true,
+  "det": "rol BARBERO; debe cambiar la clave: true"
+ },
+ {
+  "uat": "UAT-05",
+  "paso": "Primer ingreso: cambio de clave obligatorio",
+  "ok": true,
+  "det": "clave cambiada; acceso habilitado"
+ },
+ {
+  "uat": "UAT-05",
+  "paso": "El barbero ve sus atenciones y su total",
+  "ok": true,
+  "det": "Mateo hoy: 2 atenciones, total $20230; sin datos de contacto"
+ },
+ {
+  "uat": "UAT-06",
+  "paso": "Solicitud con plazo legal y respuesta del Dueño",
+  "ok": true,
+  "det": "SDMWB73YRN: vence 2026-12-10; respondida el mismo día"
+ },
+ {
+  "uat": "UAT-04",
+  "paso": "Dueño: reservas y KPI de las 3 sucursales",
+  "ok": true,
+  "det": "28 reservas visibles con datos; KPI del día: [{\"fecha\":\"2026-11-10\",\"llegadas\":4,\"abandonos\":1,\"atendidos\":3,\"id_sucursal\":1,\"pct_abandono\":25}]"
+ }
+]
