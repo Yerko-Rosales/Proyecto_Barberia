@@ -45,10 +45,10 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
     private val _bookingHour = MutableStateFlow("")
     val bookingHour: StateFlow<String> = _bookingHour.asStateFlow()
 
-    private val _bookingService = MutableStateFlow("Corte de Pelo Degrado")
+    private val _bookingService = MutableStateFlow("") // sin servicio hasta que el cliente lo elige en el paso 3
     val bookingService: StateFlow<String> = _bookingService.asStateFlow()
 
-    private val _bookingPrice = MutableStateFlow(15000.0)
+    private val _bookingPrice = MutableStateFlow(0.0)
     val bookingPrice: StateFlow<Double> = _bookingPrice.asStateFlow()
 
     private val _guestName = MutableStateFlow("")

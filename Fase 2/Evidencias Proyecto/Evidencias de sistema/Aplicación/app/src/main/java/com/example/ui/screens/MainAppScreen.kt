@@ -5299,7 +5299,7 @@ fun ManualAppointmentWalkInView(viewModel: BarberiaViewModel) {
                             clientEmail = "presencial@bigboys.cl",
                             dateTimeString = "$currentSimpleDate $selectedHour",
                             serviceName = selectedService,
-                            servicePrice = selectedPrice.toDoubleOrNull() ?: 15000.0
+                            servicePrice = selectedPrice.toDoubleOrNull() ?: 11900.0
                         ) {
                             // Carga manual exitosa
                         }
