@@ -1,7 +1,7 @@
 const http = require('http');
 const tls = require('tls');
 
-const GMAIL_USER = process.env.GMAIL_USER || 'bigboysbarberia.chile@gmail.com';
+const GMAIL_USER = process.env.GMAIL_USER || 'bigboysbarberv1@gmail.com';
 const GMAIL_PASS = process.env.GMAIL_PASS;
 if (!GMAIL_PASS) {
   console.error('Falta GMAIL_PASS. Crea el archivo .env (ver .env.example) e inicia con: npm run mail');

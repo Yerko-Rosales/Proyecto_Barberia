@@ -24,7 +24,7 @@ object DirectGmailSender {
 
     // La contraseña de aplicación NUNCA se compila en la APK (riesgo R-03): solo la ingresa el Dueño en Ajustes
     // y queda guardada en el dispositivo. Los correos del sistema los envía el servidor de correo (cola en Supabase).
-    var senderGmail: String = "bigboysbarberia.chile@gmail.com"
+    var senderGmail: String = "bigboysbarberv1@gmail.com"
     var senderAppPassword: String = ""
     var senderDisplayName: String = "Big boys Barbershop Chile 💈"
 
@@ -35,7 +35,7 @@ object DirectGmailSender {
             val savedPass = prefs.getString(KEY_APP_PASSWORD, null)
             val savedName = prefs.getString(KEY_DISPLAY_NAME, null)
 
-            senderGmail = if (!savedEmail.isNullOrBlank()) savedEmail.trim() else "bigboysbarberia.chile@gmail.com"
+            senderGmail = if (!savedEmail.isNullOrBlank()) savedEmail.trim() else "bigboysbarberv1@gmail.com"
             senderAppPassword = if (!savedPass.isNullOrBlank() && savedPass.length >= 10) savedPass.trim() else ""
             senderDisplayName = if (!savedName.isNullOrBlank()) savedName.trim() else "Big boys Barbershop Chile 💈"
             Log.d(TAG, "Loaded credentials from persistent storage: email=$senderGmail, hasPassword=${senderAppPassword.isNotBlank()}")
