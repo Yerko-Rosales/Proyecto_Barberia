@@ -724,7 +724,7 @@
         }
         if (!localStorage.getItem('bigboys_gmail_config') || !JSON.parse(localStorage.getItem('bigboys_gmail_config') || '{}').appPassword) {
           localStorage.setItem('bigboys_gmail_config', JSON.stringify({
-            senderEmail: 'bigboysbarberia.chile@gmail.com',
+            senderEmail: 'bigboysbarberv1@gmail.com',
             appPassword: ''
           }));
         }
@@ -992,11 +992,11 @@
           conf = JSON.parse(localStorage.getItem('bigboys_gmail_config') || '{}');
         } catch (e) {}
         if (!conf.appPassword || conf.appPassword.length < 10) {
-          conf.senderEmail = 'bigboysbarberia.chile@gmail.com';
+          conf.senderEmail = 'bigboysbarberv1@gmail.com';
           localStorage.setItem('bigboys_gmail_config', JSON.stringify(conf));
         }
         return {
-          senderEmail: conf.senderEmail || 'bigboysbarberia.chile@gmail.com',
+          senderEmail: conf.senderEmail || 'bigboysbarberv1@gmail.com',
           appPassword: conf.appPassword || ''
         };
       }
@@ -1075,7 +1075,7 @@
 
       logSentEmail({ fromEmail, toEmail, toName, subject, body, status = 'Enviado con Éxito ✓' }) {
         if (!toEmail) return;
-        const defaultSender = (this.getGmailConfig && this.getGmailConfig().senderEmail) || 'bigboysbarberia.chile@gmail.com';
+        const defaultSender = (this.getGmailConfig && this.getGmailConfig().senderEmail) || 'bigboysbarberv1@gmail.com';
         const logs = this.getSentEmailsLog();
         logs.unshift({
           id: Date.now() + Math.floor(Math.random() * 100),
@@ -1093,7 +1093,7 @@
 
       // 1. Correo Automático: Registro Exitoso & Regalo de Bienvenida
       sendWelcomeEmail(cleanName, cleanEmail, cleanPhone, couponPin) {
-        const fromEmail = this.getGmailConfig().senderEmail || 'bigboysbarberia.chile@gmail.com';
+        const fromEmail = this.getGmailConfig().senderEmail || 'bigboysbarberv1@gmail.com';
         const subject = `💈 ¡Bienvenido al Club Big Boys! Tu Regalo de Bienvenida (PIN: ${couponPin})`;
         const body = `¡Hola ${cleanName}!\n\n` +
           `Te damos la más cordial bienvenida al Club Oficial de Big Boys Barberías Chile.\n\n` +
@@ -1132,7 +1132,7 @@
       // Correo Automático: Reagendamiento Exitoso de Cita
       sendRescheduleConfirmationEmail(appt, bName, locName, oldDateTime, newDateTime) {
         if (!appt || !appt.customerEmail) return;
-        const fromEmail = this.getGmailConfig().senderEmail || 'bigboysbarberia.chile@gmail.com';
+        const fromEmail = this.getGmailConfig().senderEmail || 'bigboysbarberv1@gmail.com';
         const prepayFormatted = AppFormatters.formatClp(appt.prepayAmount || 3000);
         const count = appt.rescheduleCount || 1;
         const remaining = Math.max(0, 2 - count);
@@ -1176,7 +1176,7 @@
       // Correo Automático: Notificación de Retención de Abono por Anulación Tardía (<24h) o No-Show
       sendNoShowForfeitEmail(appt, bName, locName) {
         if (!appt || !appt.customerEmail) return;
-        const fromEmail = this.getGmailConfig().senderEmail || 'bigboysbarberia.chile@gmail.com';
+        const fromEmail = this.getGmailConfig().senderEmail || 'bigboysbarberv1@gmail.com';
         const prepayFormatted = AppFormatters.formatClp(appt.prepayAmount || 3000);
 
         const subject = `⚠️ Notificación de Anulación Tardía / No-Show - Cita #${appt.id} | Big Boys Barbershop`;
@@ -1209,7 +1209,7 @@
       // 3. Correo Automático: Cancelación de Hora, Disculpas y Solicitud de Datos para Devolución del Abono
       sendCancellationRefundEmail(appt, barberName, locationName) {
         if (!appt || !appt.customerEmail) return;
-        const fromEmail = this.getGmailConfig().senderEmail || 'bigboysbarberia.chile@gmail.com';
+        const fromEmail = this.getGmailConfig().senderEmail || 'bigboysbarberv1@gmail.com';
         const bName = barberName || (this.getBarbers().find(b => b.id === appt.barberId)?.name) || 'Barbero Big Boys';
         const locName = locationName || (this.getLocations().find(l => l.id === appt.locationId)?.name) || 'Sucursal Big Boys';
         const prepayFormatted = AppFormatters.formatClp(appt.prepayAmount);
@@ -4446,14 +4446,14 @@
             mode: 'no-cors',
             headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({
-              to: 'bigboysbarberia.chile@gmail.com',
+              to: 'bigboysbarberv1@gmail.com',
               subject: '💈 Prueba de Despacho 100% Nube 24/7 - Big Boys Barberías',
               body: '¡Hola!\n\nEste es un correo de prueba enviado 100% desde la NUBE de Google (Google Apps Script) para Big Boys Barberías Chile.\n\nEl servicio está activo 24/7 sin depender de computadores locales ni terminales.\n\nFecha y hora: ' + new Date().toLocaleString()
             })
           });
           setCloudTestResult('success');
-          store.addNotification('Correo de Prueba Enviado ☁️', 'Se despachó la prueba a bigboysbarberia.chile@gmail.com.');
-          alert('✓ Correo de prueba despachado a la nube. Revisa la bandeja de entrada de bigboysbarberia.chile@gmail.com.');
+          store.addNotification('Correo de Prueba Enviado ☁️', 'Se despachó la prueba a bigboysbarberv1@gmail.com.');
+          alert('✓ Correo de prueba despachado a la nube. Revisa la bandeja de entrada de bigboysbarberv1@gmail.com.');
         } catch (err) {
           setCloudTestResult('error');
           alert('Error al probar la nube: ' + err.message);
@@ -6037,7 +6037,7 @@
                         </span>
                       </h4>
                       <p className="text-xs text-zinc-400">
-                        Envía correos automáticos 24/7 con tu cuenta <strong>bigboysbarberia.chile@gmail.com</strong>, incluso con tu computador apagado.
+                        Envía correos automáticos 24/7 con tu cuenta <strong>bigboysbarberv1@gmail.com</strong>, incluso con tu computador apagado.
                       </p>
                     </div>
                   </div>
@@ -6078,14 +6078,14 @@
                   {cloudTestResult === 'success' && (
                     <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-xs flex items-center space-x-2">
                       <span>✅</span>
-                      <span>¡Prueba exitosa! Se despachó el correo de confirmación a <strong>bigboysbarberia.chile@gmail.com</strong>.</span>
+                      <span>¡Prueba exitosa! Se despachó el correo de confirmación a <strong>bigboysbarberv1@gmail.com</strong>.</span>
                     </div>
                   )}
 
                   <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-[11px] text-zinc-400 space-y-1">
                     <p className="font-semibold text-zinc-300">📋 Pasos rápidos para obtener la URL (Toma 1 minuto):</p>
                     <ol className="list-decimal list-inside space-y-0.5 text-zinc-400">
-                      <li>Abre <strong>script.google.com</strong> e inicia sesión con <em>bigboysbarberia.chile@gmail.com</em>.</li>
+                      <li>Abre <strong>script.google.com</strong> e inicia sesión con <em>bigboysbarberv1@gmail.com</em>.</li>
                       <li>Crea un "Nuevo proyecto" y pega el código de <code>google_apps_script_cloud.js</code> (creado en la carpeta web).</li>
                       <li>Haz clic en <strong>Implementar → Nueva implementación → Aplicación web</strong> (Acceso: <em>Cualquier persona</em>).</li>
                       <li>Copia la URL generada (termina en <code>/exec</code>), pégala aquí y haz clic en <strong>Guardar URL</strong>.</li>
@@ -6321,7 +6321,7 @@
                     </div>
 
                     <div className="space-y-1 text-xs text-zinc-400 bg-[#121212] p-3 rounded-xl border border-zinc-800 font-mono">
-                      <p><strong className="text-zinc-300">De:</strong> Big Boys Barberías Chile &lt;contacto.bigboyschile@gmail.com&gt;</p>
+                      <p><strong className="text-zinc-300">De:</strong> Big Boys Barberías Chile &lt;bigboysbarberv1@gmail.com&gt;</p>
                       <p><strong className="text-zinc-300">Para:</strong> {viewingEmailMsg.toName} &lt;{viewingEmailMsg.toEmail}&gt;</p>
                       <p><strong className="text-zinc-300">Fecha:</strong> {viewingEmailMsg.sentAt}</p>
                       <p><strong className="text-zinc-300">Estado:</strong> <span className="text-emerald-400 font-bold">{viewingEmailMsg.status}</span></p>
