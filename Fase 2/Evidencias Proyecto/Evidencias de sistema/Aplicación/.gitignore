@@ -22,3 +22,6 @@ debug.keystore
 
 # APK de depuración (solo local; la release sí se versiona)
 BigBoys_app-debug_*.apk
+
+# Claves de las cuentas demo para la UAT (solo local)
+uat.env

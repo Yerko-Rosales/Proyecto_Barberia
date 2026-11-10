@@ -304,6 +304,8 @@ object SupabaseManager {
             "ANTICIPACION_MINIMA" in msg -> "Esa hora ya no está disponible: se reserva con al menos 90 minutos de anticipación."
             "WEBPAY_ERROR" in msg -> "Webpay no respondió. Intenta nuevamente en unos minutos."
             "PAGO_NO_ENCONTRADO" in msg -> "No encontramos el pago."
+            "RESERVAS_FUTURAS" in msg -> "Tienes citas futuras: cancélalas antes de eliminar tu cuenta."
+            "PRORROGA_YA_USADA" in msg -> "Esta solicitud ya usó su única prórroga de 30 días."
             else -> "No se pudo conectar con el servidor. Revisa tu conexión."
         }
     }
