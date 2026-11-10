@@ -7346,6 +7346,8 @@ fun LoginRegisterScreen(
     }
 
     var isRegisterMode by remember { mutableStateOf(initialRegisterMode) }
+    // DEF-003 (10-11-2026): aceptación explícita de la Política de Privacidad y los T&C (Ley N° 21.719)
+    var aceptaPolitica by remember { mutableStateOf(false) }
 
     var showAdminPinDialog by remember { mutableStateOf(false) }
     var adminPinInput by remember { mutableStateOf("") }
@@ -7904,6 +7906,35 @@ fun LoginRegisterScreen(
                 }
 
                 item {
+                    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { aceptaPolitica = !aceptaPolitica }
+                            .testTag("register_accept_policy_row")
+                    ) {
+                        Checkbox(
+                            checked = aceptaPolitica,
+                            onCheckedChange = { aceptaPolitica = it },
+                            colors = CheckboxDefaults.colors(checkedColor = GoldPrimary, uncheckedColor = TextMuted, checkmarkColor = DarkBackground),
+                            modifier = Modifier.testTag("register_accept_policy")
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Column {
+                            Text("Acepto la Política de Privacidad y los Términos y Condiciones (Ley N° 21.719) *", color = TextIvory, fontSize = 12.sp)
+                            Text(
+                                "Leer la política",
+                                color = GoldPrimary,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.clickable { uriHandler.openUri("https://yerko-rosales.github.io/Proyecto_Barberia/privacidad.html") }
+                            )
+                        }
+                    }
+                }
+
+                item {
                     Button(
                         onClick = {
                             if (userFullnameInput.isBlank() || userFullnameInput.trim().length < 3) {
@@ -7936,6 +7967,11 @@ fun LoginRegisterScreen(
                             }
                             if (!passwordsMatch) {
                                 registerErrorMessage = "Las contraseñas no coinciden"
+                                return@Button
+                            }
+
+                            if (!aceptaPolitica) {
+                                registerErrorMessage = "Para crear tu cuenta debes aceptar la Política de Privacidad y los Términos y Condiciones"
                                 return@Button
                             }
 
@@ -7983,8 +8019,8 @@ fun LoginRegisterScreen(
                     )
                 }
 
-                // 🧪 REGISTERED TEST USER ACCESS CARD
-                item {
+                // 🧪 Tarjeta de usuario de prueba: solo en compilaciones de depuración (DEF-012, 10-11-2026)
+                if (com.example.BuildConfig.DEBUG) item {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -8203,7 +8239,7 @@ fun LoginRegisterScreen(
                     }
                 }
 
-                item {
+                if (com.example.BuildConfig.DEBUG) item {
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()

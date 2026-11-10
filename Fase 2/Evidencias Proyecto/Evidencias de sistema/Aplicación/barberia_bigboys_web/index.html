@@ -714,9 +714,10 @@
             }
           ]));
         }
-        if (!localStorage.getItem('bigboys_admin_config')) {
+        localStorage.removeItem('bigboys_admin_config'); // DEF-002: ya no existe un PIN de administración
+        if (false) {
           localStorage.setItem('bigboys_admin_config', JSON.stringify({
-            pin: '1234',
+            pin: '',
             name: 'Administrador Central Big boys',
             avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80',
             email: 'admin@bigboys.cl'
@@ -982,7 +983,9 @@
         if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('bigboys_session_active') !== 'true') {
           return false;
         }
-        return localStorage.getItem('bigboys_is_admin') === 'true';
+        let staff = null;
+        try { staff = JSON.parse(sessionStorage.getItem('bigboys_staff_session') || 'null'); } catch (e) {}
+        return localStorage.getItem('bigboys_is_admin') === 'true' && Boolean(staff && staff.role === 'DUENO');
       }
       isDarkMode() { return localStorage.getItem('bigboys_is_dark_mode') !== 'false'; }
       getAdminConfig() { return JSON.parse(localStorage.getItem('bigboys_admin_config') || '{}'); }
@@ -1370,9 +1373,11 @@
         return { success: false, message: 'Contraseña incorrecta. Por favor verifica e intenta nuevamente.' };
       }
 
-      loginAsAdmin(pin) {
-        const adminConfig = this.getAdminConfig();
-        if (pin === adminConfig.pin) {
+      loginAsAdmin() {
+        // DEF-002 (10-11-2026): acceso por PIN del prototipo deshabilitado; el Dueño entra con su cuenta y contraseña
+        return { success: false, message: 'Acceso no disponible. El Dueño ingresa con su cuenta de administración.' };
+        const adminConfig = {};
+        if (false) {
           localStorage.setItem('bigboys_is_admin', 'true');
           if (typeof sessionStorage !== 'undefined') {
             sessionStorage.setItem('bigboys_session_active', 'true');
@@ -1574,6 +1579,9 @@
         if (sb && isOwner && logged.passwordHash) {
           try {
             const { data: done, error } = await sb.rpc('api_suprimir_cuenta', { p_email: cleanEmail, p_password_sha256: logged.passwordHash });
+            if (error && String(error.message || '').includes('RESERVAS_FUTURAS')) {
+              return { success: false, message: 'Tienes citas futuras confirmadas o pendientes. Cancélalas primero (decides qué pasa con tu abono) y luego podrás eliminar tu cuenta.' };
+            }
             if (!error && done) console.log('✓ Cuenta suprimida y anonimizada en Supabase:', cleanEmail);
           } catch (e) {
             console.warn('Aviso al suprimir la cuenta en Supabase:', e);
@@ -3803,7 +3811,7 @@
       const [regEmail, setRegEmail] = useState('');
       const [regPhone, setRegPhone] = useState('');
       const [regPass, setRegPass] = useState('');
-      const [adminPin, setAdminPin] = useState('');
+      const [regAcepta, setRegAcepta] = useState(false);
       const [couponPin, setCouponPin] = useState(null);
 
       useEffect(() => {
@@ -3825,6 +3833,7 @@
       const handleRegister = async (e) => {
         e.preventDefault();
         setErrorMsg('');
+        if (!regAcepta) { setErrorMsg('Para crear tu cuenta debes aceptar la Política de Privacidad y los Términos y Condiciones.'); return; }
         const res = await store.register({ fullName: regName, email: regEmail, phone: regPhone, password: regPass });
         if (res.success) {
           setCouponPin(res.couponPin);
@@ -3832,14 +3841,6 @@
         } else {
           setErrorMsg(res.message);
         }
-      };
-
-      const handleAdminLogin = (e) => {
-        e.preventDefault();
-        setErrorMsg('');
-        const res = store.loginAsAdmin(adminPin);
-        if (res.success) onClose();
-        else setErrorMsg(res.message);
       };
 
       return (
@@ -3855,7 +3856,7 @@
             <div className="flex border-b border-zinc-800 mb-5 text-xs font-bold">
               <button onClick={() => setMode('login')} className={`flex-1 pb-2 border-b-2 ${mode === 'login' ? 'border-[#FFD700] text-[#FFD700]' : 'border-transparent text-zinc-400'}`}>Iniciar Sesión</button>
               <button onClick={() => setMode('register')} className={`flex-1 pb-2 border-b-2 ${mode === 'register' ? 'border-[#FFD700] text-[#FFD700]' : 'border-transparent text-zinc-400'}`}>Registrarme</button>
-              <button onClick={() => setMode('admin')} className={`flex-1 pb-2 border-b-2 ${mode === 'admin' ? 'border-red-500 text-red-400' : 'border-transparent text-zinc-400'}`}>🛡️ Admin</button>
+              
             </div>
 
             {errorMsg && <div className="mb-4 p-3 bg-red-950/40 border border-red-500/50 rounded-xl text-red-300 text-xs">⚠️ {errorMsg}</div>}
@@ -3917,22 +3918,14 @@
                 <input type="email" required value={regEmail} onChange={e => setRegEmail(e.target.value)} placeholder="Correo electrónico *" className="w-full px-3.5 py-2 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs" />
                 <input type="tel" required value={regPhone} onChange={e => setRegPhone(e.target.value)} placeholder="Teléfono celular *" className="w-full px-3.5 py-2 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs" />
                 <input type="password" required value={regPass} onChange={e => setRegPass(e.target.value)} placeholder="Contraseña (mínimo 6 car.) *" className="w-full px-3.5 py-2 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs" />
+                <label className="flex items-start gap-2 text-[11px] text-zinc-300 leading-snug">
+                  <input type="checkbox" checked={regAcepta} onChange={e => setRegAcepta(e.target.checked)} className="mt-0.5 accent-[#FFD700] w-4 h-4" />
+                  <span>Acepto la <a href="./privacidad.html" target="_blank" rel="noopener" className="text-[#FFD700] underline">Política de Privacidad y los Términos y Condiciones</a> (Ley N° 21.719). *</span>
+                </label>
                 <button type="submit" className="w-full py-3 bg-[#FFD700] hover:bg-[#E5C100] text-black font-black text-xs uppercase rounded-xl shadow-md">Registrarme & Recibir Regalo 🎁</button>
               </form>
             )}
 
-            {mode === 'admin' && (
-              <form onSubmit={handleAdminLogin} className="space-y-4">
-                <div className="p-3 bg-red-950/20 border border-red-500/30 rounded-xl text-xs text-red-200">
-                  🛡️ Panel exclusivo para administración central.
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-zinc-300 mb-1">PIN Administrador</label>
-                  <input type="password" required maxLength={8} value={adminPin} onChange={e => setAdminPin(e.target.value)} placeholder="1234" className="w-full px-3.5 py-2.5 rounded-xl bg-[#121212] border border-red-500 text-white text-center font-mono text-xl tracking-widest" />
-                </div>
-                <button type="submit" className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase rounded-xl">Acceder al Panel Admin</button>
-              </form>
-            )}
           </div>
         </div>
       );
@@ -3953,6 +3946,7 @@
       const [regEmail, setRegEmail] = useState('');
       const [regPhone, setRegPhone] = useState('');
       const [regPass, setRegPass] = useState('');
+      const [regAcepta, setRegAcepta] = useState(false);
       const [couponPin, setCouponPin] = useState(null);
       const [loading, setLoading] = useState(false);
 
@@ -3973,6 +3967,7 @@
         e.preventDefault();
         setRegisterErrorMsg('');
         setErrorMsg('');
+        if (!regAcepta) { setRegisterErrorMsg('Para crear tu cuenta debes aceptar la Política de Privacidad y los Términos y Condiciones.'); setErrorMsg('Para crear tu cuenta debes aceptar la Política de Privacidad y los Términos y Condiciones.'); return; }
         setRegisterLoading(true);
         setLoading(true);
         const res = await store.register({
@@ -4248,6 +4243,10 @@
                       className="w-full px-3 py-2 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs focus:border-[#FFD700] focus:outline-none"
                     />
                   </div>
+                  <label className="flex items-start gap-2 text-[11px] text-zinc-300 leading-snug">
+                    <input type="checkbox" checked={regAcepta} onChange={e => setRegAcepta(e.target.checked)} className="mt-0.5 accent-[#FFD700] w-4 h-4" />
+                    <span>Acepto la <a href="./privacidad.html" target="_blank" rel="noopener" className="text-[#FFD700] underline">Política de Privacidad y los Términos y Condiciones</a> (Ley N° 21.719). *</span>
+                  </label>
                   <button
                     type="submit"
                     disabled={loading}
@@ -4376,6 +4375,11 @@
                         className="w-full px-3.5 py-2.5 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs focus:border-[#FFD700] focus:outline-none"
                       />
                     </div>
+
+                    <label className="flex items-start gap-2 text-[11px] text-zinc-300 leading-snug">
+                      <input type="checkbox" checked={regAcepta} onChange={e => setRegAcepta(e.target.checked)} className="mt-0.5 accent-[#FFD700] w-4 h-4" />
+                      <span>Acepto la <a href="./privacidad.html" target="_blank" rel="noopener" className="text-[#FFD700] underline">Política de Privacidad y los Términos y Condiciones</a> (Ley N° 21.719). *</span>
+                    </label>
 
                     <div className="pt-2 flex space-x-2">
                       <button
@@ -7781,6 +7785,8 @@
       SOLO_CLIENTES: 'Esta opción es solo para clientes.',
       RESERVA_NO_ENCONTRADA: 'No encontramos la reserva.',
       RESERVA_YA_COBRADA: 'Esta reserva ya fue cobrada.',
+      RESERVAS_FUTURAS: 'Tienes citas futuras: cancélalas antes de eliminar tu cuenta.',
+      PRORROGA_YA_USADA: 'Esta solicitud ya usó su única prórroga de 30 días.',
       RESERVA_NO_COBRABLE: 'Solo se cobra una reserva confirmada (no un no-show ni una anulación).',
       MEDIO_PAGO_REQUERIDO: 'Selecciona con qué pagó el cliente el saldo.',
       MONTO_INVALIDO: 'El monto y la propina no pueden ser negativos.',
@@ -8644,7 +8650,8 @@
           </form>
           <button type="button" onClick={async () => {
             if (!window.confirm('¿Eliminar tu cuenta? Tus datos personales se anonimizan y no se puede deshacer.')) return;
-            await store.deleteUser(user.email);
+            const res = await store.deleteUser(user.email);
+            if (res && res.success === false) { alert(res.message); return; }
             window.location.reload();
           }} className="w-full py-2 bg-red-950/50 border border-red-500/40 text-red-300 text-xs font-bold rounded-xl">🗑️ Eliminar mi cuenta (supresión)</button>
         </div>
