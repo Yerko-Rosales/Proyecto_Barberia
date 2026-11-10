@@ -73,14 +73,16 @@ En días de mayor demanda se atienden ~130 clientes y **26 se van sin atención 
 │   │       ├── Aplicación/               # Código de la web y la app (sin secretos; ver .env.example)
 │   │       └── Base de datos/            # Script DDL y diagramas de BD
 │   └── Seguimiento semanal/
-└── Fase 3/ (Presentación final y diarios 3.1)
+└── Fase 3/
+    ├── Evidencias Grupales/      # Presentación final del proyecto
+    └── Evidencias Individuales/  # Diarios de reflexión 3.1
 ```
 
-## Estado del proyecto (06-11-2026, semana 13 de 16)
+## Estado del proyecto (10-11-2026, semana 14 de 16)
 
-- **Hitos cumplidos:** H4 cierre de la Fase 2 (18-10), H5 presentación de avance (23-10) y H6 sistema integrado (30-10). Próximos: H7 paso al ambiente UAT (10-11), H8 entrega final (13-11) y H9 defensa (27-11).
+- **Hitos cumplidos:** H4 cierre de la Fase 2 (18-10), H5 presentación de avance (23-10), H6 sistema integrado (30-10) y H7 paso al ambiente UAT (10-11). Próximos: H8 entrega final (13-11) y H9 defensa (27-11).
 - **Base de datos:** PostgreSQL 17 en Supabase (región us-west-2, EE. UU.; transferencia internacional declarada, SC-18), 27 tablas con RLS cerrado. La web y la app usan solo la API: 34 funciones `api_*` (SC-20).
 - **Funciones:** reserva con pago del abono en Webpay Plus (ambiente de integración de Transbank), reagendamiento y anulación con sus reglas, anticipación mínima de 90 minutos, fila por orden de llegada, «Mis datos», cuentas del personal, cobro del saldo en caja y reseñas. Sin RUT en los formularios (04-11).
-- **Pruebas:** BD 24/24, API 20/20, seguridad 16/16, cobro del saldo 14/14, anticipación 7/7, web 13/13 y app 10/10; app probada en un teléfono Android real (06-11). Ciclos 1 y 2 de casos funcionales y UAT, pendientes.
-- **Ambiente UAT:** la web se publica en GitHub Pages (rama `gh-pages`). Pendiente antes del H7: correos (R-17), respaldo diario con pg_dump (R-08) y limpieza de los datos de prueba (R-18).
-- **Documentación:** al 06-11-2026: 29 solicitudes de cambio, 18 riesgos (15 activos), DAS 3.3, ERS rev. 04.2 y documentos 00, 04, 07, 11, 12, 15, 16, 17 y 18 actualizados (detalle en la sección 10 del documento 00). El código está sin secretos: las claves se leen desde archivos `.env` locales excluidos de git.
+- **Pruebas:** BD 24/24, API 20/20, seguridad 16/16, cobro del saldo 14/14, anticipación 7/7, web 13/13 y app 10/10; app probada en un teléfono Android real (06-11); defecto DEF-001 corregido (07-11). Ciclos 1 y 2 de casos funcionales y UAT, pendientes.
+- **Ambiente UAT:** la web se publica en GitHub Pages (rama `gh-pages`) y la app como APK release 1.0 (`Aplicación/BigBoys_v1.0_release_10-11-2026.apk`). Respaldo diario con pg_dump (R-08). Correos operativos desde la cuenta del proyecto bigboysbarberv1@gmail.com (`npm run mail` en `barberia_bigboys_web`). Los datos de prueba se conservan como datos de demostración (R-18).
+- **Documentación:** al 10-11-2026: 29 solicitudes de cambio, 18 riesgos (14 activos), DAS 3.3, ERS rev. 04.2 y documentos 00, 04, 07, 11, 12, 15, 16, 17 y 18 actualizados (detalle en la sección 10 del documento 00). Presentación final en `Fase 3/Evidencias Grupales/`. El código está sin secretos: las claves se leen desde archivos `.env` locales excluidos de git.
