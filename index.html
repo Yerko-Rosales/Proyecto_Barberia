@@ -679,38 +679,15 @@
         quitarEjemplos('bigboys_appointments', SEED_APPOINTMENTS);
         quitarEjemplos('bigboys_email_database', null, 'email');
         quitarEjemplos('bigboys_sent_emails_log', null, 'toEmail');
-        let usersList = [];
-        try {
-          usersList = JSON.parse(localStorage.getItem('bigboys_users') || '[]');
-        } catch (e) {}
-        if (!usersList.some(u => u && u.email && u.email.toLowerCase() === 'test@bigboys.cl')) {
-          usersList.push({
-            id: 9999,
-            fullName: 'Usuario de Prueba Big Boys',
-            email: 'test@bigboys.cl',
-            phone: '+56 9 8765 4321',
-            password: '123',
-            createdAt: '01-09-2026 10:00'
-          });
-        }
-        localStorage.setItem('bigboys_users', JSON.stringify(usersList));
-        let couponsList = [];
-        try {
-          couponsList = JSON.parse(localStorage.getItem('bigboys_coupons') || '[]');
-        } catch (e) {}
-        if (!couponsList.some(c => c && c.userEmail && c.userEmail.toLowerCase() === 'test@bigboys.cl')) {
-          couponsList.push({
-            id: 9999,
-            pin: '7788',
-            userEmail: 'test@bigboys.cl',
-            userName: 'Usuario de Prueba Big Boys',
-            userPhone: '+56 9 8765 4321',
-            benefit: '1x Perfilado de Cejas Profesional Gratis',
-            isRedeemed: false,
-            issuedAt: '01-09-2026 10:00'
-          });
-        }
-        localStorage.setItem('bigboys_coupons', JSON.stringify(couponsList));
+        // DEF-018 (11-11-2026): sin cuenta ni cupón de prueba sembrados; se quitan los que hubiera en este navegador
+        const quitarPrueba = (clave, campo) => {
+          try {
+            const lista = JSON.parse(localStorage.getItem(clave) || '[]');
+            localStorage.setItem(clave, JSON.stringify(lista.filter(x => !(x && String(x.id) === '9999' && String(x[campo] || '').toLowerCase() === 'test@bigboys.cl'))));
+          } catch (e) { localStorage.setItem(clave, '[]'); }
+        };
+        quitarPrueba('bigboys_users', 'email');
+        quitarPrueba('bigboys_coupons', 'userEmail');
         if (!localStorage.getItem('bigboys_notifications')) {
           localStorage.setItem('bigboys_notifications', JSON.stringify([
             {
@@ -1348,24 +1325,11 @@
         }
 
         if (!user) {
-          if (cleanEmail === 'test@bigboys.cl') {
-            user = {
-              id: 9999,
-              fullName: 'Usuario de Prueba Big Boys',
-              email: 'test@bigboys.cl',
-              phone: '+56 9 8765 4321',
-              password: '123',
-              createdAt: '01-09-2026 10:00'
-            };
-            users.push(user);
-            localStorage.setItem('bigboys_users', JSON.stringify(users));
-          } else {
-            return { success: false, message: `El correo '${cleanEmail}' no se encuentra registrado.` };
-          }
+          return { success: false, message: `El correo '${cleanEmail}' no se encuentra registrado.` };
         }
 
-        const isTestPass = cleanEmail === 'test@bigboys.cl' && (cleanPass === '123' || cleanPass === '123456');
-        const isValid = isTestPass || !user.passwordHash || user.passwordHash === expectedHash;
+        // DEF-018 (11-11-2026): sin clave de prueba ni ingreso sin contraseña verificada
+        const isValid = !!user.passwordHash && user.passwordHash === expectedHash;
 
         if (isValid) {
           localStorage.setItem('bigboys_logged_user', JSON.stringify(user));
@@ -3880,22 +3844,6 @@
 
             {mode === 'login' && (
               <form onSubmit={handleLogin} className="space-y-4">
-                <div className="p-2.5 bg-amber-950/30 border border-[#FFD700]/30 rounded-xl text-xs space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-zinc-300 font-bold">🧪 Cuenta de Prueba Rápida:</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setLoginEmail('test@bigboys.cl');
-                        setLoginPass('123');
-                      }}
-                      className="px-2 py-0.5 bg-[#FFD700] hover:bg-[#E5C100] text-black font-black text-[10px] rounded shadow uppercase"
-                    >
-                      ⚡ Usar Datos
-                    </button>
-                  </div>
-                  <p className="text-[10px] text-zinc-400 font-mono">test@bigboys.cl | 123</p>
-                </div>
                 <div>
                   <label className="block text-xs font-bold text-zinc-300 mb-1">Correo Electrónico</label>
                   <input type="email" required value={loginEmail} onChange={e => setLoginEmail(e.target.value)} placeholder="usuario@correo.cl" className="w-full px-3.5 py-2.5 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs focus:border-[#FFD700]" />
@@ -4108,26 +4056,6 @@
               {/* FORM 1: INICIAR SESIÓN CLIENTE */}
               {mode === 'login' && (
                 <form onSubmit={handleLoginSubmit} className="space-y-4">
-                  {/* Botón rápido para usar cuenta de prueba */}
-                  <div className="p-3 bg-amber-950/30 border border-[#FFD700]/30 rounded-xl text-xs space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-zinc-300 font-bold">🧪 Cuenta de Prueba Rápida:</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setLoginEmail('test@bigboys.cl');
-                          setLoginPass('123');
-                        }}
-                        className="px-2.5 py-1 bg-[#FFD700] hover:bg-[#E5C100] text-black font-black text-[10px] rounded-lg shadow uppercase transition-all"
-                      >
-                        ⚡ Usar Datos de Prueba
-                      </button>
-                    </div>
-                    <p className="text-[11px] text-zinc-400">
-                      Correo: <strong className="text-white font-mono">test@bigboys.cl</strong> | Clave: <strong className="text-white font-mono">123</strong>
-                    </p>
-                  </div>
-
                   <div>
                     <label className="block text-xs font-bold text-zinc-300 mb-1">Correo Electrónico</label>
                     <input
