@@ -1,0 +1,17 @@
+{"testCaseName":"Test Cases/01_Web/WEB-01 Portal de acceso y politica publicada","testCaseId":"Test Cases/01_Web/WEB-01 Portal de acceso y politica publicada","iterationVariableName":""}
+{"testCaseName":"Test Cases/01_Web/WEB-02 Registro exige aceptar la politica","testCaseId":"Test Cases/01_Web/WEB-02 Registro exige aceptar la politica","iterationVariableName":""}
+{"testCaseName":"Test Cases/01_Web/WEB-03 Invitado sin acceso por PIN de administrador","testCaseId":"Test Cases/01_Web/WEB-03 Invitado sin acceso por PIN de administrador","iterationVariableName":""}
+{"testCaseName":"Test Cases/01_Web/WEB-04 Ingreso del personal con credenciales invalidas","testCaseId":"Test Cases/01_Web/WEB-04 Ingreso del personal con credenciales invalidas","iterationVariableName":""}
+{"testCaseName":"Test Cases/01_Web/WEB-05 Duenio revisa la caja del dia","testCaseId":"Test Cases/01_Web/WEB-05 Duenio revisa la caja del dia","iterationVariableName":""}
+{"testCaseName":"Test Cases/01_Web/WEB-06 Cajero opera la fila de su sucursal","testCaseId":"Test Cases/01_Web/WEB-06 Cajero opera la fila de su sucursal","iterationVariableName":""}
+{"testCaseName":"Test Cases/01_Web/WEB-07 Barbero ve sus atenciones sin datos de contacto","testCaseId":"Test Cases/01_Web/WEB-07 Barbero ve sus atenciones sin datos de contacto","iterationVariableName":""}
+{"testCaseName":"Test Cases/02_API/API-01 Login del personal por rol","testCaseId":"Test Cases/02_API/API-01 Login del personal por rol","iterationVariableName":""}
+{"testCaseName":"Test Cases/02_API/API-02 Login con correo inexistente","testCaseId":"Test Cases/02_API/API-02 Login con correo inexistente","iterationVariableName":""}
+{"testCaseName":"Test Cases/02_API/API-03 Catalogo publico de sucursales servicios y barberos","testCaseId":"Test Cases/02_API/API-03 Catalogo publico de sucursales servicios y barberos","iterationVariableName":""}
+{"testCaseName":"Test Cases/02_API/API-04 Reserva web sin abono se rechaza","testCaseId":"Test Cases/02_API/API-04 Reserva web sin abono se rechaza","iterationVariableName":""}
+{"testCaseName":"Test Cases/02_API/API-05 Horario ocupado se rechaza","testCaseId":"Test Cases/02_API/API-05 Horario ocupado se rechaza","iterationVariableName":""}
+{"testCaseName":"Test Cases/02_API/API-06 Permisos por rol","testCaseId":"Test Cases/02_API/API-06 Permisos por rol","iterationVariableName":""}
+{"testCaseName":"Test Cases/02_API/API-07 Caja del dia del Duenio y del cajero","testCaseId":"Test Cases/02_API/API-07 Caja del dia del Duenio y del cajero","iterationVariableName":""}
+{"testCaseName":"Test Cases/02_API/API-08 Barbero sin datos de contacto de clientes","testCaseId":"Test Cases/02_API/API-08 Barbero sin datos de contacto de clientes","iterationVariableName":""}
+{"testCaseName":"Test Cases/02_API/API-09 Tablas cerradas al acceso directo","testCaseId":"Test Cases/02_API/API-09 Tablas cerradas al acceso directo","iterationVariableName":""}
+{"testCaseName":"Test Cases/02_API/API-10 Fila publica sin datos personales","testCaseId":"Test Cases/02_API/API-10 Fila publica sin datos personales","iterationVariableName":""}

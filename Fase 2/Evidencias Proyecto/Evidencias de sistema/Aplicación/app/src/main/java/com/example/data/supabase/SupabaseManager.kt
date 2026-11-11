@@ -306,6 +306,8 @@ object SupabaseManager {
             "PAGO_NO_ENCONTRADO" in msg -> "No encontramos el pago."
             "RESERVAS_FUTURAS" in msg -> "Tienes citas futuras: cancélalas antes de eliminar tu cuenta."
             "PRORROGA_YA_USADA" in msg -> "Esta solicitud ya usó su única prórroga de 30 días."
+            "FOTO_INVALIDA" in msg -> "La foto no es válida: usa una imagen JPG o PNG."
+            "USUARIO_INVALIDO" in msg -> "Solo el personal tiene foto de perfil."
             else -> "No se pudo conectar con el servidor. Revisa tu conexión."
         }
     }
@@ -406,6 +408,27 @@ object SupabaseManager {
             put("p_password_sha256", passwordHash)
             put("p_fecha", date)
         })
+
+    /** Cuentas del personal (solo el Dueño, con la sesión iniciada). */
+    suspend fun listStaff(): List<JsonObject> = callRpc("api_personal_listar", buildJsonObject {
+        put("p_email", sessionEmail ?: "")
+        put("p_password_sha256", sessionPasswordHash ?: "")
+    }).decodeList<JsonObject>()
+
+    /** Cambia la foto de perfil de un funcionario (el Dueño, la de cualquiera; cada funcionario, la suya). */
+    suspend fun updateStaffPhoto(email: String, passwordHash: String, userId: Long, photo: String): JsonObject? =
+        callRpcObject("api_personal_foto", buildJsonObject {
+            put("p_email", email)
+            put("p_password_sha256", passwordHash)
+            put("p_id_usuario", userId)
+            put("p_foto", photo)
+        })
+
+    /** Credenciales de la sesión del Dueño o del cliente (para las funciones que las exigen). */
+    fun sessionCredentials(): Pair<String, String>? {
+        val e = sessionEmail; val h = sessionPasswordHash
+        return if (e.isNullOrBlank() || h.isNullOrBlank()) null else e to h
+    }
 
     /** Cambia la contraseña (primer ingreso con clave temporal). */
     suspend fun changePassword(email: String, passwordHash: String, newPasswordHash: String): JsonObject? =

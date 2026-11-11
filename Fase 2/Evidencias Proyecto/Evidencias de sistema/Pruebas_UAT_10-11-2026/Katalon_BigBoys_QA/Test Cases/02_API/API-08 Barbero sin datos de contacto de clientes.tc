@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>CP-56. Las atenciones del barbero traen su total y no incluyen correos ni teléfonos.</description>
+   <name>API-08 Barbero sin datos de contacto de clientes</name>
+   <tag>API</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>c2858c7b-858d-4d3e-a14a-9c816c77e3d5</testCaseGuid>
+</TestCaseEntity>

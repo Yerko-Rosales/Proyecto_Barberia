@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>UAT-02 y CP-47. El cajero/a entra a su sucursal, ve la fila por orden de llegada y las reservas del día, sin el panel del Dueño.</description>
+   <name>WEB-06 Cajero opera la fila de su sucursal</name>
+   <tag>Web</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>bfea2ca6-39b1-412e-a6eb-faff0483bae4</testCaseGuid>
+</TestCaseEntity>

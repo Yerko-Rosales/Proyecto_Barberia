@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>CP-27 y CP-28. Usa las palabras clave WS de Katalon: 3 sucursales con dirección, servicios con precio y barberos activos.</description>
+   <name>API-03 Catalogo publico de sucursales servicios y barberos</name>
+   <tag>API</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>b4c671f4-5471-4bae-b5a2-073e4d4cd6e1</testCaseGuid>
+</TestCaseEntity>

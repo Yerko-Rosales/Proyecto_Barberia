@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>UAT-04 y CP-55 (DEF-016). El Dueño entra al panel y ve «Caja del día», las cuentas del personal y los derechos del titular.</description>
+   <name>WEB-05 Duenio revisa la caja del dia</name>
+   <tag>Web</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>d1eeceb2-5073-4d96-a160-a6e865cc5d56</testCaseGuid>
+</TestCaseEntity>

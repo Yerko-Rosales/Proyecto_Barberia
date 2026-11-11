@@ -3214,7 +3214,10 @@ fun AdminDashboardScreen(
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
+                        // Foto del Dueño (11-11-2026); si no tiene, el ícono de administración
+                        val fotoDueno = viewModel.adminAvatarUrl.collectAsState().value
+                        if (fotoDueno.isNotBlank()) com.example.ui.util.FotoPersonal(url = fotoDueno, nombre = adminName, size = 40.dp)
+                        else Box(
                             modifier = Modifier
                                 .size(36.dp)
                                 .background(GoldPrimary.copy(alpha = 0.15f), CircleShape)
@@ -5498,15 +5501,7 @@ fun BarberManagerView(viewModel: BarberiaViewModel) {
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                AsyncImage(
-                                    model = if (b.avatarUrl.isNotBlank()) b.avatarUrl else "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200",
-                                    contentDescription = b.name,
-                                    modifier = Modifier
-                                        .size(52.dp)
-                                        .clip(CircleShape)
-                                        .border(1.5.dp, GoldPrimary, CircleShape),
-                                    contentScale = ContentScale.Crop
-                                )
+                                com.example.ui.util.FotoPersonal(url = b.avatarUrl, nombre = b.name, size = 52.dp)
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column(modifier = Modifier.weight(1f)) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -5568,6 +5563,25 @@ fun BarberManagerView(viewModel: BarberiaViewModel) {
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
+                                Spacer(modifier = Modifier.width(6.dp))
+                                val ctxFoto = LocalContext.current
+                                val fotoBarbero = androidx.activity.compose.rememberLauncherForActivityResult(
+                                    androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia()
+                                ) { uri ->
+                                    if (uri != null) {
+                                        val foto = com.example.ui.util.imagenADataUrl(ctxFoto, uri)
+                                        if (foto == null) android.widget.Toast.makeText(ctxFoto, "No se pudo leer la imagen.", android.widget.Toast.LENGTH_SHORT).show()
+                                        else viewModel.updateBarberPhotoAsOwner(b.id, foto) { ok, err ->
+                                            android.widget.Toast.makeText(ctxFoto, if (ok) "Foto de ${b.name} actualizada." else (err ?: "Error"), android.widget.Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                }
+                                OutlinedButton(
+                                    onClick = { fotoBarbero.launch(androidx.activity.result.PickVisualMediaRequest(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                    shape = RoundedCornerShape(8.dp),
+                                    modifier = Modifier.height(32.dp)
+                                ) { Text("📷 Foto", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = GoldPrimary) }
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Button(
                                     onClick = {

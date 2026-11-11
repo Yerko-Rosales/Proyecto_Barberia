@@ -252,7 +252,7 @@
 
   <!-- APLICACIÓN REACT AUTO-CONTENIDA (COMPATIBLE DIRECTA CON DOBLE CLIC Y SERVIDOR LOCAL) -->
   <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
+    const { useState, useEffect, useMemo, useRef } = React;
 
     // ==========================================
     // CONFIGURACIÓN OFICIAL SUPABASE (POSTGRESQL RELACIONAL)
@@ -289,6 +289,16 @@
     // ==========================================
     // 1. UTILITARIOS DE VALIDACIÓN Y FORMATEO
     // ==========================================
+    // Foto de perfil del personal (11-11-2026): si no hay foto, avatar con iniciales (sin imágenes de personas reales)
+    function initialsAvatar(name) {
+      const limpio = String(name || '').replace(/"[^"]*"|«[^»]*»|\(.*?\)/g, ' ').trim();
+      const ini = (limpio.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('') || 'BB').toUpperCase();
+      const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'><circle cx='80' cy='80' r='80' fill='#FFD700'/>`
+        + `<circle cx='80' cy='80' r='73' fill='#27272a'/><text x='80' y='80' dy='.35em' text-anchor='middle' font-family='Arial' font-weight='700' font-size='60' fill='#fff'>${ini}</text></svg>`;
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+    const photoOrInitials = (src, name) => src || initialsAvatar(name);
+
     const ValidationUtils = {
       isValidEmail(email) {
         if (!email) return false;
@@ -679,38 +689,15 @@
         quitarEjemplos('bigboys_appointments', SEED_APPOINTMENTS);
         quitarEjemplos('bigboys_email_database', null, 'email');
         quitarEjemplos('bigboys_sent_emails_log', null, 'toEmail');
-        let usersList = [];
-        try {
-          usersList = JSON.parse(localStorage.getItem('bigboys_users') || '[]');
-        } catch (e) {}
-        if (!usersList.some(u => u && u.email && u.email.toLowerCase() === 'test@bigboys.cl')) {
-          usersList.push({
-            id: 9999,
-            fullName: 'Usuario de Prueba Big Boys',
-            email: 'test@bigboys.cl',
-            phone: '+56 9 8765 4321',
-            password: '123',
-            createdAt: '01-09-2026 10:00'
-          });
-        }
-        localStorage.setItem('bigboys_users', JSON.stringify(usersList));
-        let couponsList = [];
-        try {
-          couponsList = JSON.parse(localStorage.getItem('bigboys_coupons') || '[]');
-        } catch (e) {}
-        if (!couponsList.some(c => c && c.userEmail && c.userEmail.toLowerCase() === 'test@bigboys.cl')) {
-          couponsList.push({
-            id: 9999,
-            pin: '7788',
-            userEmail: 'test@bigboys.cl',
-            userName: 'Usuario de Prueba Big Boys',
-            userPhone: '+56 9 8765 4321',
-            benefit: '1x Perfilado de Cejas Profesional Gratis',
-            isRedeemed: false,
-            issuedAt: '01-09-2026 10:00'
-          });
-        }
-        localStorage.setItem('bigboys_coupons', JSON.stringify(couponsList));
+        // DEF-018 (11-11-2026): sin cuenta ni cupón de prueba sembrados; se quitan los que hubiera en este navegador
+        const quitarPrueba = (clave, campo) => {
+          try {
+            const lista = JSON.parse(localStorage.getItem(clave) || '[]');
+            localStorage.setItem(clave, JSON.stringify(lista.filter(x => !(x && String(x.id) === '9999' && String(x[campo] || '').toLowerCase() === 'test@bigboys.cl'))));
+          } catch (e) { localStorage.setItem(clave, '[]'); }
+        };
+        quitarPrueba('bigboys_users', 'email');
+        quitarPrueba('bigboys_coupons', 'userEmail');
         if (!localStorage.getItem('bigboys_notifications')) {
           localStorage.setItem('bigboys_notifications', JSON.stringify([
             {
@@ -859,7 +846,7 @@
               name: b.name,
               specialty: b.specialty || '',
               rating: Number(b.rating) || 5,
-              avatarUrl: b.avatar_url || '',
+              avatarUrl: photoOrInitials(b.avatar_url, b.name),
               availableHours: b.available_hours || '',
               bio: b.bio || '',
               active: Boolean(b.active)
@@ -1348,24 +1335,11 @@
         }
 
         if (!user) {
-          if (cleanEmail === 'test@bigboys.cl') {
-            user = {
-              id: 9999,
-              fullName: 'Usuario de Prueba Big Boys',
-              email: 'test@bigboys.cl',
-              phone: '+56 9 8765 4321',
-              password: '123',
-              createdAt: '01-09-2026 10:00'
-            };
-            users.push(user);
-            localStorage.setItem('bigboys_users', JSON.stringify(users));
-          } else {
-            return { success: false, message: `El correo '${cleanEmail}' no se encuentra registrado.` };
-          }
+          return { success: false, message: `El correo '${cleanEmail}' no se encuentra registrado.` };
         }
 
-        const isTestPass = cleanEmail === 'test@bigboys.cl' && (cleanPass === '123' || cleanPass === '123456');
-        const isValid = isTestPass || !user.passwordHash || user.passwordHash === expectedHash;
+        // DEF-018 (11-11-2026): sin clave de prueba ni ingreso sin contraseña verificada
+        const isValid = !!user.passwordHash && user.passwordHash === expectedHash;
 
         if (isValid) {
           localStorage.setItem('bigboys_logged_user', JSON.stringify(user));
@@ -1833,7 +1807,7 @@
           name: name.trim(),
           specialty: specialty.trim() || 'Barbero Estilista',
           rating: 5.0,
-          avatarUrl: avatarUrl.trim() || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300',
+          avatarUrl: avatarUrl.trim() || initialsAvatar(name),
           availableHours: initialHours.trim(),
           bio: bio.trim() || 'Barbero profesional de Big Boys Barberías Chile.',
           active: true
@@ -2586,7 +2560,7 @@
                   <div>
                     <div className="flex justify-center mb-4 relative">
                       <div className="relative">
-                        <img src={barber.avatarUrl} alt={barber.name} className="w-20 h-20 rounded-full object-cover border-2 border-[#FFD700] shadow-md group-hover:scale-105 transition-transform" />
+                        <img src={photoOrInitials(barber.avatarUrl, barber.name)} alt={barber.name} className="w-20 h-20 rounded-full object-cover border-2 border-[#FFD700] shadow-md group-hover:scale-105 transition-transform" />
                         <span className={`absolute bottom-0 right-0 w-5 h-5 rounded-full border-2 border-[#1E1E1E] flex items-center justify-center text-[9px] ${
                           isUnavailable ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
                         }`}>
@@ -2660,7 +2634,7 @@
               <div className="bg-[#1E1E1E] border border-[#FFD700]/50 rounded-2xl w-full max-w-md p-6 relative shadow-2xl">
                 <button onClick={() => setActiveBioBarber(null)} className="absolute top-4 right-4 text-zinc-400 hover:text-white text-lg">✕</button>
                 <div className="flex items-center space-x-4 mb-4">
-                  <img src={activeBioBarber.avatarUrl} alt={activeBioBarber.name} className="w-16 h-16 rounded-full object-cover border-2 border-[#FFD700]" />
+                  <img src={photoOrInitials(activeBioBarber.avatarUrl, activeBioBarber.name)} alt={activeBioBarber.name} className="w-16 h-16 rounded-full object-cover border-2 border-[#FFD700]" />
                   <div>
                     <h3 className="text-lg font-black text-white font-brand">{activeBioBarber.name}</h3>
                     <p className="text-xs text-[#FFD700] font-bold">{activeBioBarber.specialty}</p>
@@ -3650,7 +3624,7 @@
                       return (
                         <div key={barber.id} onClick={() => setSelectedBarber(barber)} className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${isSelected ? 'bg-[#FFD700]/15 border-[#FFD700]' : 'bg-[#121212] border-zinc-800'}`}>
                           <div className="flex items-center space-x-3">
-                            <img src={barber.avatarUrl} alt={barber.name} className="w-12 h-12 rounded-full object-cover border-2 border-[#FFD700]" />
+                            <img src={photoOrInitials(barber.avatarUrl, barber.name)} alt={barber.name} className="w-12 h-12 rounded-full object-cover border-2 border-[#FFD700]" />
                             <div>
                               <h5 className="text-xs font-bold text-white">{barber.name}</h5>
                               <p className="text-[11px] text-zinc-400">{barber.specialty}</p>
@@ -3880,22 +3854,6 @@
 
             {mode === 'login' && (
               <form onSubmit={handleLogin} className="space-y-4">
-                <div className="p-2.5 bg-amber-950/30 border border-[#FFD700]/30 rounded-xl text-xs space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-zinc-300 font-bold">🧪 Cuenta de Prueba Rápida:</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setLoginEmail('test@bigboys.cl');
-                        setLoginPass('123');
-                      }}
-                      className="px-2 py-0.5 bg-[#FFD700] hover:bg-[#E5C100] text-black font-black text-[10px] rounded shadow uppercase"
-                    >
-                      ⚡ Usar Datos
-                    </button>
-                  </div>
-                  <p className="text-[10px] text-zinc-400 font-mono">test@bigboys.cl | 123</p>
-                </div>
                 <div>
                   <label className="block text-xs font-bold text-zinc-300 mb-1">Correo Electrónico</label>
                   <input type="email" required value={loginEmail} onChange={e => setLoginEmail(e.target.value)} placeholder="usuario@correo.cl" className="w-full px-3.5 py-2.5 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs focus:border-[#FFD700]" />
@@ -4108,26 +4066,6 @@
               {/* FORM 1: INICIAR SESIÓN CLIENTE */}
               {mode === 'login' && (
                 <form onSubmit={handleLoginSubmit} className="space-y-4">
-                  {/* Botón rápido para usar cuenta de prueba */}
-                  <div className="p-3 bg-amber-950/30 border border-[#FFD700]/30 rounded-xl text-xs space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-zinc-300 font-bold">🧪 Cuenta de Prueba Rápida:</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setLoginEmail('test@bigboys.cl');
-                          setLoginPass('123');
-                        }}
-                        className="px-2.5 py-1 bg-[#FFD700] hover:bg-[#E5C100] text-black font-black text-[10px] rounded-lg shadow uppercase transition-all"
-                      >
-                        ⚡ Usar Datos de Prueba
-                      </button>
-                    </div>
-                    <p className="text-[11px] text-zinc-400">
-                      Correo: <strong className="text-white font-mono">test@bigboys.cl</strong> | Clave: <strong className="text-white font-mono">123</strong>
-                    </p>
-                  </div>
-
                   <div>
                     <label className="block text-xs font-bold text-zinc-300 mb-1">Correo Electrónico</label>
                     <input
@@ -4794,7 +4732,7 @@
         setBarberLocIdInput(locations[0]?.id || 1);
         setBarberSpecialtyInput('');
         setBarberBioInput('');
-        setBarberAvatarInput('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300');
+        setBarberAvatarInput('');
         setBarberHoursInput('09:00,10:00,11:00,12:00,14:00,15:00,16:00,17:00,18:00');
         setBarberFeedbackMsg('');
         setShowAddBarberModal(true);
@@ -5134,9 +5072,10 @@
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
               <div className="flex items-center space-x-3.5">
+                {StaffSession.get() ? <StaffHeaderPhoto staff={StaffSession.get()} /> : (
                 <div className="w-12 h-12 rounded-2xl bg-[#FFD700]/10 border border-[#FFD700]/40 flex items-center justify-center text-2xl shadow-inner">
                   👑
-                </div>
+                </div>)}
                 <div>
                   <div className="flex items-center space-x-2">
                     <span className="text-[10px] font-black uppercase tracking-wider bg-[#FFD700]/10 text-[#FFD700] border border-[#FFD700]/30 px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
@@ -6527,7 +6466,7 @@
                               src={b.avatarUrl}
                               alt={b.name}
                               className="w-14 h-14 rounded-2xl object-cover border-2 border-[#FFD700]/70 shadow-md"
-                              onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300'; }}
+                              onError={(e) => { e.target.src = initialsAvatar(b.name); }}
                             />
                             <span
                               className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-[#1E1E1E] ${
@@ -7346,7 +7285,7 @@
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
               <div className="flex items-center space-x-4">
                 <img
-                  src={barber.avatarUrl || 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&auto=format&fit=crop&q=80'}
+                  src={photoOrInitials(barber.avatarUrl, barber.name)}
                   alt={barber.name}
                   className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-cyan-400 shadow-xl"
                 />
@@ -7799,7 +7738,9 @@
       RESERVA_NO_COBRABLE: 'Solo se cobra una reserva confirmada (no un no-show ni una anulación).',
       MEDIO_PAGO_REQUERIDO: 'Selecciona con qué pagó el cliente el saldo.',
       MONTO_INVALIDO: 'El monto y la propina no pueden ser negativos.',
-      ANTICIPACION_MINIMA: 'Esa hora ya no está disponible: se reserva con al menos 90 minutos de anticipación.'
+      ANTICIPACION_MINIMA: 'Esa hora ya no está disponible: se reserva con al menos 90 minutos de anticipación.',
+      FOTO_INVALIDA: 'La foto no es válida: usa una imagen JPG, PNG o WebP.',
+      USUARIO_INVALIDO: 'Solo el personal tiene foto de perfil.'
     };
     function apiErrorMessage(error) {
       const msg = (error && error.message) || String(error || '');
@@ -7837,6 +7778,66 @@
     const inputCls = 'w-full px-3 py-2 rounded-xl bg-[#121212] border border-zinc-700 text-white text-xs focus:border-[#FFD700] focus:outline-none';
     const cardCls = 'bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-4';
 
+    // ---------- Foto de perfil del personal (11-11-2026) ----------
+    function fileToAvatar(file) {
+      return new Promise((resolve, reject) => {
+        if (!file || !/^image\//.test(file.type)) return reject(new Error('Elige una imagen (JPG, PNG o WebP).'));
+        const img = new Image();
+        img.onload = () => {
+          const n = 320, lado = Math.min(img.width, img.height);
+          const c = document.createElement('canvas'); c.width = n; c.height = n;
+          c.getContext('2d').drawImage(img, (img.width - lado) / 2, (img.height - lado) / 2, lado, lado, 0, 0, n, n);
+          URL.revokeObjectURL(img.src);
+          resolve(c.toDataURL('image/jpeg', 0.85));
+        };
+        img.onerror = () => reject(new Error('No se pudo leer la imagen.'));
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    function StaffAvatar({ src, name, size = 'w-12 h-12' }) {
+      return <img src={photoOrInitials(src, name)} alt={'Foto de ' + (name || 'personal')} data-qa="foto-personal" className={`${size} rounded-full object-cover border-2 border-[#FFD700] shadow-md shrink-0`} />;
+    }
+
+    // Botón «Cambiar foto»: el Dueño cambia la de cualquier funcionario; cada funcionario, la suya (api_personal_foto)
+    function StaffPhotoButton({ staff, targetId, onChanged, label = '📷 Cambiar foto' }) {
+      const ref = useRef(null);
+      const [busy, setBusy] = useState(false);
+      const [err, setErr] = useState('');
+      const pick = async (e) => {
+        const file = e.target.files && e.target.files[0];
+        e.target.value = '';
+        if (!file) return;
+        setErr(''); setBusy(true);
+        try {
+          const foto = await fileToAvatar(file);
+          const r = await callApi('api_personal_foto', { ...StaffSession.creds(staff), p_id_usuario: targetId, p_foto: foto });
+          onChanged && onChanged(r.photo_url);
+          store.refreshCatalogFromCloud && store.refreshCatalogFromCloud();
+        } catch (ex) { setErr(ex.message); }
+        finally { setBusy(false); }
+      };
+      return (
+        <span className="inline-flex flex-col">
+          <input ref={ref} type="file" accept="image/png,image/jpeg,image/webp" onChange={pick} className="hidden" />
+          <button type="button" disabled={busy} onClick={() => ref.current && ref.current.click()} className="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-[#FFD700] text-[10px] font-bold rounded-lg disabled:opacity-50">{busy ? 'Subiendo…' : label}</button>
+          {err && <span className="text-[10px] text-red-400 mt-1">⚠️ {err}</span>}
+        </span>
+      );
+    }
+
+    // Foto del funcionario conectado en el encabezado de su panel, con opción de cambiarla
+    function StaffHeaderPhoto({ staff, size = 'w-14 h-14' }) {
+      const [src, setSrc] = useState(staff.photo || '');
+      const changed = (url) => { setSrc(url); StaffSession.set({ ...StaffSession.get(), photo: url }); };
+      return (
+        <div className="flex flex-col items-center gap-1">
+          <StaffAvatar src={src} name={staff.name} size={size} />
+          <StaffPhotoButton staff={staff} targetId={staff.id} onChanged={changed} label="📷 Mi foto" />
+        </div>
+      );
+    }
+
     // ---------- Ingreso del personal (cuentas creadas por el Dueño) ----------
     function StaffLoginForm({ allowedRoles, accent = 'cyan', title, description, onSuccess }) {
       const [email, setEmail] = useState('');
@@ -7849,7 +7850,7 @@
       const btn = accent === 'red' ? 'bg-red-600 hover:bg-red-500' : 'bg-cyan-600 hover:bg-cyan-500';
 
       const finish = (u, hash) => {
-        const session = { id: u.id, email: u.email, hash, role: u.role, name: u.full_name, locationId: u.location_id || null };
+        const session = { id: u.id, email: u.email, hash, role: u.role, name: u.full_name, locationId: u.location_id || null, photo: u.photo_url || '' };
         StaffSession.set(session);
         onSuccess(session);
       };
@@ -8488,6 +8489,8 @@
           <div className="space-y-2">
             {list.map(p => (
               <div key={p.id} className={cardCls + ' flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs'}>
+                <div className="flex items-center gap-3">
+                <StaffAvatar src={p.photo_url} name={p.public_name || p.full_name} />
                 <div>
                   <strong className="text-white">{p.public_name || p.full_name}</strong>
                   <span className="text-zinc-400"> · {p.email} · {ROLE_LABELS[p.role]} · {locName(p.location_id)}</span>
@@ -8495,9 +8498,13 @@
                   {p.must_change_password && <span className="ml-2 text-amber-300">(debe cambiar su clave)</span>}
                   <span className="block text-[10px] text-zinc-500">Último acceso: {AppFormatters.fecha(p.ultimo_acceso) || 'nunca'}</span>
                 </div>
+                </div>
+                <div className="flex items-center gap-2">
+                <StaffPhotoButton staff={staff} targetId={p.id} onChanged={(url) => setList(list.map(x => x.id === p.id ? { ...x, photo_url: url } : x))} />
                 {p.estado === 'ACTIVO'
                   ? <button onClick={() => toggle(p, false)} className="px-3 py-1.5 bg-zinc-800 text-red-400 font-bold rounded-lg">Bloquear acceso</button>
                   : <button onClick={() => toggle(p, true)} className="px-3 py-1.5 bg-zinc-800 text-emerald-400 font-bold rounded-lg">Reactivar con clave nueva</button>}
+                </div>
               </div>
             ))}
           </div>
@@ -8559,9 +8566,12 @@
       return (
         <div className="space-y-4 pb-10">
           <div className="flex flex-wrap justify-between items-center gap-2">
+            <div className="flex items-center gap-3">
+              <StaffHeaderPhoto staff={staff} />
             <div>
               <span className="text-[10px] font-black uppercase text-cyan-400 tracking-widest">Cajero/a · {loc ? loc.name : 'Sucursal'}</span>
               <h2 className="text-xl font-black text-white font-brand">Hola, {staff.name}</h2>
+            </div>
             </div>
             <button onClick={onLogout} className="px-3 py-2 bg-zinc-800 text-zinc-300 text-xs font-bold rounded-xl">Cerrar sesión</button>
           </div>
@@ -8616,9 +8626,12 @@
       return (
         <div className="space-y-4 pb-10 max-w-xl mx-auto">
           <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <StaffHeaderPhoto staff={staff} />
             <div>
               <span className="text-[10px] font-black uppercase text-cyan-400 tracking-widest">Barbero</span>
               <h2 className="text-xl font-black text-white font-brand">{staff.name}</h2>
+            </div>
             </div>
             <button onClick={onLogout} className="px-3 py-2 bg-zinc-800 text-zinc-300 text-xs font-bold rounded-xl">Cerrar sesión</button>
           </div>

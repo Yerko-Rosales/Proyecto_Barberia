@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>CP-07. La API no revela si el correo existe: responde con el mismo error genérico.</description>
+   <name>API-02 Login con correo inexistente</name>
+   <tag>API</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>9967526b-ac8a-4424-9057-d495fa7fa762</testCaseGuid>
+</TestCaseEntity>

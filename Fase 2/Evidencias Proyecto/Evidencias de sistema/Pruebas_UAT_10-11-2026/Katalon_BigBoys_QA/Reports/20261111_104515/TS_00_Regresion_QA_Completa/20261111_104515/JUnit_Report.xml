@@ -1,0 +1,844 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="TS_00_Regresion_QA_Completa" time="157.02" tests="17" failures="0" errors="0">
+   <testsuite name="TS_00_Regresion_QA_Completa" tests="17" failures="0" errors="0" time="157.02" skipped="0" timestamp="11-11-2026T10:45:22" hostname="User - USER-92QHCI1HJ8" id="Test Suites/TS_00_Regresion_QA_Completa">
+      <properties>
+         <property name="deviceName" value=""/>
+         <property name="devicePlatform"/>
+         <property name="logFolder" value="C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515"/>
+         <property name="logFiles" value="C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\execution0.log"/>
+         <property name="attachments" value="C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404738575.png, C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404739774.png, C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404757010.png, C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404759497.png, C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404774275.png, C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404777255.png, C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404794991.png, C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404816445.png, C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404835875.png, C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404838016.png, C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404857096.png"/>
+         <property name="hostName" value="User - USER-92QHCI1HJ8"/>
+         <property name="os" value="Windows 10 64bit"/>
+         <property name="katalonVersion" value="10.0.0.223"/>
+         <property name="browser" value="Chrome 156.0.0.0"/>
+         <property name="hostAddress" value="192.168.100.11"/>
+         <property name="sessionId" value="08875a967ba5db829cc296c743b3590f"/>
+         <property name="seleniumVersion" value="4.22.0"/>
+         <property name="proxyInformation" value="ProxyInformation { proxyOption=NO_PROXY, proxyServerType=HTTP, username=, password=********, proxyServerAddress=, proxyServerPort=0, executionList=&quot;&quot;, isApplyToDesiredCapabilities=true }"/>
+         <property name="platform" value="Windows 10"/>
+      </properties>
+      <testcase name="Test Cases/01_Web/WEB-01 Portal de acceso y politica publicada" time="18.286" classname="Test Cases/01_Web/WEB-01 Portal de acceso y politica publicada" status="PASSED">
+         <system-out><![CDATA[11-11-2026T10:45:22 - [TEST_CASE][PASSED] - Test Cases/01_Web/WEB-01 Portal de acceso y politica publicada: Test Cases/01_Web/WEB-01 Portal de acceso y politica publicada
+
+11-11-2026T10:45:22 - [TEST_STEP][PASSED] - QA.abrirPortal(): Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:45:23 - [MESSAGE][INFO] - Starting 'Chrome' driver
+
+11-11-2026T10:45:23 - [MESSAGE][INFO] - Action delay is set to 0 milliseconds
+
+11-11-2026T10:45:26 - [MESSAGE][PASSED] - Browser is opened with url: ''
+
+11-11-2026T10:45:27 - [MESSAGE][INFO] - Viewport size mismatch (1.283x587). Trying to set it again.
+
+11-11-2026T10:45:28 - [MESSAGE][WARNING] - Viewport size mismatch (1283x1283).
+
+11-11-2026T10:45:35 - [MESSAGE][PASSED] - Navigate to 'https://yerko-rosales.github.io/Proyecto_Barberia/?qa=1794404728926' successfully
+
+11-11-2026T10:45:36 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:45:36 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:45:36 - [TEST_STEP][PASSED] - verifyElementPresent(findTestObject("Web/Portal/btn_IniciarSesion"), 10): Object 'Object Repository/Web/Portal/btn_IniciarSesion' is present
+
+11-11-2026T10:45:37 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Portal/btn_IniciarSesion' is present
+
+11-11-2026T10:45:37 - [TEST_STEP][PASSED] - verifyElementPresent(findTestObject("Web/Portal/btn_Registrate"), 10): Object 'Object Repository/Web/Portal/btn_Registrate' is present
+
+11-11-2026T10:45:37 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Portal/btn_Registrate' is present
+
+11-11-2026T10:45:37 - [TEST_STEP][PASSED] - verifyElementPresent(findTestObject("Web/Portal/btn_Barbero"), 10): Object 'Object Repository/Web/Portal/btn_Barbero' is present
+
+11-11-2026T10:45:37 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Portal/btn_Barbero' is present
+
+11-11-2026T10:45:37 - [TEST_STEP][PASSED] - verifyElementPresent(findTestObject("Web/Portal/btn_Administracion"), 10): Object 'Object Repository/Web/Portal/btn_Administracion' is present
+
+11-11-2026T10:45:38 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Portal/btn_Administracion' is present
+
+11-11-2026T10:45:38 - [TEST_STEP][PASSED] - verifyElementPresent(findTestObject("Web/Portal/btn_ContinuarInvitado"), 10): Object 'Object Repository/Web/Portal/btn_ContinuarInvitado' is present
+
+11-11-2026T10:45:38 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Portal/btn_ContinuarInvitado' is present
+
+11-11-2026T10:45:38 - [TEST_STEP][PASSED] - takeScreenshot(): Taking screenshot successfully
+
+11-11-2026T10:45:38 - [MESSAGE][PASSED] - Taking screenshot successfully
+[[ATTACHMENT|C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404738575.png]]
+
+11-11-2026T10:45:38 - [TEST_STEP][PASSED] - navigateToUrl(URL_WEB + "privacidad.html"): Navigate to 'https://yerko-rosales.github.io/Proyecto_Barberia/privacidad.html' successfully
+
+11-11-2026T10:45:39 - [MESSAGE][PASSED] - Navigate to 'https://yerko-rosales.github.io/Proyecto_Barberia/privacidad.html' successfully
+
+11-11-2026T10:45:39 - [TEST_STEP][PASSED] - waitForElementPresent(QA.texto("Política de Privacidad"), TIMEOUT): Object '//*[text()[contains(normalize-space(.), "Política de Privacidad")]]' is present
+
+11-11-2026T10:45:39 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Política de Privacidad")]]' is present
+
+11-11-2026T10:45:39 - [TEST_STEP][PASSED] - pagina = QA.textoPagina(): Execute JavaScript 'return document.body.innerText' successfully
+
+11-11-2026T10:45:39 - [MESSAGE][PASSED] - Execute JavaScript 'return document.body.innerText' successfully
+
+11-11-2026T10:45:39 - [TEST_STEP][PASSED] - QA.verificar(pagina.contains("Ley") && pagina.contains("21.719"), "La política publicada cita la Ley N° 21.719"): La política publicada cita la Ley N° 21.719
+
+11-11-2026T10:45:39 - [MESSAGE][PASSED] - La política publicada cita la Ley N° 21.719
+
+11-11-2026T10:45:39 - [TEST_STEP][PASSED] - QA.verificar(toLowerCase().contains("términos"), "La página incluye los Términos y Condiciones"): La página incluye los Términos y Condiciones
+
+11-11-2026T10:45:39 - [MESSAGE][PASSED] - La página incluye los Términos y Condiciones
+
+11-11-2026T10:45:39 - [TEST_STEP][PASSED] - takeScreenshot(): Taking screenshot successfully
+
+11-11-2026T10:45:39 - [MESSAGE][PASSED] - Taking screenshot successfully
+[[ATTACHMENT|C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404739774.png]]
+
+11-11-2026T10:45:39 - [TEST_STEP][PASSED] - closeBrowser(): Browser is closed
+
+11-11-2026T10:45:40 - [MESSAGE][PASSED] - Browser is closed]]></system-out>
+         <system-err><![CDATA[]]></system-err>
+      </testcase>
+      <testcase name="Test Cases/01_Web/WEB-02 Registro exige aceptar la politica" time="19.77" classname="Test Cases/01_Web/WEB-02 Registro exige aceptar la politica" status="PASSED">
+         <system-out><![CDATA[11-11-2026T10:45:40 - [TEST_CASE][PASSED] - Test Cases/01_Web/WEB-02 Registro exige aceptar la politica: Test Cases/01_Web/WEB-02 Registro exige aceptar la politica
+
+11-11-2026T10:45:40 - [TEST_STEP][PASSED] - QA.abrirPortal(): Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:45:40 - [MESSAGE][INFO] - Starting 'Chrome' driver
+
+11-11-2026T10:45:40 - [MESSAGE][INFO] - Action delay is set to 0 milliseconds
+
+11-11-2026T10:45:42 - [MESSAGE][PASSED] - Browser is opened with url: ''
+
+11-11-2026T10:45:43 - [MESSAGE][INFO] - Viewport size mismatch (1.283x587). Trying to set it again.
+
+11-11-2026T10:45:44 - [MESSAGE][WARNING] - Viewport size mismatch (1283x1283).
+
+11-11-2026T10:45:50 - [MESSAGE][PASSED] - Navigate to 'https://yerko-rosales.github.io/Proyecto_Barberia/?qa=1794404744459' successfully
+
+11-11-2026T10:45:52 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:45:52 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:45:52 - [TEST_STEP][PASSED] - QA.clic(findTestObject("Web/Portal/btn_Registrate")): Object: 'Object Repository/Web/Portal/btn_Registrate' is clicked on
+
+11-11-2026T10:45:52 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Portal/btn_Registrate' is clickable
+
+11-11-2026T10:45:53 - [MESSAGE][PASSED] - Object: 'Object Repository/Web/Portal/btn_Registrate' is clicked on
+
+11-11-2026T10:45:53 - [TEST_STEP][PASSED] - waitForElementVisible(findTestObject("Web/Registro/input_Nombre"), TIMEOUT): Object 'Object Repository/Web/Registro/input_Nombre' is visible
+
+11-11-2026T10:45:53 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Registro/input_Nombre' is visible
+
+11-11-2026T10:45:53 - [TEST_STEP][PASSED] - setText(findTestObject("Web/Registro/input_Nombre"), "Prueba Katalon"): Text 'Prueba Katalon' is set on object 'Object Repository/Web/Registro/input_Nombre'
+
+11-11-2026T10:45:54 - [MESSAGE][PASSED] - Text 'Prueba Katalon' is set on object 'Object Repository/Web/Registro/input_Nombre'
+
+11-11-2026T10:45:54 - [TEST_STEP][PASSED] - setText(findTestObject("Web/Registro/input_Telefono"), "+56 9 1111 4444"): Text '+56 9 1111 4444' is set on object 'Object Repository/Web/Registro/input_Telefono'
+
+11-11-2026T10:45:55 - [MESSAGE][PASSED] - Text '+56 9 1111 4444' is set on object 'Object Repository/Web/Registro/input_Telefono'
+
+11-11-2026T10:45:55 - [TEST_STEP][PASSED] - setText(findTestObject("Web/Registro/input_Correo"), "katalon.qa@prueba.invalid"): Text 'katalon.qa@prueba.invalid' is set on object 'Object Repository/Web/Registro/input_Correo'
+
+11-11-2026T10:45:55 - [MESSAGE][PASSED] - Text 'katalon.qa@prueba.invalid' is set on object 'Object Repository/Web/Registro/input_Correo'
+
+11-11-2026T10:45:55 - [TEST_STEP][PASSED] - setText(findTestObject("Web/Registro/input_Clave"), "Prueba123"): Text 'Prueba123' is set on object 'Object Repository/Web/Registro/input_Clave'
+
+11-11-2026T10:45:56 - [MESSAGE][PASSED] - Text 'Prueba123' is set on object 'Object Repository/Web/Registro/input_Clave'
+
+11-11-2026T10:45:56 - [TEST_STEP][PASSED] - verifyElementPresent(findTestObject("Web/Registro/lnk_Politica"), 5): Object 'Object Repository/Web/Registro/lnk_Politica' is present
+
+11-11-2026T10:45:56 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Registro/lnk_Politica' is present
+
+11-11-2026T10:45:56 - [TEST_STEP][PASSED] - verifyElementNotChecked(findTestObject("Web/Registro/chk_AceptoPolitica"), 5): Object 'Object Repository/Web/Registro/chk_AceptoPolitica' is not checked
+
+11-11-2026T10:45:56 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Registro/chk_AceptoPolitica' is not checked
+
+11-11-2026T10:45:56 - [TEST_STEP][PASSED] - takeScreenshot(): Taking screenshot successfully
+
+11-11-2026T10:45:57 - [MESSAGE][PASSED] - Taking screenshot successfully
+[[ATTACHMENT|C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404757010.png]]
+
+11-11-2026T10:45:57 - [TEST_STEP][PASSED] - QA.clic(findTestObject("Web/Registro/btn_CrearCuenta")): Object: 'Object Repository/Web/Registro/btn_CrearCuenta' is clicked on
+
+11-11-2026T10:45:57 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Registro/btn_CrearCuenta' is clickable
+
+11-11-2026T10:45:57 - [MESSAGE][PASSED] - Object: 'Object Repository/Web/Registro/btn_CrearCuenta' is clicked on
+
+11-11-2026T10:45:57 - [TEST_STEP][PASSED] - waitForElementPresent(QA.texto("debes aceptar la Política"), 15): Object '//*[text()[contains(normalize-space(.), "debes aceptar la Política")]]' is present
+
+11-11-2026T10:45:58 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "debes aceptar la Política")]]' is present
+
+11-11-2026T10:45:58 - [TEST_STEP][PASSED] - verifyElementPresent(QA.texto("debes aceptar la Política"), 5): Object '//*[text()[contains(normalize-space(.), "debes aceptar la Política")]]' is present
+
+11-11-2026T10:45:58 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "debes aceptar la Política")]]' is present
+
+11-11-2026T10:45:58 - [TEST_STEP][PASSED] - takeScreenshot(): Taking screenshot successfully
+
+11-11-2026T10:45:59 - [MESSAGE][PASSED] - Taking screenshot successfully
+[[ATTACHMENT|C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404759497.png]]
+
+11-11-2026T10:45:59 - [TEST_STEP][PASSED] - closeBrowser(): Browser is closed
+
+11-11-2026T10:46:00 - [MESSAGE][PASSED] - Browser is closed]]></system-out>
+         <system-err><![CDATA[]]></system-err>
+      </testcase>
+      <testcase name="Test Cases/01_Web/WEB-03 Invitado sin acceso por PIN de administrador" time="17.849" classname="Test Cases/01_Web/WEB-03 Invitado sin acceso por PIN de administrador" status="PASSED">
+         <system-out><![CDATA[11-11-2026T10:46:00 - [TEST_CASE][PASSED] - Test Cases/01_Web/WEB-03 Invitado sin acceso por PIN de administrador: Test Cases/01_Web/WEB-03 Invitado sin acceso por PIN de administrador
+
+11-11-2026T10:46:00 - [TEST_STEP][PASSED] - QA.abrirPortal(): Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:46:00 - [MESSAGE][INFO] - Starting 'Chrome' driver
+
+11-11-2026T10:46:00 - [MESSAGE][INFO] - Action delay is set to 0 milliseconds
+
+11-11-2026T10:46:02 - [MESSAGE][PASSED] - Browser is opened with url: ''
+
+11-11-2026T10:46:03 - [MESSAGE][INFO] - Viewport size mismatch (1.283x587). Trying to set it again.
+
+11-11-2026T10:46:04 - [MESSAGE][WARNING] - Viewport size mismatch (1283x1283).
+
+11-11-2026T10:46:11 - [MESSAGE][PASSED] - Navigate to 'https://yerko-rosales.github.io/Proyecto_Barberia/?qa=1794404764283' successfully
+
+11-11-2026T10:46:12 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:46:12 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:46:12 - [TEST_STEP][PASSED] - QA.clic(findTestObject("Web/Portal/btn_ContinuarInvitado")): Object: 'Object Repository/Web/Portal/btn_ContinuarInvitado' is clicked on
+
+11-11-2026T10:46:12 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Portal/btn_ContinuarInvitado' is clickable
+
+11-11-2026T10:46:13 - [MESSAGE][PASSED] - Object: 'Object Repository/Web/Portal/btn_ContinuarInvitado' is clicked on
+
+11-11-2026T10:46:13 - [TEST_STEP][PASSED] - waitForElementPresent(findTestObject("Web/Cliente/btn_AgendarCita"), TIMEOUT): Object 'Object Repository/Web/Cliente/btn_AgendarCita' is present
+
+11-11-2026T10:46:13 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Cliente/btn_AgendarCita' is present
+
+11-11-2026T10:46:13 - [TEST_STEP][PASSED] - verifyElementPresent(QA.texto("BIENVENIDOS A BIG BOYS"), 10): Object '//*[text()[contains(normalize-space(.), "BIENVENIDOS A BIG BOYS")]]' is present
+
+11-11-2026T10:46:14 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "BIENVENIDOS A BIG BOYS")]]' is present
+
+11-11-2026T10:46:14 - [TEST_STEP][PASSED] - takeScreenshot(): Taking screenshot successfully
+
+11-11-2026T10:46:14 - [MESSAGE][PASSED] - Taking screenshot successfully
+[[ATTACHMENT|C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404774275.png]]
+
+11-11-2026T10:46:14 - [TEST_STEP][PASSED] - QA.clic(findTestObject("Web/Cliente/btn_IngresarRegistro")): Object: 'Object Repository/Web/Cliente/btn_IngresarRegistro' is clicked on
+
+11-11-2026T10:46:14 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Cliente/btn_IngresarRegistro' is clickable
+
+11-11-2026T10:46:15 - [MESSAGE][PASSED] - Object: 'Object Repository/Web/Cliente/btn_IngresarRegistro' is clicked on
+
+11-11-2026T10:46:15 - [TEST_STEP][PASSED] - delay(1): Delayed 1 second(s)
+
+11-11-2026T10:46:16 - [MESSAGE][PASSED] - Delayed 1 second(s)
+
+11-11-2026T10:46:16 - [TEST_STEP][PASSED] - verifyElementNotPresent(QA.texto("PIN Administrador"), 3): Web element with id: '//*[text()[contains(normalize-space(.), "PIN Administrador")]]' located by 'By.xpath: //*[text()[contains(normalize-space(.), "PIN Administrador")]]' is not present after '3' second(s)
+
+11-11-2026T10:46:16 - [MESSAGE][PASSED] - Web element with id: '//*[text()[contains(normalize-space(.), "PIN Administrador")]]' located by 'By.xpath: //*[text()[contains(normalize-space(.), "PIN Administrador")]]' is not present after '3' second(s)
+
+11-11-2026T10:46:16 - [TEST_STEP][PASSED] - verifyElementNotPresent(QA.xpath("//button[contains(., 'Admin') and contains(., '🛡')]"), 3): Web element with id: '//button[contains(., 'Admin') and contains(., '🛡')]' located by 'By.xpath: //button[contains(., 'Admin') and contains(., '🛡')]' is not present after '3' second(s)
+
+11-11-2026T10:46:17 - [MESSAGE][PASSED] - Web element with id: '//button[contains(., 'Admin') and contains(., '🛡')]' located by 'By.xpath: //button[contains(., 'Admin') and contains(., '🛡')]' is not present after '3' second(s)
+
+11-11-2026T10:46:17 - [TEST_STEP][PASSED] - adminCfg = executeJavaScript("return localStorage.getItem('bigboys_admin_config')", null): Execute JavaScript 'return localStorage.getItem('bigboys_admin_config')' successfully
+
+11-11-2026T10:46:17 - [MESSAGE][PASSED] - Execute JavaScript 'return localStorage.getItem('bigboys_admin_config')' successfully
+
+11-11-2026T10:46:17 - [TEST_STEP][PASSED] - QA.verificar(adminCfg == null, "No existe configuración local de administrador (bigboys_admin_config)"): No existe configuración local de administrador (bigboys_admin_config)
+
+11-11-2026T10:46:17 - [MESSAGE][PASSED] - No existe configuración local de administrador (bigboys_admin_config)
+
+11-11-2026T10:46:17 - [TEST_STEP][PASSED] - takeScreenshot(): Taking screenshot successfully
+
+11-11-2026T10:46:17 - [MESSAGE][PASSED] - Taking screenshot successfully
+[[ATTACHMENT|C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404777255.png]]
+
+11-11-2026T10:46:17 - [TEST_STEP][PASSED] - closeBrowser(): Browser is closed
+
+11-11-2026T10:46:18 - [MESSAGE][PASSED] - Browser is closed]]></system-out>
+         <system-err><![CDATA[]]></system-err>
+      </testcase>
+      <testcase name="Test Cases/01_Web/WEB-04 Ingreso del personal con credenciales invalidas" time="17.59" classname="Test Cases/01_Web/WEB-04 Ingreso del personal con credenciales invalidas" status="PASSED">
+         <system-out><![CDATA[11-11-2026T10:46:18 - [TEST_CASE][PASSED] - Test Cases/01_Web/WEB-04 Ingreso del personal con credenciales invalidas: Test Cases/01_Web/WEB-04 Ingreso del personal con credenciales invalidas
+
+11-11-2026T10:46:18 - [TEST_STEP][PASSED] - QA.abrirPortal(): Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:46:18 - [MESSAGE][INFO] - Starting 'Chrome' driver
+
+11-11-2026T10:46:18 - [MESSAGE][INFO] - Action delay is set to 0 milliseconds
+
+11-11-2026T10:46:20 - [MESSAGE][PASSED] - Browser is opened with url: ''
+
+11-11-2026T10:46:21 - [MESSAGE][INFO] - Viewport size mismatch (1.283x587). Trying to set it again.
+
+11-11-2026T10:46:22 - [MESSAGE][WARNING] - Viewport size mismatch (1283x1283).
+
+11-11-2026T10:46:28 - [MESSAGE][PASSED] - Navigate to 'https://yerko-rosales.github.io/Proyecto_Barberia/?qa=1794404782162' successfully
+
+11-11-2026T10:46:29 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:46:29 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:46:29 - [TEST_STEP][PASSED] - QA.clic(findTestObject("Web/Portal/btn_Administracion")): Object: 'Object Repository/Web/Portal/btn_Administracion' is clicked on
+
+11-11-2026T10:46:30 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Portal/btn_Administracion' is clickable
+
+11-11-2026T10:46:30 - [MESSAGE][PASSED] - Object: 'Object Repository/Web/Portal/btn_Administracion' is clicked on
+
+11-11-2026T10:46:30 - [TEST_STEP][PASSED] - waitForElementVisible(findTestObject("Web/Portal/input_CorreoPersonal"), TIMEOUT): Object 'Object Repository/Web/Portal/input_CorreoPersonal' is visible
+
+11-11-2026T10:46:31 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Portal/input_CorreoPersonal' is visible
+
+11-11-2026T10:46:31 - [TEST_STEP][PASSED] - setText(findTestObject("Web/Portal/input_CorreoPersonal"), "no.existe.katalon@bigboys.cl"): Text 'no.existe.katalon@bigboys.cl' is set on object 'Object Repository/Web/Portal/input_CorreoPersonal'
+
+11-11-2026T10:46:31 - [MESSAGE][PASSED] - Text 'no.existe.katalon@bigboys.cl' is set on object 'Object Repository/Web/Portal/input_CorreoPersonal'
+
+11-11-2026T10:46:31 - [TEST_STEP][PASSED] - setText(findTestObject("Web/Portal/input_ClavePersonal"), "ClaveIncorrecta1"): Text 'ClaveIncorrecta1' is set on object 'Object Repository/Web/Portal/input_ClavePersonal'
+
+11-11-2026T10:46:32 - [MESSAGE][PASSED] - Text 'ClaveIncorrecta1' is set on object 'Object Repository/Web/Portal/input_ClavePersonal'
+
+11-11-2026T10:46:32 - [TEST_STEP][PASSED] - QA.clic(findTestObject("Web/Portal/btn_IngresarPersonal")): Object: 'Object Repository/Web/Portal/btn_IngresarPersonal' is clicked on
+
+11-11-2026T10:46:32 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Portal/btn_IngresarPersonal' is clickable
+
+11-11-2026T10:46:32 - [MESSAGE][PASSED] - Object: 'Object Repository/Web/Portal/btn_IngresarPersonal' is clicked on
+
+11-11-2026T10:46:32 - [TEST_STEP][PASSED] - waitForElementVisible(findTestObject("Web/Portal/msg_Error"), TIMEOUT): Object 'Object Repository/Web/Portal/msg_Error' is visible
+
+11-11-2026T10:46:34 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Portal/msg_Error' is visible
+
+11-11-2026T10:46:34 - [TEST_STEP][PASSED] - verifyElementPresent(findTestObject("Web/Portal/input_CorreoPersonal"), 5): Object 'Object Repository/Web/Portal/input_CorreoPersonal' is present
+
+11-11-2026T10:46:34 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Portal/input_CorreoPersonal' is present
+
+11-11-2026T10:46:34 - [TEST_STEP][PASSED] - verifyElementNotPresent(findTestObject("Web/Panel/btn_CerrarSesion"), 3): Web element with id: 'Object Repository/Web/Panel/btn_CerrarSesion' located by 'By.xpath: //button[normalize-space()='Cerrar sesión' or .//span[normalize-space()='Cerrar Sesión']]' is not present after '3' second(s)
+
+11-11-2026T10:46:34 - [MESSAGE][PASSED] - Web element with id: 'Object Repository/Web/Panel/btn_CerrarSesion' located by 'By.xpath: //button[normalize-space()='Cerrar sesión' or .//span[normalize-space()='Cerrar Sesión']]' is not present after '3' second(s)
+
+11-11-2026T10:46:34 - [TEST_STEP][PASSED] - takeScreenshot(): Taking screenshot successfully
+
+11-11-2026T10:46:35 - [MESSAGE][PASSED] - Taking screenshot successfully
+[[ATTACHMENT|C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404794991.png]]
+
+11-11-2026T10:46:35 - [TEST_STEP][PASSED] - closeBrowser(): Browser is closed
+
+11-11-2026T10:46:35 - [MESSAGE][PASSED] - Browser is closed]]></system-out>
+         <system-err><![CDATA[]]></system-err>
+      </testcase>
+      <testcase name="Test Cases/01_Web/WEB-05 Duenio revisa la caja del dia" time="21.673" classname="Test Cases/01_Web/WEB-05 Duenio revisa la caja del dia" status="PASSED">
+         <system-out><![CDATA[11-11-2026T10:46:35 - [TEST_CASE][PASSED] - Test Cases/01_Web/WEB-05 Duenio revisa la caja del dia: Test Cases/01_Web/WEB-05 Duenio revisa la caja del dia
+
+11-11-2026T10:46:36 - [TEST_STEP][PASSED] - QA.abrirPortal(): Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:46:36 - [MESSAGE][INFO] - Starting 'Chrome' driver
+
+11-11-2026T10:46:36 - [MESSAGE][INFO] - Action delay is set to 0 milliseconds
+
+11-11-2026T10:46:38 - [MESSAGE][PASSED] - Browser is opened with url: ''
+
+11-11-2026T10:46:38 - [MESSAGE][INFO] - Viewport size mismatch (1.283x587). Trying to set it again.
+
+11-11-2026T10:46:39 - [MESSAGE][WARNING] - Viewport size mismatch (1283x1283).
+
+11-11-2026T10:46:46 - [MESSAGE][PASSED] - Navigate to 'https://yerko-rosales.github.io/Proyecto_Barberia/?qa=1794404799723' successfully
+
+11-11-2026T10:46:46 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:46:47 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:46:47 - [TEST_STEP][PASSED] - QA.ingresarPersonal("dueno"): Object: '//button[@type='submit' and contains(., 'Ingresar')]' is clicked on
+
+11-11-2026T10:46:47 - [MESSAGE][PASSED] - Object '//button[.//span[normalize-space()='Administración']]' is clickable
+
+11-11-2026T10:46:47 - [MESSAGE][PASSED] - Object: '//button[.//span[normalize-space()='Administración']]' is clicked on
+
+11-11-2026T10:46:48 - [MESSAGE][PASSED] - Object '//input[@placeholder='correo@bigboys.cl']' is visible
+
+11-11-2026T10:46:48 - [MESSAGE][PASSED] - Text 'admin@bigboys.cl' is set on object '//input[@placeholder='correo@bigboys.cl']'
+
+11-11-2026T10:46:49 - [MESSAGE][INFO] - Contraseña de admin@bigboys.cl escrita (no se registra)
+
+11-11-2026T10:46:49 - [MESSAGE][PASSED] - Object '//button[@type='submit' and contains(., 'Ingresar')]' is clickable
+
+11-11-2026T10:46:49 - [MESSAGE][PASSED] - Object: '//button[@type='submit' and contains(., 'Ingresar')]' is clicked on
+
+11-11-2026T10:46:49 - [TEST_STEP][PASSED] - waitForElementPresent(findTestObject("Web/Panel/tab_Ventas"), TIMEOUT): Object 'Object Repository/Web/Panel/tab_Ventas' is present
+
+11-11-2026T10:46:50 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Panel/tab_Ventas' is present
+
+11-11-2026T10:46:50 - [TEST_STEP][PASSED] - verifyElementPresent(findTestObject("Web/Panel/tab_Personal"), 5): Object 'Object Repository/Web/Panel/tab_Personal' is present
+
+11-11-2026T10:46:51 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Panel/tab_Personal' is present
+
+11-11-2026T10:46:51 - [TEST_STEP][PASSED] - verifyElementPresent(findTestObject("Web/Panel/tab_Derechos"), 5): Object 'Object Repository/Web/Panel/tab_Derechos' is present
+
+11-11-2026T10:46:51 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Panel/tab_Derechos' is present
+
+11-11-2026T10:46:51 - [TEST_STEP][PASSED] - verifyElementPresent(findTestObject("Web/Panel/tab_FilaLlegada"), 5): Object 'Object Repository/Web/Panel/tab_FilaLlegada' is present
+
+11-11-2026T10:46:51 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Panel/tab_FilaLlegada' is present
+
+11-11-2026T10:46:51 - [TEST_STEP][PASSED] - QA.clic(findTestObject("Web/Panel/tab_Ventas")): Object: 'Object Repository/Web/Panel/tab_Ventas' is clicked on
+
+11-11-2026T10:46:51 - [MESSAGE][PASSED] - Object 'Object Repository/Web/Panel/tab_Ventas' is clickable
+
+11-11-2026T10:46:52 - [MESSAGE][PASSED] - Object: 'Object Repository/Web/Panel/tab_Ventas' is clicked on
+
+11-11-2026T10:46:52 - [TEST_STEP][PASSED] - waitForElementPresent(QA.texto("Caja del día"), TIMEOUT): Object '//*[text()[contains(normalize-space(.), "Caja del día")]]' is present
+
+11-11-2026T10:46:52 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Caja del día")]]' is present
+
+11-11-2026T10:46:52 - [TEST_STEP][PASSED] - verifyElementPresent(QA.texto("Caja del día"), 5): Object '//*[text()[contains(normalize-space(.), "Caja del día")]]' is present
+
+11-11-2026T10:46:53 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Caja del día")]]' is present
+
+11-11-2026T10:46:53 - [TEST_STEP][PASSED] - delay(3): Delayed 3 second(s)
+
+11-11-2026T10:46:56 - [MESSAGE][PASSED] - Delayed 3 second(s)
+
+11-11-2026T10:46:56 - [TEST_STEP][PASSED] - takeScreenshot(): Taking screenshot successfully
+
+11-11-2026T10:46:56 - [MESSAGE][PASSED] - Taking screenshot successfully
+[[ATTACHMENT|C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404816445.png]]
+
+11-11-2026T10:46:56 - [TEST_STEP][PASSED] - closeBrowser(): Browser is closed
+
+11-11-2026T10:46:57 - [MESSAGE][PASSED] - Browser is closed]]></system-out>
+         <system-err><![CDATA[]]></system-err>
+      </testcase>
+      <testcase name="Test Cases/01_Web/WEB-06 Cajero opera la fila de su sucursal" time="21.344" classname="Test Cases/01_Web/WEB-06 Cajero opera la fila de su sucursal" status="PASSED">
+         <system-out><![CDATA[11-11-2026T10:46:57 - [TEST_CASE][PASSED] - Test Cases/01_Web/WEB-06 Cajero opera la fila de su sucursal: Test Cases/01_Web/WEB-06 Cajero opera la fila de su sucursal
+
+11-11-2026T10:46:57 - [TEST_STEP][PASSED] - QA.abrirPortal(): Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:46:57 - [MESSAGE][INFO] - Starting 'Chrome' driver
+
+11-11-2026T10:46:57 - [MESSAGE][INFO] - Action delay is set to 0 milliseconds
+
+11-11-2026T10:46:59 - [MESSAGE][PASSED] - Browser is opened with url: ''
+
+11-11-2026T10:47:00 - [MESSAGE][INFO] - Viewport size mismatch (1.283x587). Trying to set it again.
+
+11-11-2026T10:47:01 - [MESSAGE][WARNING] - Viewport size mismatch (1283x1283).
+
+11-11-2026T10:47:08 - [MESSAGE][PASSED] - Navigate to 'https://yerko-rosales.github.io/Proyecto_Barberia/?qa=1794404821227' successfully
+
+11-11-2026T10:47:08 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:47:08 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:47:08 - [TEST_STEP][PASSED] - QA.ingresarPersonal("caja"): Object: '//button[@type='submit' and contains(., 'Ingresar')]' is clicked on
+
+11-11-2026T10:47:09 - [MESSAGE][PASSED] - Object '//button[.//span[normalize-space()='Administración']]' is clickable
+
+11-11-2026T10:47:09 - [MESSAGE][PASSED] - Object: '//button[.//span[normalize-space()='Administración']]' is clicked on
+
+11-11-2026T10:47:09 - [MESSAGE][PASSED] - Object '//input[@placeholder='correo@bigboys.cl']' is visible
+
+11-11-2026T10:47:10 - [MESSAGE][PASSED] - Text 'caja1@bigboys.cl' is set on object '//input[@placeholder='correo@bigboys.cl']'
+
+11-11-2026T10:47:10 - [MESSAGE][INFO] - Contraseña de caja1@bigboys.cl escrita (no se registra)
+
+11-11-2026T10:47:10 - [MESSAGE][PASSED] - Object '//button[@type='submit' and contains(., 'Ingresar')]' is clickable
+
+11-11-2026T10:47:11 - [MESSAGE][PASSED] - Object: '//button[@type='submit' and contains(., 'Ingresar')]' is clicked on
+
+11-11-2026T10:47:11 - [TEST_STEP][PASSED] - waitForElementPresent(QA.texto("Cajero/a"), TIMEOUT): Object '//*[text()[contains(normalize-space(.), "Cajero/a")]]' is present
+
+11-11-2026T10:47:12 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Cajero/a")]]' is present
+
+11-11-2026T10:47:12 - [TEST_STEP][PASSED] - verifyElementPresent(QA.xpath("//button[contains(., 'Fila por llegada')]"), 10): Object '//button[contains(., 'Fila por llegada')]' is present
+
+11-11-2026T10:47:12 - [MESSAGE][PASSED] - Object '//button[contains(., 'Fila por llegada')]' is present
+
+11-11-2026T10:47:12 - [TEST_STEP][PASSED] - verifyElementPresent(QA.xpath("//button[contains(., 'Reservas de hoy')]"), 10): Object '//button[contains(., 'Reservas de hoy')]' is present
+
+11-11-2026T10:47:13 - [MESSAGE][PASSED] - Object '//button[contains(., 'Reservas de hoy')]' is present
+
+11-11-2026T10:47:13 - [TEST_STEP][PASSED] - verifyElementNotPresent(findTestObject("Web/Panel/tab_Personal"), 3): Web element with id: 'Object Repository/Web/Panel/tab_Personal' located by 'By.xpath: //button[contains(., 'Cuentas del personal')]' is not present after '3' second(s)
+
+11-11-2026T10:47:13 - [MESSAGE][PASSED] - Web element with id: 'Object Repository/Web/Panel/tab_Personal' located by 'By.xpath: //button[contains(., 'Cuentas del personal')]' is not present after '3' second(s)
+
+11-11-2026T10:47:13 - [TEST_STEP][PASSED] - verifyElementNotPresent(findTestObject("Web/Panel/tab_Derechos"), 3): Web element with id: 'Object Repository/Web/Panel/tab_Derechos' located by 'By.xpath: //button[contains(., 'Derechos (Ley 21.719)')]' is not present after '3' second(s)
+
+11-11-2026T10:47:13 - [MESSAGE][PASSED] - Web element with id: 'Object Repository/Web/Panel/tab_Derechos' located by 'By.xpath: //button[contains(., 'Derechos (Ley 21.719)')]' is not present after '3' second(s)
+
+11-11-2026T10:47:13 - [TEST_STEP][PASSED] - delay(2): Delayed 2 second(s)
+
+11-11-2026T10:47:15 - [MESSAGE][PASSED] - Delayed 2 second(s)
+
+11-11-2026T10:47:15 - [TEST_STEP][PASSED] - takeScreenshot(): Taking screenshot successfully
+
+11-11-2026T10:47:16 - [MESSAGE][PASSED] - Taking screenshot successfully
+[[ATTACHMENT|C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404835875.png]]
+
+11-11-2026T10:47:16 - [TEST_STEP][PASSED] - QA.clic(QA.xpath("//button[contains(., 'Reservas de hoy')]")): Object: '//button[contains(., 'Reservas de hoy')]' is clicked on
+
+11-11-2026T10:47:16 - [MESSAGE][PASSED] - Object '//button[contains(., 'Reservas de hoy')]' is clickable
+
+11-11-2026T10:47:16 - [MESSAGE][PASSED] - Object: '//button[contains(., 'Reservas de hoy')]' is clicked on
+
+11-11-2026T10:47:16 - [TEST_STEP][PASSED] - delay(1): Delayed 1 second(s)
+
+11-11-2026T10:47:17 - [MESSAGE][PASSED] - Delayed 1 second(s)
+
+11-11-2026T10:47:17 - [TEST_STEP][PASSED] - takeScreenshot(): Taking screenshot successfully
+
+11-11-2026T10:47:18 - [MESSAGE][PASSED] - Taking screenshot successfully
+[[ATTACHMENT|C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404838016.png]]
+
+11-11-2026T10:47:18 - [TEST_STEP][PASSED] - closeBrowser(): Browser is closed
+
+11-11-2026T10:47:18 - [MESSAGE][PASSED] - Browser is closed]]></system-out>
+         <system-err><![CDATA[]]></system-err>
+      </testcase>
+      <testcase name="Test Cases/01_Web/WEB-07 Barbero ve sus atenciones sin datos de contacto" time="19.159" classname="Test Cases/01_Web/WEB-07 Barbero ve sus atenciones sin datos de contacto" status="PASSED">
+         <system-out><![CDATA[11-11-2026T10:47:18 - [TEST_CASE][PASSED] - Test Cases/01_Web/WEB-07 Barbero ve sus atenciones sin datos de contacto: Test Cases/01_Web/WEB-07 Barbero ve sus atenciones sin datos de contacto
+
+11-11-2026T10:47:19 - [TEST_STEP][PASSED] - QA.abrirPortal(): Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:47:19 - [MESSAGE][INFO] - Starting 'Chrome' driver
+
+11-11-2026T10:47:19 - [MESSAGE][INFO] - Action delay is set to 0 milliseconds
+
+11-11-2026T10:47:21 - [MESSAGE][PASSED] - Browser is opened with url: ''
+
+11-11-2026T10:47:21 - [MESSAGE][INFO] - Viewport size mismatch (1.283x587). Trying to set it again.
+
+11-11-2026T10:47:22 - [MESSAGE][WARNING] - Viewport size mismatch (1283x1283).
+
+11-11-2026T10:47:29 - [MESSAGE][PASSED] - Navigate to 'https://yerko-rosales.github.io/Proyecto_Barberia/?qa=1794404842634' successfully
+
+11-11-2026T10:47:29 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:47:29 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Portal de Acceso")]]' is present
+
+11-11-2026T10:47:29 - [TEST_STEP][PASSED] - QA.ingresarPersonal("barbero"): Object: '//button[@type='submit' and contains(., 'Ingresar')]' is clicked on
+
+11-11-2026T10:47:30 - [MESSAGE][PASSED] - Object '//button[.//span[normalize-space()='Barbero']]' is clickable
+
+11-11-2026T10:47:30 - [MESSAGE][PASSED] - Object: '//button[.//span[normalize-space()='Barbero']]' is clicked on
+
+11-11-2026T10:47:30 - [MESSAGE][PASSED] - Object '//input[@placeholder='correo@bigboys.cl']' is visible
+
+11-11-2026T10:47:31 - [MESSAGE][PASSED] - Text 'mateo@bigboys.cl' is set on object '//input[@placeholder='correo@bigboys.cl']'
+
+11-11-2026T10:47:31 - [MESSAGE][INFO] - Contraseña de mateo@bigboys.cl escrita (no se registra)
+
+11-11-2026T10:47:32 - [MESSAGE][PASSED] - Object '//button[@type='submit' and contains(., 'Ingresar')]' is clickable
+
+11-11-2026T10:47:32 - [MESSAGE][PASSED] - Object: '//button[@type='submit' and contains(., 'Ingresar')]' is clicked on
+
+11-11-2026T10:47:32 - [TEST_STEP][PASSED] - waitForElementPresent(QA.texto("Total cobrado"), TIMEOUT): Object '//*[text()[contains(normalize-space(.), "Total cobrado")]]' is present
+
+11-11-2026T10:47:33 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Total cobrado")]]' is present
+
+11-11-2026T10:47:33 - [TEST_STEP][PASSED] - verifyElementPresent(QA.texto("Propinas"), 5): Object '//*[text()[contains(normalize-space(.), "Propinas")]]' is present
+
+11-11-2026T10:47:34 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "Propinas")]]' is present
+
+11-11-2026T10:47:34 - [TEST_STEP][PASSED] - verifyElementPresent(QA.texto("no se muestran datos de contacto"), 5): Object '//*[text()[contains(normalize-space(.), "no se muestran datos de contacto")]]' is present
+
+11-11-2026T10:47:34 - [MESSAGE][PASSED] - Object '//*[text()[contains(normalize-space(.), "no se muestran datos de contacto")]]' is present
+
+11-11-2026T10:47:34 - [TEST_STEP][PASSED] - delay(2): Delayed 2 second(s)
+
+11-11-2026T10:47:36 - [MESSAGE][PASSED] - Delayed 2 second(s)
+
+11-11-2026T10:47:36 - [TEST_STEP][PASSED] - pagina = QA.textoPagina(): Execute JavaScript 'return document.body.innerText' successfully
+
+11-11-2026T10:47:36 - [MESSAGE][PASSED] - Execute JavaScript 'return document.body.innerText' successfully
+
+11-11-2026T10:47:36 - [TEST_STEP][PASSED] - QA.verificar(!(pagina =~ "[\w.+-]+@[\w-]+\.[\w.]+"), "La vista del barbero no muestra correos de clientes"): La vista del barbero no muestra correos de clientes
+
+11-11-2026T10:47:36 - [MESSAGE][PASSED] - La vista del barbero no muestra correos de clientes
+
+11-11-2026T10:47:36 - [TEST_STEP][PASSED] - QA.verificar(!(pagina.contains("+56")), "La vista del barbero no muestra teléfonos de clientes"): La vista del barbero no muestra teléfonos de clientes
+
+11-11-2026T10:47:36 - [MESSAGE][PASSED] - La vista del barbero no muestra teléfonos de clientes
+
+11-11-2026T10:47:36 - [TEST_STEP][PASSED] - verifyElementNotPresent(findTestObject("Web/Panel/tab_Ventas"), 3): Web element with id: 'Object Repository/Web/Panel/tab_Ventas' located by 'By.xpath: //button[contains(., '📊 Ventas')]' is not present after '3' second(s)
+
+11-11-2026T10:47:36 - [MESSAGE][PASSED] - Web element with id: 'Object Repository/Web/Panel/tab_Ventas' located by 'By.xpath: //button[contains(., '📊 Ventas')]' is not present after '3' second(s)
+
+11-11-2026T10:47:36 - [TEST_STEP][PASSED] - takeScreenshot(): Taking screenshot successfully
+
+11-11-2026T10:47:37 - [MESSAGE][PASSED] - Taking screenshot successfully
+[[ATTACHMENT|C:\\Users\\User\\Desktop\\informatica\\8\u00B0_Semestre\\Proyecto_Barberia\\Fase 2\\Evidencias Proyecto\\Evidencias de sistema\\Pruebas_UAT_10-11-2026\\Katalon_BigBoys_QA\\Reports\\20261111_104515\\TS_00_Regresion_QA_Completa\\20261111_104515\\1794404857096.png]]
+
+11-11-2026T10:47:37 - [TEST_STEP][PASSED] - closeBrowser(): Browser is closed
+
+11-11-2026T10:47:38 - [MESSAGE][PASSED] - Browser is closed]]></system-out>
+         <system-err><![CDATA[]]></system-err>
+      </testcase>
+      <testcase name="Test Cases/02_API/API-01 Login del personal por rol" time="3.216" classname="Test Cases/02_API/API-01 Login del personal por rol" status="PASSED">
+         <system-out><![CDATA[11-11-2026T10:47:38 - [TEST_CASE][PASSED] - Test Cases/02_API/API-01 Login del personal por rol: Test Cases/02_API/API-01 Login del personal por rol
+
+11-11-2026T10:47:38 - [TEST_STEP][PASSED] - d = QA.rpcOk("api_login", QA.cred("dueno")): POST /rpc/api_login → HTTP 200 en 1322 ms
+
+11-11-2026T10:47:39 - [MESSAGE][INFO] - POST /rpc/api_login → HTTP 200 en 1322 ms
+
+11-11-2026T10:47:39 - [TEST_STEP][PASSED] - QA.verificar(role == "DUENO", Dueño: rol $d.role): Dueño: rol DUENO
+
+11-11-2026T10:47:39 - [MESSAGE][PASSED] - Dueño: rol DUENO
+
+11-11-2026T10:47:39 - [TEST_STEP][PASSED] - c = QA.rpcOk("api_login", QA.cred("caja")): POST /rpc/api_login → HTTP 200 en 746 ms
+
+11-11-2026T10:47:40 - [MESSAGE][INFO] - POST /rpc/api_login → HTTP 200 en 746 ms
+
+11-11-2026T10:47:40 - [TEST_STEP][PASSED] - QA.verificar(role == "ADMIN_SUCURSAL" && location_id == 1, Cajero/a: rol $c.role, sucursal $c.location_id): Cajero/a: rol ADMIN_SUCURSAL, sucursal 1
+
+11-11-2026T10:47:40 - [MESSAGE][PASSED] - Cajero/a: rol ADMIN_SUCURSAL, sucursal 1
+
+11-11-2026T10:47:40 - [TEST_STEP][PASSED] - b = QA.rpcOk("api_login", QA.cred("barbero")): POST /rpc/api_login → HTTP 200 en 744 ms
+
+11-11-2026T10:47:41 - [MESSAGE][INFO] - POST /rpc/api_login → HTTP 200 en 744 ms
+
+11-11-2026T10:47:41 - [TEST_STEP][PASSED] - QA.verificar(role == "BARBERO", Barbero: rol $b.role): Barbero: rol BARBERO
+
+11-11-2026T10:47:41 - [MESSAGE][PASSED] - Barbero: rol BARBERO
+
+11-11-2026T10:47:41 - [TEST_STEP][PASSED] - QA.verificar(!(keySet().any({ -> ... })), "La respuesta del login no devuelve la contraseña ni su hash"): La respuesta del login no devuelve la contraseña ni su hash
+
+11-11-2026T10:47:41 - [MESSAGE][PASSED] - La respuesta del login no devuelve la contraseña ni su hash]]></system-out>
+         <system-err><![CDATA[]]></system-err>
+      </testcase>
+      <testcase name="Test Cases/02_API/API-02 Login con correo inexistente" time="0.829" classname="Test Cases/02_API/API-02 Login con correo inexistente" status="PASSED">
+         <system-out><![CDATA[11-11-2026T10:47:41 - [TEST_CASE][PASSED] - Test Cases/02_API/API-02 Login con correo inexistente: Test Cases/02_API/API-02 Login con correo inexistente
+
+11-11-2026T10:47:41 - [TEST_STEP][PASSED] - r = QA.rpc("api_login", ["p_email":"no.existe.katalon@bigboys.cl", "p_password_sha256":QA.sha256("ClaveIncorrecta1")]): POST /rpc/api_login → HTTP 200 en 684 ms
+
+11-11-2026T10:47:42 - [MESSAGE][INFO] - POST /rpc/api_login → HTTP 200 en 684 ms
+
+11-11-2026T10:47:42 - [TEST_STEP][PASSED] - QA.verificar(error != null || json == null, Ingreso rechazado (HTTP $r.status: $r.error)): Ingreso rechazado (HTTP 200: null)
+
+11-11-2026T10:47:42 - [MESSAGE][PASSED] - Ingreso rechazado (HTTP 200: null)
+
+11-11-2026T10:47:42 - [TEST_STEP][PASSED] - QA.verificar(error == null || !(toLowerCase().contains("no existe")), "El mensaje no revela si el correo está registrado"): El mensaje no revela si el correo está registrado
+
+11-11-2026T10:47:42 - [MESSAGE][PASSED] - El mensaje no revela si el correo está registrado]]></system-out>
+         <system-err><![CDATA[]]></system-err>
+      </testcase>
+      <testcase name="Test Cases/02_API/API-03 Catalogo publico de sucursales servicios y barberos" time="4.725" classname="Test Cases/02_API/API-03 Catalogo publico de sucursales servicios y barberos" status="PASSED">
+         <system-out><![CDATA[11-11-2026T10:47:42 - [TEST_CASE][PASSED] - Test Cases/02_API/API-03 Catalogo publico de sucursales servicios y barberos: Test Cases/02_API/API-03 Catalogo publico de sucursales servicios y barberos
+
+11-11-2026T10:47:42 - [TEST_STEP][PASSED] - req = new com.kms.katalon.core.testobject.RequestObject(api_sucursales): null
+
+11-11-2026T10:47:42 - [TEST_STEP][PASSED] - req.setRestUrl(SUPABASE_URL + "/rest/v1/rpc/api_sucursales"): null
+
+11-11-2026T10:47:42 - [TEST_STEP][PASSED] - req.setRestRequestMethod("POST"): null
+
+11-11-2026T10:47:42 - [TEST_STEP][PASSED] - req.setHttpHeaderProperties([new com.kms.katalon.core.testobject.TestObjectProperty(apikey, com.kms.katalon.core.testobject.ConditionType.EQUALS, internal.GlobalVariable.SUPABASE_ANON_KEY), new com.kms.katalon.core.testobject.TestObjectProperty(Authorization, com.kms.katalon.core.testobject.ConditionType.EQUALS, (Bearer  + internal.GlobalVariable.SUPABASE_ANON_KEY)), new com.kms.katalon.core.testobject.TestObjectProperty(Content-Type, com.kms.katalon.core.testobject.ConditionType.EQUALS, application/json)]): null
+
+11-11-2026T10:47:42 - [TEST_STEP][PASSED] - req.setBodyContent(new com.kms.katalon.core.testobject.impl.HttpTextBodyContent({}, UTF-8, application/json)): null
+
+11-11-2026T10:47:42 - [TEST_STEP][PASSED] - res = sendRequest(req): Send request successfully
+
+11-11-2026T10:47:45 - [MESSAGE][INFO] - HAR: C:\Users\User\Desktop\informatica\8°_Semestre\Proyecto_Barberia\Fase 2\Evidencias Proyecto\Evidencias de sistema\Pruebas_UAT_10-11-2026\Katalon_BigBoys_QA\Reports\20261111_104515\TS_00_Regresion_QA_Completa\20261111_104515\requests\main\0.har
+
+11-11-2026T10:47:45 - [MESSAGE][PASSED] - Send request successfully
+
+11-11-2026T10:47:45 - [TEST_STEP][PASSED] - verifyResponseStatusCode(res, 200): Verify response status code successfully
+
+11-11-2026T10:47:45 - [MESSAGE][PASSED] - Verify response status code successfully
+
+11-11-2026T10:47:45 - [TEST_STEP][PASSED] - suc = JsonSlurper().parseText(res.getResponseText()): null
+
+11-11-2026T10:47:45 - [TEST_STEP][PASSED] - QA.verificar(suc.size() == 3 && suc.every({ -> ... }), "Las 3 sucursales tienen dirección: " +  }).join(" | ")): Las 3 sucursales tienen dirección: Peñaflor – Sucursal 21 de Mayo | Peñaflor – Sucursal Alcalde Luis Araya Cereceda | Talagante
+
+11-11-2026T10:47:45 - [MESSAGE][PASSED] - Las 3 sucursales tienen dirección: Peñaflor – Sucursal 21 de Mayo | Peñaflor – Sucursal Alcalde Luis Araya Cereceda | Talagante
+
+11-11-2026T10:47:45 - [TEST_STEP][PASSED] - srv = QA.rpcOk("api_servicios", ["p_sucursal":null]): POST /rpc/api_servicios → HTTP 200 en 670 ms
+
+11-11-2026T10:47:46 - [MESSAGE][INFO] - POST /rpc/api_servicios → HTTP 200 en 670 ms
+
+11-11-2026T10:47:46 - [TEST_STEP][PASSED] - QA.verificar(srv.size() > 0 && srv.every({ -> ... }), $srv.size() servicios, todos con precio): 9 servicios, todos con precio
+
+11-11-2026T10:47:46 - [MESSAGE][PASSED] - 9 servicios, todos con precio
+
+11-11-2026T10:47:46 - [TEST_STEP][PASSED] - bar = QA.rpcOk("api_barberos", [:]): POST /rpc/api_barberos → HTTP 200 en 705 ms
+
+11-11-2026T10:47:46 - [MESSAGE][INFO] - POST /rpc/api_barberos → HTTP 200 en 705 ms
+
+11-11-2026T10:47:46 - [TEST_STEP][PASSED] - QA.verificar( }).size() > 0, $bar.findAll({ -> ... }).size() barberos activos): 4 barberos activos
+
+11-11-2026T10:47:46 - [MESSAGE][PASSED] - 4 barberos activos]]></system-out>
+         <system-err><![CDATA[]]></system-err>
+      </testcase>
+      <testcase name="Test Cases/02_API/API-04 Reserva web sin abono se rechaza" time="0.791" classname="Test Cases/02_API/API-04 Reserva web sin abono se rechaza" status="PASSED">
+         <system-out><![CDATA[11-11-2026T10:47:46 - [TEST_CASE][PASSED] - Test Cases/02_API/API-04 Reserva web sin abono se rechaza: Test Cases/02_API/API-04 Reserva web sin abono se rechaza
+
+11-11-2026T10:47:46 - [TEST_STEP][PASSED] - QA.rpcRechaza("api_crear_reserva", ["p":["canal":"WEB", "barber_id":1, "service_name":"Corte", "date_time":"2026-12-15 10:00", "status":"Confirmada", "customer_name":"Prueba Katalon"]], "PAGO_REQUERIDO"): api_crear_reserva rechazada con PAGO_REQUERIDO, como se esperaba
+
+11-11-2026T10:47:47 - [MESSAGE][INFO] - POST /rpc/api_crear_reserva → HTTP 400 en 705 ms · error: PAGO_REQUERIDO
+
+11-11-2026T10:47:47 - [MESSAGE][PASSED] - api_crear_reserva rechazada con PAGO_REQUERIDO, como se esperaba]]></system-out>
+         <system-err><![CDATA[]]></system-err>
+      </testcase>
+      <testcase name="Test Cases/02_API/API-05 Horario ocupado se rechaza" time="1.821" classname="Test Cases/02_API/API-05 Horario ocupado se rechaza" status="PASSED">
+         <system-out><![CDATA[11-11-2026T10:47:47 - [TEST_CASE][PASSED] - Test Cases/02_API/API-05 Horario ocupado se rechaza: Test Cases/02_API/API-05 Horario ocupado se rechaza
+
+11-11-2026T10:47:47 - [TEST_STEP][PASSED] - reservas = QA.rpcOk("api_listar_reservas", ["p_formato":"WEB"] + QA.cred("dueno")): POST /rpc/api_listar_reservas → HTTP 200 en 808 ms
+
+11-11-2026T10:47:48 - [MESSAGE][INFO] - POST /rpc/api_listar_reservas → HTTP 200 en 808 ms
+
+11-11-2026T10:47:48 - [TEST_STEP][PASSED] - ahora = Date().format("yyyy-MM-dd HH:mm", TimeZone.getTimeZone("America/Santiago")): null
+
+11-11-2026T10:47:48 - [TEST_STEP][PASSED] - r = reservas.find({ -> ... }): null
+
+11-11-2026T10:47:48 - [TEST_STEP][PASSED] - QA.verificar(r != null, Hay una reserva futura confirmada para la prueba ($r?.codigo, $r?.date_time)): Hay una reserva futura confirmada para la prueba (Wmwb7dgec, 2026-11-25 09:00)
+
+11-11-2026T10:47:48 - [MESSAGE][PASSED] - Hay una reserva futura confirmada para la prueba (Wmwb7dgec, 2026-11-25 09:00)
+
+11-11-2026T10:47:48 - [TEST_STEP][PASSED] - QA.rpcRechaza("api_crear_reserva", ["p":["id":System.currentTimeMillis(), "canal":"WEB", "barber_id":barber_id, "service_name":"Corte", "date_time":date_time, "status":"PENDIENTE_PAGO", ... ]], "HORARIO_OCUPADO"): api_crear_reserva rechazada con HORARIO_OCUPADO, como se esperaba
+
+11-11-2026T10:47:49 - [MESSAGE][INFO] - POST /rpc/api_crear_reserva → HTTP 400 en 781 ms · error: HORARIO_OCUPADO
+
+11-11-2026T10:47:49 - [MESSAGE][PASSED] - api_crear_reserva rechazada con HORARIO_OCUPADO, como se esperaba]]></system-out>
+         <system-err><![CDATA[]]></system-err>
+      </testcase>
+      <testcase name="Test Cases/02_API/API-06 Permisos por rol" time="1.524" classname="Test Cases/02_API/API-06 Permisos por rol" status="PASSED">
+         <system-out><![CDATA[11-11-2026T10:47:49 - [TEST_CASE][PASSED] - Test Cases/02_API/API-06 Permisos por rol: Test Cases/02_API/API-06 Permisos por rol
+
+11-11-2026T10:47:49 - [TEST_STEP][PASSED] - QA.rpcRechaza("api_personal_crear", QA.cred("caja") + ["p":["full_name":"No Debe Crearse", "email":"katalon.qa@bigboys.cl", "role":"BARBERO", "location_id":1, "temp_password_sha256":QA.sha256("Temporal123")]], "SIN_PERMISO"): api_personal_crear rechazada con SIN_PERMISO, como se esperaba
+
+11-11-2026T10:47:49 - [MESSAGE][INFO] - POST /rpc/api_personal_crear → HTTP 400 en 358 ms · error: SIN_PERMISO
+
+11-11-2026T10:47:49 - [MESSAGE][PASSED] - api_personal_crear rechazada con SIN_PERMISO, como se esperaba
+
+11-11-2026T10:47:49 - [TEST_STEP][PASSED] - QA.rpcRechaza("api_solicitudes_listar", QA.cred("barbero"), "SIN_PERMISO"): api_solicitudes_listar rechazada con SIN_PERMISO, como se esperaba
+
+11-11-2026T10:47:50 - [MESSAGE][INFO] - POST /rpc/api_solicitudes_listar → HTTP 400 en 718 ms · error: SIN_PERMISO
+
+11-11-2026T10:47:50 - [MESSAGE][PASSED] - api_solicitudes_listar rechazada con SIN_PERMISO, como se esperaba
+
+11-11-2026T10:47:50 - [TEST_STEP][PASSED] - QA.rpcRechaza("api_personal_listar", QA.cred("barbero"), "SIN_PERMISO"): api_personal_listar rechazada con SIN_PERMISO, como se esperaba
+
+11-11-2026T10:47:51 - [MESSAGE][INFO] - POST /rpc/api_personal_listar → HTTP 400 en 342 ms · error: SIN_PERMISO
+
+11-11-2026T10:47:51 - [MESSAGE][PASSED] - api_personal_listar rechazada con SIN_PERMISO, como se esperaba]]></system-out>
+         <system-err><![CDATA[]]></system-err>
+      </testcase>
+      <testcase name="Test Cases/02_API/API-07 Caja del dia del Duenio y del cajero" time="2.599" classname="Test Cases/02_API/API-07 Caja del dia del Duenio y del cajero" status="PASSED">
+         <system-out><![CDATA[11-11-2026T10:47:51 - [TEST_CASE][PASSED] - Test Cases/02_API/API-07 Caja del dia del Duenio y del cajero: Test Cases/02_API/API-07 Caja del dia del Duenio y del cajero
+
+11-11-2026T10:47:51 - [TEST_STEP][PASSED] - desde = "2026-11-01": null
+
+11-11-2026T10:47:51 - [TEST_STEP][PASSED] - hasta = Date().format("yyyy-MM-dd", TimeZone.getTimeZone("America/Santiago")): null
+
+11-11-2026T10:47:51 - [TEST_STEP][PASSED] - d = QA.rpcOk("api_caja_resumen", QA.cred("dueno") + ["p_desde":desde, "p_hasta":hasta, "p_sucursal":null]): POST /rpc/api_caja_resumen → HTTP 200 en 774 ms
+
+11-11-2026T10:47:52 - [MESSAGE][INFO] - POST /rpc/api_caja_resumen → HTTP 200 en 774 ms
+
+11-11-2026T10:47:52 - [TEST_STEP][PASSED] - QA.verificar(sucursales instanceof java.util.List && consolidado != null && subtotal_penaflor != null, Dueño: $d.sucursales.size() sucursales, subtotal Peñaflor y consolidado): Dueño: 1 sucursales, subtotal Peñaflor y consolidado
+
+11-11-2026T10:47:52 - [MESSAGE][PASSED] - Dueño: 1 sucursales, subtotal Peñaflor y consolidado
+
+11-11-2026T10:47:52 - [TEST_STEP][PASSED] - sucursales.each({ java.lang.Object s -> ... }): Peñaflor – Sucursal 21 de Mayo: en caja 61260 = servicios 64260 − abonos 3000 (5 atenciones, 4 por llegada)
+
+11-11-2026T10:47:52 - [MESSAGE][PASSED] - Peñaflor – Sucursal 21 de Mayo: en caja 61260 = servicios 64260 − abonos 3000 (5 atenciones, 4 por llegada)
+
+11-11-2026T10:47:52 - [TEST_STEP][PASSED] - QA.verificar(en_caja == sucursales.sum(0, { -> ... }), Consolidado en caja $d.consolidado.en_caja = suma de las sucursales): Consolidado en caja 61260 = suma de las sucursales
+
+11-11-2026T10:47:52 - [MESSAGE][PASSED] - Consolidado en caja 61260 = suma de las sucursales
+
+11-11-2026T10:47:52 - [TEST_STEP][PASSED] - c = QA.rpcOk("api_caja_resumen", QA.cred("caja") + ["p_desde":desde, "p_hasta":hasta, "p_sucursal":null]): POST /rpc/api_caja_resumen → HTTP 200 en 711 ms
+
+11-11-2026T10:47:52 - [MESSAGE][INFO] - POST /rpc/api_caja_resumen → HTTP 200 en 711 ms
+
+11-11-2026T10:47:52 - [TEST_STEP][PASSED] - QA.verificar(sucursales.every({ -> ... }), Cajero/a ve solo su sucursal: $c.sucursales.collect({ -> ... })): Cajero/a ve solo su sucursal: [Peñaflor – Sucursal 21 de Mayo]
+
+11-11-2026T10:47:52 - [MESSAGE][PASSED] - Cajero/a ve solo su sucursal: [Peñaflor – Sucursal 21 de Mayo]
+
+11-11-2026T10:47:52 - [TEST_STEP][PASSED] - otra = QA.rpc("api_caja_resumen", QA.cred("caja") + ["p_desde":desde, "p_hasta":hasta, "p_sucursal":2]): POST /rpc/api_caja_resumen → HTTP 400 en 794 ms · error: SIN_PERMISO
+
+11-11-2026T10:47:53 - [MESSAGE][INFO] - POST /rpc/api_caja_resumen → HTTP 400 en 794 ms · error: SIN_PERMISO
+
+11-11-2026T10:47:53 - [TEST_STEP][PASSED] - QA.verificar(error != null || sucursales.every({ -> ... }), "Cajero/a que pide la sucursal 2: " + (otra.error) ? otra.error : recibe solo la suya): Cajero/a que pide la sucursal 2: SIN_PERMISO
+
+11-11-2026T10:47:53 - [MESSAGE][PASSED] - Cajero/a que pide la sucursal 2: SIN_PERMISO]]></system-out>
+         <system-err><![CDATA[]]></system-err>
+      </testcase>
+      <testcase name="Test Cases/02_API/API-08 Barbero sin datos de contacto de clientes" time="0.544" classname="Test Cases/02_API/API-08 Barbero sin datos de contacto de clientes" status="PASSED">
+         <system-out><![CDATA[11-11-2026T10:47:53 - [TEST_CASE][PASSED] - Test Cases/02_API/API-08 Barbero sin datos de contacto de clientes: Test Cases/02_API/API-08 Barbero sin datos de contacto de clientes
+
+11-11-2026T10:47:53 - [TEST_STEP][PASSED] - hoy = Date().format("yyyy-MM-dd", TimeZone.getTimeZone("America/Santiago")): null
+
+11-11-2026T10:47:53 - [TEST_STEP][PASSED] - m = QA.rpcOk("api_mis_atenciones", QA.cred("barbero") + ["p_fecha":hoy]): POST /rpc/api_mis_atenciones → HTTP 200 en 355 ms
+
+11-11-2026T10:47:54 - [MESSAGE][INFO] - POST /rpc/api_mis_atenciones → HTTP 200 en 355 ms
+
+11-11-2026T10:47:54 - [TEST_STEP][PASSED] - txt = JsonOutput.toJson(m): null
+
+11-11-2026T10:47:54 - [TEST_STEP][PASSED] - QA.verificar(total != null, Total del día informado: $m.total): Total del día informado: 0
+
+11-11-2026T10:47:54 - [MESSAGE][PASSED] - Total del día informado: 0
+
+11-11-2026T10:47:54 - [TEST_STEP][PASSED] - QA.verificar(!(txt =~ "@") && !(txt.contains("+56")), "La respuesta no contiene correos ni teléfonos"): La respuesta no contiene correos ni teléfonos
+
+11-11-2026T10:47:54 - [MESSAGE][PASSED] - La respuesta no contiene correos ni teléfonos]]></system-out>
+         <system-err><![CDATA[]]></system-err>
+      </testcase>
+      <testcase name="Test Cases/02_API/API-09 Tablas cerradas al acceso directo" time="4.076" classname="Test Cases/02_API/API-09 Tablas cerradas al acceso directo" status="PASSED">
+         <system-out><![CDATA[11-11-2026T10:47:54 - [TEST_CASE][PASSED] - Test Cases/02_API/API-09 Tablas cerradas al acceso directo: Test Cases/02_API/API-09 Tablas cerradas al acceso directo
+
+11-11-2026T10:47:54 - [TEST_STEP][PASSED] - ["usuario", "cliente", "reserva", "pago", "registro_auditoria", "solicitud_derecho"].each({ java.lang.Object tabla -> ... }): Tabla solicitud_derecho: HTTP 401 sin datos
+
+11-11-2026T10:47:55 - [MESSAGE][INFO] - HAR: C:\Users\User\Desktop\informatica\8°_Semestre\Proyecto_Barberia\Fase 2\Evidencias Proyecto\Evidencias de sistema\Pruebas_UAT_10-11-2026\Katalon_BigBoys_QA\Reports\20261111_104515\TS_00_Regresion_QA_Completa\20261111_104515\requests\main\1.har
+
+11-11-2026T10:47:55 - [MESSAGE][PASSED] - Send request successfully
+
+11-11-2026T10:47:55 - [MESSAGE][PASSED] - Tabla usuario: HTTP 401 sin datos
+
+11-11-2026T10:47:55 - [MESSAGE][INFO] - HAR: C:\Users\User\Desktop\informatica\8°_Semestre\Proyecto_Barberia\Fase 2\Evidencias Proyecto\Evidencias de sistema\Pruebas_UAT_10-11-2026\Katalon_BigBoys_QA\Reports\20261111_104515\TS_00_Regresion_QA_Completa\20261111_104515\requests\main\2.har
+
+11-11-2026T10:47:55 - [MESSAGE][PASSED] - Send request successfully
+
+11-11-2026T10:47:55 - [MESSAGE][PASSED] - Tabla cliente: HTTP 401 sin datos
+
+11-11-2026T10:47:56 - [MESSAGE][INFO] - HAR: C:\Users\User\Desktop\informatica\8°_Semestre\Proyecto_Barberia\Fase 2\Evidencias Proyecto\Evidencias de sistema\Pruebas_UAT_10-11-2026\Katalon_BigBoys_QA\Reports\20261111_104515\TS_00_Regresion_QA_Completa\20261111_104515\requests\main\3.har
+
+11-11-2026T10:47:56 - [MESSAGE][PASSED] - Send request successfully
+
+11-11-2026T10:47:56 - [MESSAGE][PASSED] - Tabla reserva: HTTP 401 sin datos
+
+11-11-2026T10:47:57 - [MESSAGE][INFO] - HAR: C:\Users\User\Desktop\informatica\8°_Semestre\Proyecto_Barberia\Fase 2\Evidencias Proyecto\Evidencias de sistema\Pruebas_UAT_10-11-2026\Katalon_BigBoys_QA\Reports\20261111_104515\TS_00_Regresion_QA_Completa\20261111_104515\requests\main\4.har
+
+11-11-2026T10:47:57 - [MESSAGE][PASSED] - Send request successfully
+
+11-11-2026T10:47:57 - [MESSAGE][PASSED] - Tabla pago: HTTP 401 sin datos
+
+11-11-2026T10:47:57 - [MESSAGE][INFO] - HAR: C:\Users\User\Desktop\informatica\8°_Semestre\Proyecto_Barberia\Fase 2\Evidencias Proyecto\Evidencias de sistema\Pruebas_UAT_10-11-2026\Katalon_BigBoys_QA\Reports\20261111_104515\TS_00_Regresion_QA_Completa\20261111_104515\requests\main\5.har
+
+11-11-2026T10:47:57 - [MESSAGE][PASSED] - Send request successfully
+
+11-11-2026T10:47:57 - [MESSAGE][PASSED] - Tabla registro_auditoria: HTTP 401 sin datos
+
+11-11-2026T10:47:58 - [MESSAGE][INFO] - HAR: C:\Users\User\Desktop\informatica\8°_Semestre\Proyecto_Barberia\Fase 2\Evidencias Proyecto\Evidencias de sistema\Pruebas_UAT_10-11-2026\Katalon_BigBoys_QA\Reports\20261111_104515\TS_00_Regresion_QA_Completa\20261111_104515\requests\main\6.har
+
+11-11-2026T10:47:58 - [MESSAGE][PASSED] - Send request successfully
+
+11-11-2026T10:47:58 - [MESSAGE][PASSED] - Tabla solicitud_derecho: HTTP 401 sin datos]]></system-out>
+         <system-err><![CDATA[]]></system-err>
+      </testcase>
+      <testcase name="Test Cases/02_API/API-10 Fila publica sin datos personales" time="0.809" classname="Test Cases/02_API/API-10 Fila publica sin datos personales" status="PASSED">
+         <system-out><![CDATA[11-11-2026T10:47:58 - [TEST_CASE][PASSED] - Test Cases/02_API/API-10 Fila publica sin datos personales: Test Cases/02_API/API-10 Fila publica sin datos personales
+
+11-11-2026T10:47:58 - [TEST_STEP][PASSED] - f = QA.rpcOk("api_fila_listar", ["p_sucursal":1]): POST /rpc/api_fila_listar → HTTP 200 en 661 ms
+
+11-11-2026T10:47:59 - [MESSAGE][INFO] - POST /rpc/api_fila_listar → HTTP 200 en 661 ms
+
+11-11-2026T10:47:59 - [TEST_STEP][PASSED] - QA.verificar(turnos instanceof java.util.List, Fila de la sucursal 1 del $f.fecha: $f.turnos.size() turnos ($f.turnos.collect({ -> ... }).countBy({ -> ... }))): Fila de la sucursal 1 del 2026-11-11: 0 turnos ([:])
+
+11-11-2026T10:47:59 - [MESSAGE][PASSED] - Fila de la sucursal 1 del 2026-11-11: 0 turnos ([:])
+
+11-11-2026T10:47:59 - [TEST_STEP][PASSED] - QA.verificar(turnos.every({ -> ... }), "Los nombres se muestran abreviados: " +  }).join(", ")): Los nombres se muestran abreviados: 
+
+11-11-2026T10:47:59 - [MESSAGE][PASSED] - Los nombres se muestran abreviados: 
+
+11-11-2026T10:47:59 - [TEST_STEP][PASSED] - txt = JsonOutput.toJson(f): null
+
+11-11-2026T10:47:59 - [TEST_STEP][PASSED] - QA.verificar(!(txt =~ "@") && !(txt.contains("+56")), "La fila pública no expone correos ni teléfonos"): La fila pública no expone correos ni teléfonos
+
+11-11-2026T10:47:59 - [MESSAGE][PASSED] - La fila pública no expone correos ni teléfonos]]></system-out>
+         <system-err><![CDATA[]]></system-err>
+      </testcase>
+      <system-out><![CDATA[11-11-2026T10:45:22 - [TEST_SUITE][PASSED] - TS_00_Regresion_QA_Completa: Test Cases/02_API/API-10 Fila publica sin datos personales]]></system-out>
+      <system-err><![CDATA[]]></system-err>
+   </testsuite>
+</testsuites>
