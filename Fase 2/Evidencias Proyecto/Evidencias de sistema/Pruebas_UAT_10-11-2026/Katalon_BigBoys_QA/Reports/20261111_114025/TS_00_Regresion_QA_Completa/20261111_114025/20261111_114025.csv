@@ -1,0 +1,199 @@
+Suite/Test/Step Name,Browser,Description,Tag,Start time,End time,Duration,Status
+TS_00_Regresion_QA_Completa,Chrome 156.0.0.0,Regresión completa del ambiente QA/UAT: 7 casos web + 10 casos de API.,,11-11-2026 11:40:34,11-11-2026 11:43:53,"3m - 18,681s",PASSED
+,,,,,,,
+Test Cases/01_Web/WEB-01 Portal de acceso y politica publicada,Chrome 156.0.0.0,CP-73 (DEF-008) y CP-27. El portal carga con sus 4 accesos y la Política de Privacidad y los T&C están publicados.,Web,11-11-2026 11:40:34,11-11-2026 11:40:58,"23,666s",PASSED
+QA.abrirPortal(),Chrome 156.0.0.0,,,11-11-2026 11:40:35,11-11-2026 11:40:54,"18,592s",PASSED
+"verifyElementPresent(findTestObject(""Web/Portal/btn_IniciarSesion""), 10)",Chrome 156.0.0.0,,,11-11-2026 11:40:54,11-11-2026 11:40:54,"0,438s",PASSED
+"verifyElementPresent(findTestObject(""Web/Portal/btn_Registrate""), 10)",Chrome 156.0.0.0,,,11-11-2026 11:40:54,11-11-2026 11:40:55,"0,291s",PASSED
+"verifyElementPresent(findTestObject(""Web/Portal/btn_Barbero""), 10)",Chrome 156.0.0.0,,,11-11-2026 11:40:55,11-11-2026 11:40:55,"0,251s",PASSED
+"verifyElementPresent(findTestObject(""Web/Portal/btn_Administracion""), 10)",Chrome 156.0.0.0,,,11-11-2026 11:40:55,11-11-2026 11:40:55,"0,263s",PASSED
+"verifyElementPresent(findTestObject(""Web/Portal/btn_ContinuarInvitado""), 10)",Chrome 156.0.0.0,,,11-11-2026 11:40:55,11-11-2026 11:40:55,"0,262s",PASSED
+takeScreenshot(),Chrome 156.0.0.0,,,11-11-2026 11:40:55,11-11-2026 11:40:56,"0,493s",PASSED
+"navigateToUrl(URL_WEB + ""privacidad.html"")",Chrome 156.0.0.0,,,11-11-2026 11:40:56,11-11-2026 11:40:56,"0,325s",PASSED
+"waitForElementPresent(QA.texto(""Política de Privacidad""), TIMEOUT)",Chrome 156.0.0.0,,,11-11-2026 11:40:56,11-11-2026 11:40:57,"0,381s",PASSED
+pagina = QA.textoPagina(),Chrome 156.0.0.0,,,11-11-2026 11:40:57,11-11-2026 11:40:57,"0,080s",PASSED
+"QA.verificar(pagina.contains(""Ley"") && pagina.contains(""21.719""), ""La política publicada cita la Ley N° 21.719"")",Chrome 156.0.0.0,,,11-11-2026 11:40:57,11-11-2026 11:40:57,"0,046s",PASSED
+"QA.verificar(toLowerCase().contains(""términos""), ""La página incluye los Términos y Condiciones"")",Chrome 156.0.0.0,,,11-11-2026 11:40:57,11-11-2026 11:40:57,"0,006s",PASSED
+takeScreenshot(),Chrome 156.0.0.0,,,11-11-2026 11:40:57,11-11-2026 11:40:57,"0,388s",PASSED
+closeBrowser(),Chrome 156.0.0.0,,,11-11-2026 11:40:57,11-11-2026 11:40:58,"1,052s",PASSED
+,,,,,,,
+Test Cases/01_Web/WEB-02 Registro exige aceptar la politica,Chrome 156.0.0.0,CP-01 y CP-02 (DEF-003). Sin marcar la casilla de aceptación no se crea la cuenta y se explica el motivo.,Web,11-11-2026 11:40:58,11-11-2026 11:41:21,"22,392s",PASSED
+QA.abrirPortal(),Chrome 156.0.0.0,,,11-11-2026 11:40:58,11-11-2026 11:41:12,"13,372s",PASSED
+"QA.clic(findTestObject(""Web/Portal/btn_Registrate""))",Chrome 156.0.0.0,,,11-11-2026 11:41:12,11-11-2026 11:41:13,"1,277s",PASSED
+"waitForElementVisible(findTestObject(""Web/Registro/input_Nombre""), TIMEOUT)",Chrome 156.0.0.0,,,11-11-2026 11:41:13,11-11-2026 11:41:13,"0,393s",PASSED
+"setText(findTestObject(""Web/Registro/input_Nombre""), ""Prueba Katalon"")",Chrome 156.0.0.0,,,11-11-2026 11:41:13,11-11-2026 11:41:14,"0,677s",PASSED
+"setText(findTestObject(""Web/Registro/input_Telefono""), ""+56 9 1111 4444"")",Chrome 156.0.0.0,,,11-11-2026 11:41:14,11-11-2026 11:41:15,"0,619s",PASSED
+"setText(findTestObject(""Web/Registro/input_Correo""), ""katalon.qa@prueba.invalid"")",Chrome 156.0.0.0,,,11-11-2026 11:41:15,11-11-2026 11:41:15,"0,666s",PASSED
+"setText(findTestObject(""Web/Registro/input_Clave""), ""Prueba123"")",Chrome 156.0.0.0,,,11-11-2026 11:41:15,11-11-2026 11:41:16,"0,572s",PASSED
+"verifyElementPresent(findTestObject(""Web/Registro/lnk_Politica""), 5)",Chrome 156.0.0.0,,,11-11-2026 11:41:16,11-11-2026 11:41:16,"0,355s",PASSED
+"verifyElementNotChecked(findTestObject(""Web/Registro/chk_AceptoPolitica""), 5)",Chrome 156.0.0.0,,,11-11-2026 11:41:16,11-11-2026 11:41:17,"0,287s",PASSED
+takeScreenshot(),Chrome 156.0.0.0,,,11-11-2026 11:41:17,11-11-2026 11:41:17,"0,403s",PASSED
+"QA.clic(findTestObject(""Web/Registro/btn_CrearCuenta""))",Chrome 156.0.0.0,,,11-11-2026 11:41:17,11-11-2026 11:41:18,"0,612s",PASSED
+"waitForElementPresent(QA.texto(""debes aceptar la Política""), 15)",Chrome 156.0.0.0,,,11-11-2026 11:41:18,11-11-2026 11:41:18,"0,507s",PASSED
+"verifyElementPresent(QA.texto(""debes aceptar la Política""), 5)",Chrome 156.0.0.0,,,11-11-2026 11:41:18,11-11-2026 11:41:19,"1,059s",PASSED
+takeScreenshot(),Chrome 156.0.0.0,,,11-11-2026 11:41:19,11-11-2026 11:41:20,"0,407s",PASSED
+closeBrowser(),Chrome 156.0.0.0,,,11-11-2026 11:41:20,11-11-2026 11:41:21,"0,971s",PASSED
+,,,,,,,
+Test Cases/01_Web/WEB-03 Invitado sin acceso por PIN de administrador,Chrome 156.0.0.0,CP-13 y CP-15 (DEF-002). El invitado entra sin cuenta y el modal de ingreso ya no ofrece el acceso «Admin» con PIN.,Web,11-11-2026 11:41:21,11-11-2026 11:41:41,"20,044s",PASSED
+QA.abrirPortal(),Chrome 156.0.0.0,,,11-11-2026 11:41:21,11-11-2026 11:41:34,"13,460s",PASSED
+"QA.clic(findTestObject(""Web/Portal/btn_ContinuarInvitado""))",Chrome 156.0.0.0,,,11-11-2026 11:41:34,11-11-2026 11:41:35,"0,836s",PASSED
+"waitForElementPresent(findTestObject(""Web/Cliente/btn_AgendarCita""), TIMEOUT)",Chrome 156.0.0.0,,,11-11-2026 11:41:35,11-11-2026 11:41:35,"0,291s",PASSED
+"verifyElementPresent(QA.texto(""BIENVENIDOS A BIG BOYS""), 10)",Chrome 156.0.0.0,,,11-11-2026 11:41:35,11-11-2026 11:41:36,"0,311s",PASSED
+takeScreenshot(),Chrome 156.0.0.0,,,11-11-2026 11:41:36,11-11-2026 11:41:36,"0,619s",PASSED
+"QA.clic(findTestObject(""Web/Cliente/btn_IngresarRegistro""))",Chrome 156.0.0.0,,,11-11-2026 11:41:36,11-11-2026 11:41:37,"0,681s",PASSED
+delay(1),Chrome 156.0.0.0,,,11-11-2026 11:41:37,11-11-2026 11:41:38,"1,107s",PASSED
+"verifyElementNotPresent(QA.texto(""PIN Administrador""), 3)",Chrome 156.0.0.0,,,11-11-2026 11:41:38,11-11-2026 11:41:39,"0,460s",PASSED
+"verifyElementNotPresent(QA.xpath(""//button[contains(., 'Admin') and contains(., '🛡')]""), 3)",Chrome 156.0.0.0,,,11-11-2026 11:41:39,11-11-2026 11:41:39,"0,255s",PASSED
+"adminCfg = executeJavaScript(""return localStorage.getItem('bigboys_admin_config')"", null)",Chrome 156.0.0.0,,,11-11-2026 11:41:39,11-11-2026 11:41:39,"0,023s",PASSED
+"QA.verificar(adminCfg == null, ""No existe configuración local de administrador (bigboys_admin_config)"")",Chrome 156.0.0.0,,,11-11-2026 11:41:39,11-11-2026 11:41:39,"0,005s",PASSED
+takeScreenshot(),Chrome 156.0.0.0,,,11-11-2026 11:41:39,11-11-2026 11:41:39,"0,550s",PASSED
+closeBrowser(),Chrome 156.0.0.0,,,11-11-2026 11:41:39,11-11-2026 11:41:41,"1,181s",PASSED
+,,,,,,,
+Test Cases/01_Web/WEB-04 Ingreso del personal con credenciales invalidas,Chrome 156.0.0.0,CP-07. Con un correo inexistente el sistema rechaza el ingreso con un mensaje genérico y no abre ningún panel.,Web,11-11-2026 11:41:41,11-11-2026 11:42:03,"22,141s",PASSED
+QA.abrirPortal(),Chrome 156.0.0.0,,,11-11-2026 11:41:41,11-11-2026 11:41:56,"15,663s",PASSED
+"QA.clic(findTestObject(""Web/Portal/btn_Administracion""))",Chrome 156.0.0.0,,,11-11-2026 11:41:56,11-11-2026 11:41:57,"0,761s",PASSED
+"waitForElementVisible(findTestObject(""Web/Portal/input_CorreoPersonal""), TIMEOUT)",Chrome 156.0.0.0,,,11-11-2026 11:41:57,11-11-2026 11:41:58,"0,377s",PASSED
+"setText(findTestObject(""Web/Portal/input_CorreoPersonal""), ""no.existe.katalon@bigboys.cl"")",Chrome 156.0.0.0,,,11-11-2026 11:41:58,11-11-2026 11:41:58,"0,668s",PASSED
+"setText(findTestObject(""Web/Portal/input_ClavePersonal""), ""ClaveIncorrecta1"")",Chrome 156.0.0.0,,,11-11-2026 11:41:58,11-11-2026 11:41:59,"0,594s",PASSED
+"QA.clic(findTestObject(""Web/Portal/btn_IngresarPersonal""))",Chrome 156.0.0.0,,,11-11-2026 11:41:59,11-11-2026 11:41:59,"0,570s",PASSED
+"waitForElementVisible(findTestObject(""Web/Portal/msg_Error""), TIMEOUT)",Chrome 156.0.0.0,,,11-11-2026 11:41:59,11-11-2026 11:42:01,"1,359s",PASSED
+"verifyElementPresent(findTestObject(""Web/Portal/input_CorreoPersonal""), 5)",Chrome 156.0.0.0,,,11-11-2026 11:42:01,11-11-2026 11:42:01,"0,259s",PASSED
+"verifyElementNotPresent(findTestObject(""Web/Panel/btn_CerrarSesion""), 3)",Chrome 156.0.0.0,,,11-11-2026 11:42:01,11-11-2026 11:42:01,"0,280s",PASSED
+takeScreenshot(),Chrome 156.0.0.0,,,11-11-2026 11:42:01,11-11-2026 11:42:02,"0,397s",PASSED
+closeBrowser(),Chrome 156.0.0.0,,,11-11-2026 11:42:02,11-11-2026 11:42:03,"0,998s",PASSED
+,,,,,,,
+Test Cases/01_Web/WEB-05 Duenio revisa la caja del dia,Chrome 156.0.0.0,"UAT-04 y CP-55 (DEF-016). El Dueño entra al panel y ve «Caja del día», las cuentas del personal y los derechos del titular.",Web,11-11-2026 11:42:03,11-11-2026 11:42:29,"26,119s",PASSED
+QA.abrirPortal(),Chrome 156.0.0.0,,,11-11-2026 11:42:03,11-11-2026 11:42:16,"13,571s",PASSED
+"QA.ingresarPersonal(""dueno"")",Chrome 156.0.0.0,,,11-11-2026 11:42:16,11-11-2026 11:42:19,"2,845s",PASSED
+"waitForElementPresent(findTestObject(""Web/Panel/tab_Ventas""), TIMEOUT)",Chrome 156.0.0.0,,,11-11-2026 11:42:19,11-11-2026 11:42:21,"1,270s",PASSED
+"verifyElementPresent(findTestObject(""Web/Panel/tab_Personal""), 5)",Chrome 156.0.0.0,,,11-11-2026 11:42:21,11-11-2026 11:42:21,"0,262s",PASSED
+"verifyElementPresent(findTestObject(""Web/Panel/tab_Derechos""), 5)",Chrome 156.0.0.0,,,11-11-2026 11:42:21,11-11-2026 11:42:21,"0,251s",PASSED
+"verifyElementPresent(findTestObject(""Web/Panel/tab_FilaLlegada""), 5)",Chrome 156.0.0.0,,,11-11-2026 11:42:21,11-11-2026 11:42:21,"0,254s",PASSED
+"QA.clic(findTestObject(""Web/Panel/tab_Ventas""))",Chrome 156.0.0.0,,,11-11-2026 11:42:21,11-11-2026 11:42:22,"0,605s",PASSED
+"waitForElementPresent(QA.texto(""Caja del día""), TIMEOUT)",Chrome 156.0.0.0,,,11-11-2026 11:42:22,11-11-2026 11:42:23,"1,380s",PASSED
+"verifyElementPresent(QA.texto(""Caja del día""), 5)",Chrome 156.0.0.0,,,11-11-2026 11:42:23,11-11-2026 11:42:24,"1,006s",PASSED
+delay(3),Chrome 156.0.0.0,,,11-11-2026 11:42:24,11-11-2026 11:42:27,"3,015s",PASSED
+takeScreenshot(),Chrome 156.0.0.0,,,11-11-2026 11:42:27,11-11-2026 11:42:28,"0,494s",PASSED
+closeBrowser(),Chrome 156.0.0.0,,,11-11-2026 11:42:28,11-11-2026 11:42:29,"0,960s",PASSED
+,,,,,,,
+Test Cases/01_Web/WEB-06 Cajero opera la fila de su sucursal,Chrome 156.0.0.0,"UAT-02 y CP-47. El cajero/a entra a su sucursal, ve la fila por orden de llegada y las reservas del día, sin el panel del Dueño.",Web,11-11-2026 11:42:29,11-11-2026 11:42:53,"24,493s",PASSED
+QA.abrirPortal(),Chrome 156.0.0.0,,,11-11-2026 11:42:29,11-11-2026 11:42:42,"13,095s",PASSED
+"QA.ingresarPersonal(""caja"")",Chrome 156.0.0.0,,,11-11-2026 11:42:42,11-11-2026 11:42:45,"2,729s",PASSED
+"waitForElementPresent(QA.texto(""Cajero/a""), TIMEOUT)",Chrome 156.0.0.0,,,11-11-2026 11:42:45,11-11-2026 11:42:47,"2,074s",PASSED
+"verifyElementPresent(QA.xpath(""//button[contains(., 'Fila por llegada')]""), 10)",Chrome 156.0.0.0,,,11-11-2026 11:42:47,11-11-2026 11:42:47,"0,260s",PASSED
+"verifyElementPresent(QA.xpath(""//button[contains(., 'Reservas de hoy')]""), 10)",Chrome 156.0.0.0,,,11-11-2026 11:42:47,11-11-2026 11:42:47,"0,238s",PASSED
+"verifyElementNotPresent(findTestObject(""Web/Panel/tab_Personal""), 3)",Chrome 156.0.0.0,,,11-11-2026 11:42:47,11-11-2026 11:42:48,"0,258s",PASSED
+"verifyElementNotPresent(findTestObject(""Web/Panel/tab_Derechos""), 3)",Chrome 156.0.0.0,,,11-11-2026 11:42:48,11-11-2026 11:42:48,"0,240s",PASSED
+delay(2),Chrome 156.0.0.0,,,11-11-2026 11:42:48,11-11-2026 11:42:50,"2,004s",PASSED
+takeScreenshot(),Chrome 156.0.0.0,,,11-11-2026 11:42:50,11-11-2026 11:42:50,"0,432s",PASSED
+"QA.clic(QA.xpath(""//button[contains(., 'Reservas de hoy')]""))",Chrome 156.0.0.0,,,11-11-2026 11:42:50,11-11-2026 11:42:51,"0,614s",PASSED
+delay(1),Chrome 156.0.0.0,,,11-11-2026 11:42:51,11-11-2026 11:42:52,"1,006s",PASSED
+takeScreenshot(),Chrome 156.0.0.0,,,11-11-2026 11:42:52,11-11-2026 11:42:52,"0,402s",PASSED
+closeBrowser(),Chrome 156.0.0.0,,,11-11-2026 11:42:52,11-11-2026 11:42:53,"0,975s",PASSED
+,,,,,,,
+Test Cases/01_Web/WEB-07 Barbero ve sus atenciones sin datos de contacto,Chrome 156.0.0.0,"CP-56 y UAT-05. El barbero ve sus atenciones y lo cobrado del día, sin correos ni teléfonos de clientes.",Web,11-11-2026 11:42:53,11-11-2026 11:43:16,"22,784s",PASSED
+QA.abrirPortal(),Chrome 156.0.0.0,,,11-11-2026 11:42:54,11-11-2026 11:43:07,"13,288s",PASSED
+"QA.ingresarPersonal(""barbero"")",Chrome 156.0.0.0,,,11-11-2026 11:43:07,11-11-2026 11:43:10,"2,751s",PASSED
+"waitForElementPresent(QA.texto(""Total cobrado""), TIMEOUT)",Chrome 156.0.0.0,,,11-11-2026 11:43:10,11-11-2026 11:43:12,"2,263s",PASSED
+"verifyElementPresent(QA.texto(""Propinas""), 5)",Chrome 156.0.0.0,,,11-11-2026 11:43:12,11-11-2026 11:43:12,"0,267s",PASSED
+"verifyElementPresent(QA.texto(""no se muestran datos de contacto""), 5)",Chrome 156.0.0.0,,,11-11-2026 11:43:12,11-11-2026 11:43:12,"0,274s",PASSED
+delay(2),Chrome 156.0.0.0,,,11-11-2026 11:43:12,11-11-2026 11:43:14,"2,007s",PASSED
+pagina = QA.textoPagina(),Chrome 156.0.0.0,,,11-11-2026 11:43:14,11-11-2026 11:43:14,"0,021s",PASSED
+"QA.verificar(!(pagina =~ ""[\w.+-]+@[\w-]+\.[\w.]+""), ""La vista del barbero no muestra correos de clientes"")",Chrome 156.0.0.0,,,11-11-2026 11:43:14,11-11-2026 11:43:14,"0,011s",PASSED
+"QA.verificar(!(pagina.contains(""+56"")), ""La vista del barbero no muestra teléfonos de clientes"")",Chrome 156.0.0.0,,,11-11-2026 11:43:14,11-11-2026 11:43:14,"0,001s",PASSED
+"verifyElementNotPresent(findTestObject(""Web/Panel/tab_Ventas""), 3)",Chrome 156.0.0.0,,,11-11-2026 11:43:14,11-11-2026 11:43:15,"0,245s",PASSED
+takeScreenshot(),Chrome 156.0.0.0,,,11-11-2026 11:43:15,11-11-2026 11:43:15,"0,428s",PASSED
+closeBrowser(),Chrome 156.0.0.0,,,11-11-2026 11:43:15,11-11-2026 11:43:16,"0,986s",PASSED
+,,,,,,,
+Test Cases/01_Web/WEB-08 Sin cuenta de prueba publicada en el ingreso,Chrome 156.0.0.0,"DEF-018 y CP-01. El ingreso de clientes (portal y modal del invitado) no muestra la «Cuenta de Prueba Rápida» ni su correo y clave, y el navegador no guarda una cuenta o cupón de prueba.",Web,11-11-2026 11:43:16,11-11-2026 11:43:36,"20,327s",PASSED
+QA.abrirPortal(),Chrome 156.0.0.0,,,11-11-2026 11:43:16,11-11-2026 11:43:29,"12,514s",PASSED
+"QA.clic(findTestObject(""Web/Portal/btn_IniciarSesion""))",Chrome 156.0.0.0,,,11-11-2026 11:43:29,11-11-2026 11:43:29,"0,581s",PASSED
+delay(1),Chrome 156.0.0.0,,,11-11-2026 11:43:29,11-11-2026 11:43:30,"1,006s",PASSED
+"verifyElementPresent(QA.xpath(""//input[@type='password']""), 10)",Chrome 156.0.0.0,,,11-11-2026 11:43:30,11-11-2026 11:43:31,"0,258s",PASSED
+"verifyElementNotPresent(QA.texto(""Cuenta de Prueba""), 3)",Chrome 156.0.0.0,,,11-11-2026 11:43:31,11-11-2026 11:43:31,"0,282s",PASSED
+"verifyElementNotPresent(QA.xpath(""//button[contains(., 'Usar Datos')]""), 3)",Chrome 156.0.0.0,,,11-11-2026 11:43:31,11-11-2026 11:43:31,"0,271s",PASSED
+"QA.verificar(!(textoPagina().contains(""test@bigboys.cl"")), ""El portal no publica el correo de la cuenta de prueba"")",Chrome 156.0.0.0,,,11-11-2026 11:43:31,11-11-2026 11:43:31,"0,024s",PASSED
+takeScreenshot(),Chrome 156.0.0.0,,,11-11-2026 11:43:31,11-11-2026 11:43:32,"0,395s",PASSED
+"QA.clic(findTestObject(""Web/Portal/btn_ContinuarInvitado""))",Chrome 156.0.0.0,,,11-11-2026 11:43:32,11-11-2026 11:43:32,"0,747s",PASSED
+"waitForElementPresent(findTestObject(""Web/Cliente/btn_AgendarCita""), TIMEOUT)",Chrome 156.0.0.0,,,11-11-2026 11:43:32,11-11-2026 11:43:33,"0,371s",PASSED
+"QA.clic(findTestObject(""Web/Cliente/btn_IngresarRegistro""))",Chrome 156.0.0.0,,,11-11-2026 11:43:33,11-11-2026 11:43:33,"0,612s",PASSED
+delay(1),Chrome 156.0.0.0,,,11-11-2026 11:43:33,11-11-2026 11:43:34,"1,005s",PASSED
+"verifyElementNotPresent(QA.texto(""Cuenta de Prueba""), 3)",Chrome 156.0.0.0,,,11-11-2026 11:43:34,11-11-2026 11:43:35,"0,294s",PASSED
+"QA.verificar(!(textoPagina().contains(""test@bigboys.cl"")), ""El modal de ingreso no publica el correo de la cuenta de prueba"")",Chrome 156.0.0.0,,,11-11-2026 11:43:35,11-11-2026 11:43:35,"0,022s",PASSED
+"sembrados = getItem('bigboys_coupons') || '')"", null).toString()",Chrome 156.0.0.0,,,11-11-2026 11:43:35,11-11-2026 11:43:35,"0,021s",PASSED
+"QA.verificar(!(sembrados.contains(""test@bigboys.cl"")) && !(sembrados.contains(""7788"")), ""El navegador no guarda una cuenta ni un cupón de prueba"")",Chrome 156.0.0.0,,,11-11-2026 11:43:35,11-11-2026 11:43:35,"0,003s",PASSED
+takeScreenshot(),Chrome 156.0.0.0,,,11-11-2026 11:43:35,11-11-2026 11:43:35,"0,549s",PASSED
+closeBrowser(),Chrome 156.0.0.0,,,11-11-2026 11:43:35,11-11-2026 11:43:36,"1,142s",PASSED
+,,,,,,,
+Test Cases/02_API/API-01 Login del personal por rol,Chrome 156.0.0.0,"CP-06. Dueño, cajero/a y barbero inician sesión y la API devuelve su rol y alcance (el cajero/a queda en su sucursal).",API,11-11-2026 11:43:36,11-11-2026 11:43:40,"3,213s",PASSED
+"d = QA.rpcOk(""api_login"", QA.cred(""dueno""))",Chrome 156.0.0.0,,,11-11-2026 11:43:37,11-11-2026 11:43:38,"1,440s",PASSED
+"QA.verificar(role == ""DUENO"", Dueño: rol $d.role)",Chrome 156.0.0.0,,,11-11-2026 11:43:38,11-11-2026 11:43:38,"0,014s",PASSED
+"c = QA.rpcOk(""api_login"", QA.cred(""caja""))",Chrome 156.0.0.0,,,11-11-2026 11:43:38,11-11-2026 11:43:39,"0,777s",PASSED
+"QA.verificar(role == ""ADMIN_SUCURSAL"" && location_id == 1, Cajero/a: rol $c.role, sucursal $c.location_id)",Chrome 156.0.0.0,,,11-11-2026 11:43:39,11-11-2026 11:43:39,"0,001s",PASSED
+"b = QA.rpcOk(""api_login"", QA.cred(""barbero""))",Chrome 156.0.0.0,,,11-11-2026 11:43:39,11-11-2026 11:43:40,"0,781s",PASSED
+"QA.verificar(role == ""BARBERO"", Barbero: rol $b.role)",Chrome 156.0.0.0,,,11-11-2026 11:43:40,11-11-2026 11:43:40,"0,001s",PASSED
+"QA.verificar(!(keySet().any({ -> ... })), ""La respuesta del login no devuelve la contraseña ni su hash"")",Chrome 156.0.0.0,,,11-11-2026 11:43:40,11-11-2026 11:43:40,"0,021s",PASSED
+,,,,,,,
+Test Cases/02_API/API-02 Login con correo inexistente,Chrome 156.0.0.0,CP-07. La API no revela si el correo existe: responde con el mismo error genérico.,API,11-11-2026 11:43:40,11-11-2026 11:43:41,"0,867s",PASSED
+"r = QA.rpc(""api_login"", [""p_email"":""no.existe.katalon@bigboys.cl"", ""p_password_sha256"":QA.sha256(""ClaveIncorrecta1"")])",Chrome 156.0.0.0,,,11-11-2026 11:43:40,11-11-2026 11:43:41,"0,698s",PASSED
+"QA.verificar(error != null || json == null, Ingreso rechazado (HTTP $r.status: $r.error))",Chrome 156.0.0.0,,,11-11-2026 11:43:41,11-11-2026 11:43:41,"0,002s",PASSED
+"QA.verificar(error == null || !(toLowerCase().contains(""no existe"")), ""El mensaje no revela si el correo está registrado"")",Chrome 156.0.0.0,,,11-11-2026 11:43:41,11-11-2026 11:43:41,"0,001s",PASSED
+,,,,,,,
+Test Cases/02_API/API-03 Catalogo publico de sucursales servicios y barberos,Chrome 156.0.0.0,"CP-27 y CP-28. Usa las palabras clave WS de Katalon: 3 sucursales con dirección, servicios con precio y barberos activos.",API,11-11-2026 11:43:41,11-11-2026 11:43:45,"4,740s",PASSED
+req = new com.kms.katalon.core.testobject.RequestObject(api_sucursales),Chrome 156.0.0.0,,,11-11-2026 11:43:41,11-11-2026 11:43:41,"0,028s",PASSED
+"req.setRestUrl(SUPABASE_URL + ""/rest/v1/rpc/api_sucursales"")",Chrome 156.0.0.0,,,11-11-2026 11:43:41,11-11-2026 11:43:41,"0,002s",PASSED
+"req.setRestRequestMethod(""POST"")",Chrome 156.0.0.0,,,11-11-2026 11:43:41,11-11-2026 11:43:41,"0,002s",PASSED
+"req.setHttpHeaderProperties([new com.kms.katalon.core.testobject.TestObjectProperty(apikey, com.kms.katalon.core.testobject.ConditionType.EQUALS, internal.GlobalVariable.SUPABASE_ANON_KEY), new com.kms.katalon.core.testobject.TestObjectProperty(Authorization, com.kms.katalon.core.testobject.ConditionType.EQUALS, (Bearer  + internal.GlobalVariable.SUPABASE_ANON_KEY)), new com.kms.katalon.core.testobject.TestObjectProperty(Content-Type, com.kms.katalon.core.testobject.ConditionType.EQUALS, application/json)])",Chrome 156.0.0.0,,,11-11-2026 11:43:41,11-11-2026 11:43:41,"0,020s",PASSED
+"req.setBodyContent(new com.kms.katalon.core.testobject.impl.HttpTextBodyContent({}, UTF-8, application/json))",Chrome 156.0.0.0,,,11-11-2026 11:43:41,11-11-2026 11:43:41,"0,026s",PASSED
+res = sendRequest(req),Chrome 156.0.0.0,,,11-11-2026 11:43:41,11-11-2026 11:43:44,"2,751s",PASSED
+"verifyResponseStatusCode(res, 200)",Chrome 156.0.0.0,,,11-11-2026 11:43:44,11-11-2026 11:43:44,"0,025s",PASSED
+suc = JsonSlurper().parseText(res.getResponseText()),Chrome 156.0.0.0,,,11-11-2026 11:43:44,11-11-2026 11:43:44,"0,021s",PASSED
+"QA.verificar(suc.size() == 3 && suc.every({ -> ... }), ""Las 3 sucursales tienen dirección: "" +  }).join("" | ""))",Chrome 156.0.0.0,,,11-11-2026 11:43:44,11-11-2026 11:43:44,"0,028s",PASSED
+"srv = QA.rpcOk(""api_servicios"", [""p_sucursal"":null])",Chrome 156.0.0.0,,,11-11-2026 11:43:44,11-11-2026 11:43:45,"0,656s",PASSED
+"QA.verificar(srv.size() > 0 && srv.every({ -> ... }), $srv.size() servicios, todos con precio)",Chrome 156.0.0.0,,,11-11-2026 11:43:45,11-11-2026 11:43:45,"0,004s",PASSED
+"bar = QA.rpcOk(""api_barberos"", [:])",Chrome 156.0.0.0,,,11-11-2026 11:43:45,11-11-2026 11:43:45,"0,665s",PASSED
+"QA.verificar( }).size() > 0, $bar.findAll({ -> ... }).size() barberos activos)",Chrome 156.0.0.0,,,11-11-2026 11:43:45,11-11-2026 11:43:45,"0,006s",PASSED
+,,,,,,,
+Test Cases/02_API/API-04 Reserva web sin abono se rechaza,Chrome 156.0.0.0,CP-32 y regla del abono (OE2). Un visitante no puede crear una reserva confirmada sin pasar por Webpay.,API,11-11-2026 11:43:45,11-11-2026 11:43:46,"0,435s",PASSED
+"QA.rpcRechaza(""api_crear_reserva"", [""p"":[""canal"":""WEB"", ""barber_id"":1, ""service_name"":""Corte"", ""date_time"":""2026-12-15 10:00"", ""status"":""Confirmada"", ""customer_name"":""Prueba Katalon""]], ""PAGO_REQUERIDO"")",Chrome 156.0.0.0,,,11-11-2026 11:43:45,11-11-2026 11:43:46,"0,330s",PASSED
+,,,,,,,
+Test Cases/02_API/API-05 Horario ocupado se rechaza,Chrome 156.0.0.0,CP-33. La base de datos impide reservar un bloque ya tomado por otra reserva (restricción de exclusión).,API,11-11-2026 11:43:46,11-11-2026 11:43:47,"0,889s",PASSED
+"reservas = QA.rpcOk(""api_listar_reservas"", [""p_formato"":""WEB""] + QA.cred(""dueno""))",Chrome 156.0.0.0,,,11-11-2026 11:43:46,11-11-2026 11:43:46,"0,363s",PASSED
+"ahora = Date().format(""yyyy-MM-dd HH:mm"", TimeZone.getTimeZone(""America/Santiago""))",Chrome 156.0.0.0,,,11-11-2026 11:43:46,11-11-2026 11:43:46,"0,023s",PASSED
+r = reservas.find({ -> ... }),Chrome 156.0.0.0,,,11-11-2026 11:43:46,11-11-2026 11:43:46,"0,007s",PASSED
+"QA.verificar(r != null, Hay una reserva futura confirmada para la prueba ($r?.codigo, $r?.date_time))",Chrome 156.0.0.0,,,11-11-2026 11:43:46,11-11-2026 11:43:46,"0,002s",PASSED
+"QA.rpcRechaza(""api_crear_reserva"", [""p"":[""id"":System.currentTimeMillis(), ""canal"":""WEB"", ""barber_id"":barber_id, ""service_name"":""Corte"", ""date_time"":date_time, ""status"":""PENDIENTE_PAGO"", ... ]], ""HORARIO_OCUPADO"")",Chrome 156.0.0.0,,,11-11-2026 11:43:46,11-11-2026 11:43:47,"0,330s",PASSED
+,,,,,,,
+Test Cases/02_API/API-06 Permisos por rol,Chrome 156.0.0.0,"CP-15, CP-53 y CP-59. El cajero/a no crea personal y el barbero no ve las solicitudes de derechos ni la caja.",API,11-11-2026 11:43:47,11-11-2026 11:43:48,"1,681s",PASSED
+"QA.rpcRechaza(""api_personal_crear"", QA.cred(""caja"") + [""p"":[""full_name"":""No Debe Crearse"", ""email"":""katalon.qa@bigboys.cl"", ""role"":""BARBERO"", ""location_id"":1, ""temp_password_sha256"":QA.sha256(""Temporal123"")]], ""SIN_PERMISO"")",Chrome 156.0.0.0,,,11-11-2026 11:43:47,11-11-2026 11:43:48,"0,824s",PASSED
+"QA.rpcRechaza(""api_solicitudes_listar"", QA.cred(""barbero""), ""SIN_PERMISO"")",Chrome 156.0.0.0,,,11-11-2026 11:43:48,11-11-2026 11:43:48,"0,380s",PASSED
+"QA.rpcRechaza(""api_personal_listar"", QA.cred(""barbero""), ""SIN_PERMISO"")",Chrome 156.0.0.0,,,11-11-2026 11:43:48,11-11-2026 11:43:48,"0,391s",PASSED
+,,,,,,,
+Test Cases/02_API/API-07 Caja del dia del Duenio y del cajero,Chrome 156.0.0.0,"UAT-04, CP-55 y CP-74 (DEF-016). El Dueño ve las 3 sucursales con subtotal Peñaflor y consolidado; el cajero/a solo la suya. En caja = monto − abono.",API,11-11-2026 11:43:48,11-11-2026 11:43:50,"1,438s",PASSED
+"desde = ""2026-11-01""",Chrome 156.0.0.0,,,11-11-2026 11:43:49,11-11-2026 11:43:49,"0,002s",PASSED
+"hasta = Date().format(""yyyy-MM-dd"", TimeZone.getTimeZone(""America/Santiago""))",Chrome 156.0.0.0,,,11-11-2026 11:43:49,11-11-2026 11:43:49,"0,003s",PASSED
+"d = QA.rpcOk(""api_caja_resumen"", QA.cred(""dueno"") + [""p_desde"":desde, ""p_hasta"":hasta, ""p_sucursal"":null])",Chrome 156.0.0.0,,,11-11-2026 11:43:49,11-11-2026 11:43:49,"0,366s",PASSED
+"QA.verificar(sucursales instanceof java.util.List && consolidado != null && subtotal_penaflor != null, Dueño: $d.sucursales.size() sucursales, subtotal Peñaflor y consolidado)",Chrome 156.0.0.0,,,11-11-2026 11:43:49,11-11-2026 11:43:49,"0,002s",PASSED
+sucursales.each({ java.lang.Object s -> ... }),Chrome 156.0.0.0,,,11-11-2026 11:43:49,11-11-2026 11:43:49,"0,009s",PASSED
+"QA.verificar(en_caja == sucursales.sum(0, { -> ... }), Consolidado en caja $d.consolidado.en_caja = suma de las sucursales)",Chrome 156.0.0.0,,,11-11-2026 11:43:49,11-11-2026 11:43:49,"0,014s",PASSED
+"c = QA.rpcOk(""api_caja_resumen"", QA.cred(""caja"") + [""p_desde"":desde, ""p_hasta"":hasta, ""p_sucursal"":null])",Chrome 156.0.0.0,,,11-11-2026 11:43:49,11-11-2026 11:43:49,"0,366s",PASSED
+"QA.verificar(sucursales.every({ -> ... }), Cajero/a ve solo su sucursal: $c.sucursales.collect({ -> ... }))",Chrome 156.0.0.0,,,11-11-2026 11:43:49,11-11-2026 11:43:49,"0,004s",PASSED
+"otra = QA.rpc(""api_caja_resumen"", QA.cred(""caja"") + [""p_desde"":desde, ""p_hasta"":hasta, ""p_sucursal"":2])",Chrome 156.0.0.0,,,11-11-2026 11:43:49,11-11-2026 11:43:50,"0,352s",PASSED
+"QA.verificar(error != null || sucursales.every({ -> ... }), ""Cajero/a que pide la sucursal 2: "" + (otra.error) ? otra.error : recibe solo la suya)",Chrome 156.0.0.0,,,11-11-2026 11:43:50,11-11-2026 11:43:50,"0,001s",PASSED
+,,,,,,,
+Test Cases/02_API/API-08 Barbero sin datos de contacto de clientes,Chrome 156.0.0.0,CP-56. Las atenciones del barbero traen su total y no incluyen correos ni teléfonos.,API,11-11-2026 11:43:50,11-11-2026 11:43:50,"0,512s",PASSED
+"hoy = Date().format(""yyyy-MM-dd"", TimeZone.getTimeZone(""America/Santiago""))",Chrome 156.0.0.0,,,11-11-2026 11:43:50,11-11-2026 11:43:50,"0,002s",PASSED
+"m = QA.rpcOk(""api_mis_atenciones"", QA.cred(""barbero"") + [""p_fecha"":hoy])",Chrome 156.0.0.0,,,11-11-2026 11:43:50,11-11-2026 11:43:50,"0,360s",PASSED
+txt = JsonOutput.toJson(m),Chrome 156.0.0.0,,,11-11-2026 11:43:50,11-11-2026 11:43:50,"0,002s",PASSED
+"QA.verificar(total != null, Total del día informado: $m.total)",Chrome 156.0.0.0,,,11-11-2026 11:43:50,11-11-2026 11:43:50,"0,002s",PASSED
+"QA.verificar(!(txt =~ ""@"") && !(txt.contains(""+56"")), ""La respuesta no contiene correos ni teléfonos"")",Chrome 156.0.0.0,,,11-11-2026 11:43:50,11-11-2026 11:43:50,"0,002s",PASSED
+,,,,,,,
+Test Cases/02_API/API-09 Tablas cerradas al acceso directo,Chrome 156.0.0.0,"CP-NF-04 (seguridad, RLS). Con la clave pública no se leen tablas con datos personales; solo se accede por las funciones api_*.",API,11-11-2026 11:43:50,11-11-2026 11:43:52,"1,866s",PASSED
+"[""usuario"", ""cliente"", ""reserva"", ""pago"", ""registro_auditoria"", ""solicitud_derecho""].each({ java.lang.Object tabla -> ... })",Chrome 156.0.0.0,,,11-11-2026 11:43:51,11-11-2026 11:43:52,"1,478s",PASSED
+,,,,,,,
+Test Cases/02_API/API-10 Fila publica sin datos personales,Chrome 156.0.0.0,CP-47 y CP-48. La fila pública de la sucursal muestra turnos y estados; el nombre va abreviado y sin contacto.,API,11-11-2026 11:43:52,11-11-2026 11:43:53,"0,577s",PASSED
+"f = QA.rpcOk(""api_fila_listar"", [""p_sucursal"":1])",Chrome 156.0.0.0,,,11-11-2026 11:43:52,11-11-2026 11:43:53,"0,330s",PASSED
+"QA.verificar(turnos instanceof java.util.List, Fila de la sucursal 1 del $f.fecha: $f.turnos.size() turnos ($f.turnos.collect({ -> ... }).countBy({ -> ... })))",Chrome 156.0.0.0,,,11-11-2026 11:43:53,11-11-2026 11:43:53,"0,020s",PASSED
+"QA.verificar(turnos.every({ -> ... }), ""Los nombres se muestran abreviados: "" +  }).join("", ""))",Chrome 156.0.0.0,,,11-11-2026 11:43:53,11-11-2026 11:43:53,"0,014s",PASSED
+txt = JsonOutput.toJson(f),Chrome 156.0.0.0,,,11-11-2026 11:43:53,11-11-2026 11:43:53,"0,003s",PASSED
+"QA.verificar(!(txt =~ ""@"") && !(txt.contains(""+56"")), ""La fila pública no expone correos ni teléfonos"")",Chrome 156.0.0.0,,,11-11-2026 11:43:53,11-11-2026 11:43:53,"0,002s",PASSED

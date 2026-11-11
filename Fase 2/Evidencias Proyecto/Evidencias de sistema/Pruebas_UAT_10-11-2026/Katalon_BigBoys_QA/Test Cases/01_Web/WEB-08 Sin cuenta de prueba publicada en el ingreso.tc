@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>DEF-018 y CP-01. El ingreso de clientes (portal y modal del invitado) no muestra la «Cuenta de Prueba Rápida» ni su correo y clave, y el navegador no guarda una cuenta o cupón de prueba.</description>
+   <name>WEB-08 Sin cuenta de prueba publicada en el ingreso</name>
+   <tag>Web</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>6bee78d1-add5-4c3a-941b-66b69311a9a9</testCaseGuid>
+</TestCaseEntity>

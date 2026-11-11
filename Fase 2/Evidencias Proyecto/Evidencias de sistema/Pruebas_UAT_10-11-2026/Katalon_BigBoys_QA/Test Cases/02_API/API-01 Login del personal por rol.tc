@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>CP-06. Dueño, cajero/a y barbero inician sesión y la API devuelve su rol y alcance (el cajero/a queda en su sucursal).</description>
+   <name>API-01 Login del personal por rol</name>
+   <tag>API</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>f2872bdb-8d55-41b3-9bc4-43e353fb436a</testCaseGuid>
+</TestCaseEntity>

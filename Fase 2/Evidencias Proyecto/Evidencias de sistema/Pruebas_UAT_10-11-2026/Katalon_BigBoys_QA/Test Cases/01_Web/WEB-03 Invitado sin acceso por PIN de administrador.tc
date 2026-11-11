@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>CP-13 y CP-15 (DEF-002). El invitado entra sin cuenta y el modal de ingreso ya no ofrece el acceso «Admin» con PIN.</description>
+   <name>WEB-03 Invitado sin acceso por PIN de administrador</name>
+   <tag>Web</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>37090084-a661-45c5-92a4-9447b6203131</testCaseGuid>
+</TestCaseEntity>

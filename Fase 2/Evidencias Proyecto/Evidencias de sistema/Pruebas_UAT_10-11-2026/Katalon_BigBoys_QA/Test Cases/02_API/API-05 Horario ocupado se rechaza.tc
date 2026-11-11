@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>CP-33. La base de datos impide reservar un bloque ya tomado por otra reserva (restricción de exclusión).</description>
+   <name>API-05 Horario ocupado se rechaza</name>
+   <tag>API</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>3443e8ba-51de-4117-a747-7c148c18a290</testCaseGuid>
+</TestCaseEntity>

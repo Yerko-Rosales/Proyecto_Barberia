@@ -92,7 +92,7 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
     private val _adminName = MutableStateFlow("Administrador Central Big boys")
     val adminName: StateFlow<String> = _adminName.asStateFlow()
 
-    private val _adminAvatarUrl = MutableStateFlow("https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80")
+    private val _adminAvatarUrl = MutableStateFlow("")
     val adminAvatarUrl: StateFlow<String> = _adminAvatarUrl.asStateFlow()
 
     // Gmail Direct SMTP Configuration (No paid APIs required)
@@ -366,6 +366,7 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
             }
             _isAdmin.value = true
             _loggedInBarber.value = null
+            _adminAvatarUrl.value = profile.text("photo_url") ?: ""
             // The owner's credentials authorize status changes in api_actualizar_reserva
             SupabaseManager.setSession(email, hash)
             _loggedInUser.value = User(
@@ -728,7 +729,10 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
     // ------------------------------------------------------------------
 
     /** Cuenta del barbero con sesión iniciada (correo, hash y si debe cambiar su clave temporal). */
-    data class BarberAccount(val email: String, val passwordHash: String, val mustChangePassword: Boolean)
+    data class BarberAccount(
+        val email: String, val passwordHash: String, val mustChangePassword: Boolean,
+        val userId: Long = 0, val photo: String = ""
+    )
 
     private val _barberAccount = MutableStateFlow<BarberAccount?>(null)
     val barberAccount: StateFlow<BarberAccount?> = _barberAccount.asStateFlow()
@@ -737,9 +741,11 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
         _barberAccount.value = BarberAccount(
             email = profile.text("email") ?: "",
             passwordHash = hash,
-            mustChangePassword = profile.text("must_change_password") == "true"
+            mustChangePassword = profile.text("must_change_password") == "true",
+            userId = profile.text("id")?.toLongOrNull() ?: 0,
+            photo = profile.text("photo_url") ?: ""
         )
-        _loggedInBarber.value = barber
+        _loggedInBarber.value = barber.copy(avatarUrl = profile.text("photo_url")?.ifBlank { null } ?: barber.avatarUrl)
         _loggedInUser.value = null
         _isAdmin.value = false
         addNotification(
@@ -760,6 +766,41 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
             try {
                 SupabaseManager.changePassword(account.email, account.passwordHash, newHash)
                 _barberAccount.value = account.copy(passwordHash = newHash, mustChangePassword = false)
+                callback(true, null)
+            } catch (e: Exception) {
+                callback(false, SupabaseManager.friendlyError(e))
+            }
+        }
+    }
+
+    /** El barbero cambia su propia foto de perfil (api_personal_foto). */
+    fun updateMyBarberPhoto(photo: String, callback: (Boolean, String?) -> Unit) {
+        val account = _barberAccount.value ?: return callback(false, "Inicia sesión nuevamente.")
+        viewModelScope.launch {
+            try {
+                SupabaseManager.updateStaffPhoto(account.email, account.passwordHash, account.userId, photo)
+                _barberAccount.value = account.copy(photo = photo)
+                _loggedInBarber.value = _loggedInBarber.value?.copy(avatarUrl = photo)
+                repository.syncBarbersAndLocationsFromCloud()
+                callback(true, null)
+            } catch (e: Exception) {
+                callback(false, SupabaseManager.friendlyError(e))
+            }
+        }
+    }
+
+    /** El Dueño cambia la foto de un barbero desde la lista de barberos del panel. */
+    fun updateBarberPhotoAsOwner(barberId: Int, photo: String, callback: (Boolean, String?) -> Unit) {
+        val creds = SupabaseManager.sessionCredentials()
+        if (!_isAdmin.value || creds == null) return callback(false, "Ingresa con la cuenta del Dueño.")
+        viewModelScope.launch {
+            try {
+                val userId = SupabaseManager.listStaff()
+                    .firstOrNull { it.text("barber_id")?.toIntOrNull() == barberId }
+                    ?.text("id")?.toLongOrNull()
+                    ?: return@launch callback(false, "Este barbero no tiene cuenta del personal.")
+                SupabaseManager.updateStaffPhoto(creds.first, creds.second, userId, photo)
+                repository.syncBarbersAndLocationsFromCloud()
                 callback(true, null)
             } catch (e: Exception) {
                 callback(false, SupabaseManager.friendlyError(e))
@@ -968,7 +1009,7 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
         onCompleted: () -> Unit = {}
     ) {
         viewModelScope.launch {
-            val defaultAvatar = if (avatarUrl.isNotBlank()) avatarUrl else "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300"
+            val defaultAvatar = avatarUrl.trim()
             val newBarber = Barber(
                 locationId = locationId,
                 name = name.trim(),

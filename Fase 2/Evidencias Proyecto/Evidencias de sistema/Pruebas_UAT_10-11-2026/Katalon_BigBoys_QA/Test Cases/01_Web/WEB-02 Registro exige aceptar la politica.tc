@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>CP-01 y CP-02 (DEF-003). Sin marcar la casilla de aceptación no se crea la cuenta y se explica el motivo.</description>
+   <name>WEB-02 Registro exige aceptar la politica</name>
+   <tag>Web</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>659af6be-398b-4683-a459-457c8ce4e12d</testCaseGuid>
+</TestCaseEntity>

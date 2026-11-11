@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>UAT-04, CP-55 y CP-74 (DEF-016). El Dueño ve las 3 sucursales con subtotal Peñaflor y consolidado; el cajero/a solo la suya. En caja = monto − abono.</description>
+   <name>API-07 Caja del dia del Duenio y del cajero</name>
+   <tag>API</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>8576ea12-6d5f-462f-8e34-4c957d7b2089</testCaseGuid>
+</TestCaseEntity>

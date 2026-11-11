@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>CP-15, CP-53 y CP-59. El cajero/a no crea personal y el barbero no ve las solicitudes de derechos ni la caja.</description>
+   <name>API-06 Permisos por rol</name>
+   <tag>API</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>85374909-1218-47e1-949c-8fe12f73c4f1</testCaseGuid>
+</TestCaseEntity>

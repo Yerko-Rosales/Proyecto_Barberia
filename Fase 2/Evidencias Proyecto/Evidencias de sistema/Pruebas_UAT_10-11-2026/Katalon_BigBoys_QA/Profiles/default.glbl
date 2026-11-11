@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalVariableEntities>
+   <description>Ambiente QA/UAT</description>
+   <name>default</name>
+   <tag></tag>
+   <defaultProfile>true</defaultProfile>
+   <GlobalVariableEntity>
+      <description>Ambiente UAT publicado (GitHub Pages)</description>
+      <initValue>'https://yerko-rosales.github.io/Proyecto_Barberia/'</initValue>
+      <name>URL_WEB</name>
+   </GlobalVariableEntity>
+   <GlobalVariableEntity>
+      <description>API api_* (PostgREST de Supabase)</description>
+      <initValue>'https://dgrflhgotxljjiejckoj.supabase.co'</initValue>
+      <name>SUPABASE_URL</name>
+   </GlobalVariableEntity>
+   <GlobalVariableEntity>
+      <description>Clave pública de la web (no es secreta: la publica index.html)</description>
+      <initValue>'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRncmZsaGdvdHhsamppZWpja29qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyOTMxMjEsImV4cCI6MjEwNjg2OTEyMX0.jGudvOPU3tafkt5vHvoSgW0jkSbnBhUsGFy4OuF5fpg'</initValue>
+      <name>SUPABASE_ANON_KEY</name>
+   </GlobalVariableEntity>
+   <GlobalVariableEntity>
+      <description>Archivo local con las claves del personal (fuera de git). Ruta relativa a la carpeta del proyecto o absoluta</description>
+      <initValue>'../../Aplicación/uat.env'</initValue>
+      <name>RUTA_UAT_ENV</name>
+   </GlobalVariableEntity>
+   <GlobalVariableEntity>
+      <description>Segundos de espera máxima por elemento</description>
+      <initValue>60</initValue>
+      <name>TIMEOUT</name>
+   </GlobalVariableEntity>
+</GlobalVariableEntities>

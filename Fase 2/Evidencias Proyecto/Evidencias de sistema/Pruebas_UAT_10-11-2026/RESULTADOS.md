@@ -128,6 +128,8 @@ Satisfacción de los usuarios de prueba (criterio ≥ 4 de 5): la registran YR y
 
 ## 4. Registro de defectos
 
+18 defectos: 12 cerrados y 6 diferidos a la V2 (SC-30). DEF-018 se agregó el 11-11-2026.
+
 | ID | Casos | Descripción | Severidad | Estado | Detección | Cierre |
 |---|---|---|---|---|---|---|
 | DEF-001 | CP-32 | La app saltaba el paso 3 y mostraba un servicio de $15.000. | Media | Cerrado | 06-11-2026 | 10-11-2026 |
@@ -147,6 +149,7 @@ Satisfacción de los usuarios de prueba (criterio ≥ 4 de 5): la registran YR y
 | DEF-015 | CP-45 | El servidor de correos reintenta sin límite y no marca FALLIDA tras 3 intentos. | Baja | Diferido (SC-30) | 10-11-2026 | — |
 | DEF-016 | UAT-04, CP-55 | Ventas y Reportes del Dueño no incluían las atenciones de la fila: el cierre de caja no cuadraba. | Alta | Cerrado | 10-11-2026 | 10-11-2026 |
 | DEF-017 | UAT-04, CP-74 | La web cargaba citas, reseñas y correos de ejemplo del prototipo y los mezclaba con los datos reales. | Media | Cerrado | 10-11-2026 | 10-11-2026 |
+| DEF-018 | CP-NF-04, CP-NF-08 | La web publicada mostraba una «Cuenta de Prueba Rápida» con correo y clave que inicia sesión en una cuenta de cliente real, y aceptaba esa cuenta en el navegador sin consultar la base de datos. Se detectó en el video de la regresión en Katalon (11-11-2026). Evidencia: `capturas/def018_*.png`. | Media | Cerrado | 11-11-2026 | 11-11-2026 |
 
 ## 5. Archivos
 

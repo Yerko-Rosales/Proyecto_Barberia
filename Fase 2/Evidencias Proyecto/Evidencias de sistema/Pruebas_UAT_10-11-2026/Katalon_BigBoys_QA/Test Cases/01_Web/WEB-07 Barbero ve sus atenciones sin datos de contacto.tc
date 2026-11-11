@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>CP-56 y UAT-05. El barbero ve sus atenciones y lo cobrado del día, sin correos ni teléfonos de clientes.</description>
+   <name>WEB-07 Barbero ve sus atenciones sin datos de contacto</name>
+   <tag>Web</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>1268fcef-1350-4b42-a5a5-1e8472efdf1a</testCaseGuid>
+</TestCaseEntity>

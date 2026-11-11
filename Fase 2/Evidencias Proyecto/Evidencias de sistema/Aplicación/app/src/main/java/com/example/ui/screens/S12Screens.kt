@@ -229,6 +229,16 @@ fun BarberEarningsScreen(viewModel: BarberiaViewModel, barber: Barber, onLogout:
     var newPass by remember { mutableStateOf("") }
     var message by remember { mutableStateOf<String?>(null) }
     val mustChange = account?.mustChangePassword == true
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val fotoLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            val foto = com.example.ui.util.imagenADataUrl(context, uri)
+            if (foto == null) message = "No se pudo leer la imagen."
+            else viewModel.updateMyBarberPhoto(foto) { ok, err -> message = if (ok) "Foto actualizada." else err }
+        }
+    }
 
     LaunchedEffect(mustChange) {
         while (!mustChange) {
@@ -244,6 +254,13 @@ fun BarberEarningsScreen(viewModel: BarberiaViewModel, barber: Barber, onLogout:
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                com.example.ui.util.FotoPersonal(url = account?.photo?.ifBlank { null } ?: barber.avatarUrl, nombre = barber.name, size = 56.dp)
+                TextButton(onClick = {
+                    fotoLauncher.launch(androidx.activity.result.PickVisualMediaRequest(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly))
+                }, contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)) { Text("📷 Mi foto", color = GoldPrimary, fontSize = 10.sp) }
+            }
+            Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
                 Text("BARBERO", color = GoldPrimary, fontSize = 11.sp, fontWeight = FontWeight.Black)
                 Text(barber.name, color = TextIvory, fontWeight = FontWeight.Bold, fontSize = 18.sp)

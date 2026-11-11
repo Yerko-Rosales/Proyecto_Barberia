@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>CP-NF-04 (seguridad, RLS). Con la clave pública no se leen tablas con datos personales; solo se accede por las funciones api_*.</description>
+   <name>API-09 Tablas cerradas al acceso directo</name>
+   <tag>API</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>7d639151-2923-4e9c-a8ac-466081ba74b7</testCaseGuid>
+</TestCaseEntity>

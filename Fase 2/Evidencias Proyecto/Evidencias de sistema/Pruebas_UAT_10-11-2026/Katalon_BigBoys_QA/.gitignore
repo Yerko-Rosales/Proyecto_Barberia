@@ -1,0 +1,9 @@
+.gradle
+bin
+Libs
+output
+build
+.classpath
+.project
+.cache
+katalon-analytics-tmp

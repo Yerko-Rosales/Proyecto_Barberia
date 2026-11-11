@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>CP-32 y regla del abono (OE2). Un visitante no puede crear una reserva confirmada sin pasar por Webpay.</description>
+   <name>API-04 Reserva web sin abono se rechaza</name>
+   <tag>API</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>df9a821d-3bd4-4558-aab9-0c36602edd36</testCaseGuid>
+</TestCaseEntity>

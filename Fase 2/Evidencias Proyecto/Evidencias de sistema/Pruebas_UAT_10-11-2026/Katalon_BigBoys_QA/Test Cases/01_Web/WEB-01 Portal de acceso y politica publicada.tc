@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>CP-73 (DEF-008) y CP-27. El portal carga con sus 4 accesos y la Política de Privacidad y los T&amp;C están publicados.</description>
+   <name>WEB-01 Portal de acceso y politica publicada</name>
+   <tag>Web</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>bf6e19d8-4eea-4050-a7d1-c3e9cf86261e</testCaseGuid>
+</TestCaseEntity>

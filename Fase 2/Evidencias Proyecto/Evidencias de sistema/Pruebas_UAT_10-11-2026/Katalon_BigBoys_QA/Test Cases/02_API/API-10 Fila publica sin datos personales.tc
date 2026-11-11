@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>CP-47 y CP-48. La fila pública de la sucursal muestra turnos y estados; el nombre va abreviado y sin contacto.</description>
+   <name>API-10 Fila publica sin datos personales</name>
+   <tag>API</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>afbf5d55-cfd7-44a7-9f3a-f69eda2be144</testCaseGuid>
+</TestCaseEntity>

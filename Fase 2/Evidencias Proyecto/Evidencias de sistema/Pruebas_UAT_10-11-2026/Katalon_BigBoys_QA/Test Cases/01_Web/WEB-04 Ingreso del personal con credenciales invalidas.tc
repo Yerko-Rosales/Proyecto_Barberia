@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>CP-07. Con un correo inexistente el sistema rechaza el ingreso con un mensaje genérico y no abre ningún panel.</description>
+   <name>WEB-04 Ingreso del personal con credenciales invalidas</name>
+   <tag>Web</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>08589f08-3e22-46d0-9c53-eae06e55f2b6</testCaseGuid>
+</TestCaseEntity>
