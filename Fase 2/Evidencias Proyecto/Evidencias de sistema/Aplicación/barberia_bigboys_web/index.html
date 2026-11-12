@@ -2501,9 +2501,11 @@
       const [selectedLocationId, setSelectedLocationId] = useState('all');
       const [activeBioBarber, setActiveBioBarber] = useState(null);
 
+      // DEF-019 (12-11-2026): el catálogo público muestra solo barberos activos
       const filteredBarbers = useMemo(() => {
-        if (selectedLocationId === 'all') return barbers;
-        return barbers.filter(b => b.locationId === parseInt(selectedLocationId, 10));
+        const activos = (barbers || []).filter(b => b && b.active !== false);
+        if (selectedLocationId === 'all') return activos;
+        return activos.filter(b => b.locationId === parseInt(selectedLocationId, 10));
       }, [barbers, selectedLocationId]);
 
       const getLocationName = (locId) => {
@@ -2786,7 +2788,7 @@
           {/* Cards de Sucursales con Direcciones Actualizadas */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {locations.map(loc => {
-              const locBarbers = barbers.filter(b => b.locationId === loc.id);
+              const locBarbers = barbers.filter(b => b.locationId === loc.id && b.active !== false); // DEF-019
               const isSelected = activeLocId === loc.id;
               const isCopied = copiedAddressId === loc.id;
 

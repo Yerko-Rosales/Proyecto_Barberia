@@ -128,7 +128,7 @@ Satisfacción de los usuarios de prueba (criterio ≥ 4 de 5): la registran YR y
 
 ## 4. Registro de defectos
 
-18 defectos: 12 cerrados y 6 diferidos a la V2 (SC-30). DEF-018 se agregó el 11-11-2026.
+19 defectos: 13 cerrados y 6 diferidos a la V2 (SC-30). DEF-018 se agregó el 11-11-2026 y DEF-019 el 12-11-2026.
 
 | ID | Casos | Descripción | Severidad | Estado | Detección | Cierre |
 |---|---|---|---|---|---|---|
@@ -150,6 +150,7 @@ Satisfacción de los usuarios de prueba (criterio ≥ 4 de 5): la registran YR y
 | DEF-016 | UAT-04, CP-55 | Ventas y Reportes del Dueño no incluían las atenciones de la fila: el cierre de caja no cuadraba. | Alta | Cerrado | 10-11-2026 | 10-11-2026 |
 | DEF-017 | UAT-04, CP-74 | La web cargaba citas, reseñas y correos de ejemplo del prototipo y los mezclaba con los datos reales. | Media | Cerrado | 10-11-2026 | 10-11-2026 |
 | DEF-018 | CP-NF-04, CP-NF-08 | La web publicada mostraba una «Cuenta de Prueba Rápida» con correo y clave que inicia sesión en una cuenta de cliente real, y aceptaba esa cuenta en el navegador sin consultar la base de datos. Se detectó en el video de la regresión en Katalon (11-11-2026). Evidencia: `capturas/def018_*.png`. | Media | Cerrado | 11-11-2026 | 11-11-2026 |
+| DEF-019 | CP-28 | El catálogo público de la web («Barberos») y las tarjetas de «Sucursales» listaban los barberos desactivados (dos «Barbero Prueba» y «Barbero UAT»); la reserva y la app sí los filtraban. Se detectó al revisar las fotos de los barberos (12-11-2026). La web muestra solo los activos y el Dueño conserva la nómina completa. Evidencia: `capturas/sc32_fotos_barberos_web_12-11-2026.png` (antes) y `capturas/def019_*.png` (corregido). | Baja | Cerrado | 12-11-2026 | 12-11-2026 |
 
 ## 5. Archivos
 
