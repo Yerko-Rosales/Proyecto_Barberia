@@ -1127,45 +1127,6 @@
       }
 
       // Correo Automático: Reagendamiento Exitoso de Cita
-      // Correo de confirmación de una reserva nueva, al volver de Webpay con el abono aprobado (DEF-020)
-      sendReservationConfirmationEmail(result, pending) {
-        const reserva = (result && result.reserva) || {};
-        const to = ((pending && pending.email) || reserva.customer_email || '').trim();
-        if (!to) return;
-        const nombre = (pending && pending.nombre) || reserva.customer_name || 'cliente';
-        const fromEmail = this.getGmailConfig().senderEmail || 'bigboysbarberv1@gmail.com';
-        const bName = (this.getBarbers().find(b => Number(b.id) === Number(reserva.barber_id))?.name) || 'Barbero Big Boys';
-        const locName = (this.getLocations().find(l => Number(l.id) === Number(reserva.location_id))?.name) || 'Sucursal Big Boys';
-        const medio = ({ DEBITO: 'Débito', CREDITO: 'Crédito', PREPAGO: 'Prepago' })[result.tipo_medio] || 'Tarjeta';
-
-        const subject = `✅ Reserva Confirmada ${result.codigo} - Big Boys Barbershop`;
-        const body = `Estimado/a ${nombre}:\n\n` +
-          `Tu abono fue aprobado por Webpay y tu reserva en Big Boys Barberías quedó CONFIRMADA.\n\n` +
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-          `📋 DETALLES DE TU RESERVA:\n` +
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-          `• Código de Reserva: ${result.codigo}\n` +
-          `• Fecha y Hora: ${AppFormatters.fecha(reserva.date_time)} hrs\n` +
-          `• Sucursal: ${locName}\n` +
-          `• Barbero: ${bName}\n` +
-          `• Servicio: ${reserva.service_name || 'Servicio Big Boys'}\n\n` +
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-          `💳 ABONO PAGADO CON WEBPAY:\n` +
-          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-          `• Monto: ${AppFormatters.formatClp(result.monto)} (se descuenta del total en el local)\n` +
-          `• Código de Autorización: ${result.autorizacion || '-'}\n` +
-          `• Medio de Pago: ${medio}${result.tarjeta ? ` ···· ${result.tarjeta}` : ''}\n` +
-          `• Fecha del Pago: ${AppFormatters.fecha(result.fecha)}\n\n` +
-          `Recordatorio: puedes reagendar hasta 2 veces con al menos 24 horas de anticipación. Si cancelas con menos de 24 horas o no asistes (tolerancia de 15 minutos), pierdes el abono.\n\n` +
-          `¡Te esperamos en Big Boys!\n\n` +
-          `Atentamente,\n` +
-          `Big Boys Barberías Chile\n` +
-          `Contacto: ${fromEmail}`;
-
-        this.logSentEmail({ fromEmail, toEmail: to, toName: nombre, subject, body, status: 'Enviado con Éxito ✓' });
-        this.sendRealEmail({ to, subject, body });
-      }
-
       sendRescheduleConfirmationEmail(appt, bName, locName, oldDateTime, newDateTime) {
         if (!appt || !appt.customerEmail) return;
         const fromEmail = this.getGmailConfig().senderEmail || 'bigboysbarberv1@gmail.com';
@@ -8007,12 +7968,8 @@
         setLoading(true);
         try {
           const returnUrl = window.location.origin + window.location.pathname;
-          const payload = buildWebpayPayload(bookingDraft, user);
-          const tx = await callApi('api_webpay_iniciar', { p: payload, p_return_url: returnUrl });
-          // El correo y el nombre se guardan para enviar la confirmación al volver de Webpay (DEF-020)
-          sessionStorage.setItem('bigboys_webpay_pending', JSON.stringify({
-            codigo: tx.codigo, token: tx.token, email: payload.customer_email, nombre: payload.customer_name
-          }));
+          const tx = await callApi('api_webpay_iniciar', { p: buildWebpayPayload(bookingDraft, user), p_return_url: returnUrl });
+          sessionStorage.setItem('bigboys_webpay_pending', JSON.stringify({ codigo: tx.codigo, token: tx.token }));
           redirectToWebpay(tx.url, tx.token);
         } catch (err) {
           setError(err.message);
@@ -8077,7 +8034,6 @@
             sessionStorage.removeItem('bigboys_webpay_pending');
             store.refreshAppointmentsFromCloud();
             if (r.aprobado) store.addNotification('Reserva confirmada', `Tu abono fue aprobado. Código de reserva ${r.codigo}.`);
-            if (r.aprobado && !r.sin_cupo) store.sendReservationConfirmationEmail(r, pending);
           })
           .catch(err => setError(err.message));
       }, []);
