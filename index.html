@@ -971,7 +971,13 @@
       }
       getLoggedInUser() {
         const raw = localStorage.getItem('bigboys_logged_user');
-        return raw ? JSON.parse(raw) : null;
+        const user = raw ? JSON.parse(raw) : null;
+        // Sesión de cliente abierta antes con una cuenta del personal: se descarta
+        if (user && user.role && user.role !== 'CLIENTE') {
+          localStorage.removeItem('bigboys_logged_user');
+          return null;
+        }
+        return user;
       }
       isAdmin() {
         if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('bigboys_session_active') !== 'true') {
@@ -1287,6 +1293,12 @@
         return next;
       }
 
+      staffLoginMessage(role) {
+        const tab = role === 'BARBERO' ? 'Barbero' : 'Administración';
+        const label = { DUENO: 'Dueño / Administración', ADMIN_SUCURSAL: 'Cajero/a de sucursal', BARBERO: 'Barbero' }[role] || 'personal';
+        return `Esta cuenta es de ${label}. Ingresa por la pestaña «${tab}».`;
+      }
+
       async login(email, password) {
         const cleanEmail = (email || '').trim().toLowerCase();
         const cleanPass = (password || '').trim();
@@ -1304,6 +1316,10 @@
           try {
             const { data: cloudUser, error } = await sb.rpc('api_login', { p_email: cleanEmail, p_password_sha256: expectedHash });
             if (!error && cloudUser) {
+              // El ingreso de clientes es solo para cuentas CLIENTE; el personal entra por su pestaña
+              if (cloudUser.role && cloudUser.role !== 'CLIENTE') {
+                return { success: false, message: this.staffLoginMessage(cloudUser.role) };
+              }
               const merged = {
                 ...(user || {}),
                 id: cloudUser.id,
@@ -1336,6 +1352,9 @@
 
         if (!user) {
           return { success: false, message: `El correo '${cleanEmail}' no se encuentra registrado.` };
+        }
+        if (user.role && user.role !== 'CLIENTE') {
+          return { success: false, message: this.staffLoginMessage(user.role) };
         }
 
         // DEF-018 (11-11-2026): sin clave de prueba ni ingreso sin contraseña verificada
