@@ -307,6 +307,16 @@ class BarberiaViewModel(application: Application) : AndroidViewModel(application
 
             // Credentials are validated in Supabase (api_login) so users registered on the Web can log in
             val cloudUserDto = SupabaseManager.fetchCloudUser(cleanEmail, hashPassword(cleanPass))
+            if (cloudUserDto != null && cloudUserDto.isStaff) {
+                val label = when (cloudUserDto.role) {
+                    "DUENO" -> "Dueño / Administración"
+                    "ADMIN_SUCURSAL" -> "Cajero/a de sucursal"
+                    "BARBERO" -> "Barbero"
+                    else -> "personal"
+                }
+                callback(false, "Esta cuenta es de $label. Ingresa por el acceso del personal.")
+                return@launch
+            }
             if (cloudUserDto != null) {
                 val cloudUser = cloudUserDto.toUser()
                 if (user == null) {

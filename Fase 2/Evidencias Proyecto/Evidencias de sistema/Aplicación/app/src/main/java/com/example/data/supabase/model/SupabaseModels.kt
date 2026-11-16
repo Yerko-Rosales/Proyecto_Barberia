@@ -63,8 +63,12 @@ data class UserDto(
     @SerialName("full_name") val fullName: String = "",
     @SerialName("email") val email: String = "",
     @SerialName("phone") val phone: String = "",
-    @SerialName("password_hash") val passwordHash: String = ""
+    @SerialName("password_hash") val passwordHash: String = "",
+    @SerialName("role") val role: String? = null
 ) {
+    /** Staff accounts (owner, cashier, barber) must not sign in through the customer login. */
+    val isStaff: Boolean get() = !role.isNullOrBlank() && role != "CLIENTE"
+
     fun toUser(): User = User(
         id = id ?: 0,
         fullName = fullName,
