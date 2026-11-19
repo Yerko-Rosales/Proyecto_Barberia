@@ -5199,20 +5199,7 @@
           {subTab === 'reportes' && (
             <div className="space-y-4">
               {StaffSession.get() && <CashSummaryPanel staff={StaffSession.get()} />}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5">
-                  <span className="text-[10px] text-zinc-400 font-bold uppercase block">Recaudación Total</span>
-                  <h3 className="text-2xl font-black text-[#FFD700] mt-1">{AppFormatters.formatClp(totalRevenue)}</h3>
-                </div>
-                <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5">
-                  <span className="text-[10px] text-zinc-400 font-bold uppercase block">Abonos Garantizados</span>
-                  <h3 className="text-2xl font-black text-green-400 mt-1">{AppFormatters.formatClp(totalPrepay)}</h3>
-                </div>
-                <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5">
-                  <span className="text-[10px] text-zinc-400 font-bold uppercase block">Cortes Realizados</span>
-                  <h3 className="text-2xl font-black text-white mt-1">{completedAppts.length}</h3>
-                </div>
-              </div>
+              <SalesChartsPanel locations={locations} barbers={barbers} appointments={appointments} />
             </div>
           )}
 
@@ -8229,6 +8216,180 @@
               </div>
             </div>
           )}
+        </div>
+      );
+    }
+
+    // Gráficos de ventas del Dueño (19-11-2026): los mismos de la app (Admin → Reportes & Gráficos):
+    // filtro por sucursal, torta de ventas por sucursal, torta por barbero y volumen de citas por barbero.
+    const SALES_CHART_COLORS = ['#D4AF37', '#38BDF8', '#34D399', '#F472B6', '#A78BFA', '#FB923C', '#FACC15', '#2DD4BF'];
+
+    function SalesDonutChart({ title, subtitle, slices, centerLabel }) {
+      const total = slices.reduce((s, x) => s + x.value, 0);
+      const R = 70, STROKE = 26, C = 2 * Math.PI * R;
+      let acc = 0;
+      return (
+        <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5">
+          <span className="text-xs text-[#FFD700] font-black uppercase tracking-wider block">{title}</span>
+          <span className="text-[11px] text-zinc-400 block mb-4">{subtitle}</span>
+          {slices.length === 0 ? (
+            <div className="text-xs text-zinc-500 py-6 text-center">Sin datos para este filtro.</div>
+          ) : (
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="relative shrink-0" style={{ width: 180, height: 180 }}>
+                <svg viewBox="0 0 180 180" width="180" height="180" role="img" aria-label={title}>
+                  <circle cx="90" cy="90" r={R} fill="none" stroke="#3f3f46" strokeOpacity="0.35" strokeWidth={STROKE} />
+                  {total > 0 && slices.map((s, i) => {
+                    const len = (s.value / total) * C;
+                    const el = (
+                      <circle key={i} cx="90" cy="90" r={R} fill="none" stroke={s.color} strokeWidth={STROKE}
+                        strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-acc}
+                        transform="rotate(-90 90 90)">
+                        <title>{`${s.label}: ${AppFormatters.formatClp(s.value)} (${Math.round((s.value / total) * 100)}%)`}</title>
+                      </circle>
+                    );
+                    acc += len;
+                    return el;
+                  })}
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+                  <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider">{centerLabel}</span>
+                  <span className="text-sm font-black text-white font-mono">{AppFormatters.formatClp(total)}</span>
+                </div>
+              </div>
+              <div className="flex-1 w-full min-w-0 space-y-2">
+                {slices.map((s, i) => {
+                  const pct = total > 0 ? Math.round((s.value / total) * 100) : 0;
+                  return (
+                    <div key={i} className="flex items-center gap-3 bg-[#121212] border border-zinc-800 rounded-xl px-3 py-2">
+                      <span className="w-3 h-3 rounded-full shrink-0" style={{ background: s.color }}></span>
+                      {s.avatarUrl && <img src={s.avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" />}
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold text-white truncate">{s.label}</div>
+                        {s.subtitle && <div className="text-[10px] text-zinc-400">{s.subtitle}</div>}
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className="text-xs font-black text-[#FFD700] font-mono">{AppFormatters.formatClp(s.value)}</div>
+                        <div className="text-[10px] text-zinc-400">{pct}% · {s.count} citas</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function SalesChartsPanel({ locations, barbers, appointments }) {
+      const [locFilter, setLocFilter] = useState(null);      // null = todas las sucursales
+      const [chartFilter, setChartFilter] = useState('todos'); // 'todos' | 'locales' | 'barberos'
+      const shortName = (n) => String(n || '').replace('Big Boys - ', '');
+      const inLoc = (a) => locFilter === null || a.locationId === locFilter;
+
+      const completed = useMemo(() => appointments.filter(a => a.status === 'Completada' && inLoc(a)), [appointments, locFilter]);
+      const totalVentas = completed.reduce((s, a) => s + (a.servicePrice || 0), 0);
+      const totalAbonos = completed.reduce((s, a) => s + (a.prepayAmount || 0), 0);
+      const totalCitas = appointments.filter(inLoc).length;
+
+      const locationSlices = useMemo(() => locations.map((loc, i) => {
+        const done = appointments.filter(a => a.locationId === loc.id && a.status === 'Completada');
+        const all = appointments.filter(a => a.locationId === loc.id);
+        return {
+          label: shortName(loc.name),
+          value: done.reduce((s, a) => s + (a.servicePrice || 0), 0),
+          count: all.length,
+          color: SALES_CHART_COLORS[i % SALES_CHART_COLORS.length],
+          subtitle: `${done.length} completadas · ${all.length} agendadas`
+        };
+      }).filter(s => s.value > 0 || s.count > 0), [appointments, locations]);
+
+      const branchBarbers = useMemo(() => barbers.filter(b => locFilter === null || b.locationId === locFilter), [barbers, locFilter]);
+      const barberSlices = useMemo(() => branchBarbers.map((b, i) => {
+        const done = appointments.filter(a => a.barberId === b.id && a.status === 'Completada');
+        const all = appointments.filter(a => a.barberId === b.id);
+        return {
+          label: b.name,
+          value: done.reduce((s, a) => s + (a.servicePrice || 0), 0),
+          count: all.length,
+          color: SALES_CHART_COLORS[(i + 2) % SALES_CHART_COLORS.length],
+          subtitle: `${done.length} cortes completados`,
+          avatarUrl: b.avatarUrl
+        };
+      }).filter(s => s.value > 0 || s.count > 0), [appointments, branchBarbers]);
+
+      const volume = branchBarbers.map(b => ({ b, n: appointments.filter(a => a.barberId === b.id && inLoc(a)).length }));
+      const maxVol = Math.max(1, ...volume.map(v => v.n));
+      const selectedName = locFilter === null ? null : shortName((locations.find(l => l.id === locFilter) || {}).name);
+
+      const chip = (active) => `px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${active
+        ? 'bg-[#FFD700] text-black'
+        : 'bg-[#121212] text-zinc-300 border border-zinc-800 hover:text-white'}`;
+
+      return (
+        <div className="space-y-4">
+          <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5 space-y-3">
+            <span className="text-[10px] text-[#FFD700] font-bold uppercase tracking-wider block">Filtrar reportes y gráficos</span>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => setLocFilter(null)} className={chip(locFilter === null)}>Todas las sucursales</button>
+              {locations.map(loc => (
+                <button key={loc.id} onClick={() => setLocFilter(loc.id)} className={chip(locFilter === loc.id)}>{shortName(loc.name)}</button>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {[['todos', '📊 Todos los gráficos'], ['locales', '🥧 Torta por sucursales'], ['barberos', '🥧 Torta por barberos']].map(([id, label]) => (
+                <button key={id} onClick={() => setChartFilter(id)} className={chip(chartFilter === id)}>{label}</button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5">
+              <span className="text-[10px] text-zinc-400 font-bold uppercase block">Recaudación Total{selectedName ? ` · ${selectedName}` : ''}</span>
+              <h3 className="text-2xl font-black text-[#FFD700] mt-1">{AppFormatters.formatClp(totalVentas)}</h3>
+            </div>
+            <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5">
+              <span className="text-[10px] text-zinc-400 font-bold uppercase block">Abonos Garantizados</span>
+              <h3 className="text-2xl font-black text-green-400 mt-1">{AppFormatters.formatClp(totalAbonos)}</h3>
+            </div>
+            <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5">
+              <span className="text-[10px] text-zinc-400 font-bold uppercase block">Cortes Realizados · Total Citas</span>
+              <h3 className="text-2xl font-black text-white mt-1">{completed.length} <span className="text-sm text-zinc-400 font-bold">/ {totalCitas}</span></h3>
+            </div>
+          </div>
+
+          <div className={`grid grid-cols-1 gap-4 ${chartFilter === 'todos' ? 'xl:grid-cols-2' : ''}`}>
+            {(chartFilter === 'todos' || chartFilter === 'locales') && (
+              <SalesDonutChart title="🥧 Ventas por sucursal" subtitle="Participación y recaudación de cada local (citas completadas)"
+                slices={locationSlices} centerLabel="Total locales" />
+            )}
+            {(chartFilter === 'todos' || chartFilter === 'barberos') && (
+              <SalesDonutChart title={selectedName ? `🥧 Barberos · ${selectedName}` : '🥧 Desempeño por barbero'}
+                subtitle="Distribución de ingresos generados por cada profesional"
+                slices={barberSlices} centerLabel="Total equipo" />
+            )}
+          </div>
+
+          <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5">
+            <span className="text-xs text-[#FFD700] font-black uppercase tracking-wider block">📊 {selectedName ? `Volumen de citas · ${selectedName}` : 'Volumen de citas por barbero'}</span>
+            <span className="text-[11px] text-zinc-400 block mb-4">Total de citas agendadas por cada profesional.</span>
+            {volume.length === 0 ? (
+              <div className="text-xs text-zinc-500">No hay barberos registrados en esta sucursal.</div>
+            ) : (
+              <div className="space-y-2.5">
+                {volume.map(({ b, n }) => (
+                  <div key={b.id} className="flex items-center gap-3">
+                    <span className="w-44 text-xs text-white font-semibold truncate">{b.name}</span>
+                    <div className="flex-1 h-3 rounded-full bg-[#121212] border border-zinc-800 overflow-hidden">
+                      <div className="h-full rounded-full bg-[#FFD700]" style={{ width: `${(n / maxVol) * 100}%` }}></div>
+                    </div>
+                    <span className="w-16 text-right text-xs font-black text-[#FFD700] font-mono">{n} citas</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       );
     }
