@@ -453,3 +453,13 @@ body.light-mode button.text-\[\#FFD700\],
 body.light-mode a.text-\[\#FFD700\] {
   color: #7A5C00 !important;
 }
+
+/* Línea de escaneo del Asesor de estilo con IA */
+@keyframes scanLaser {
+  0% { top: 5%; opacity: 0.4; }
+  50% { top: 90%; opacity: 1; }
+  100% { top: 5%; opacity: 0.4; }
+}
+.animate-scan-laser {
+  animation: scanLaser 1.8s ease-in-out infinite;
+}

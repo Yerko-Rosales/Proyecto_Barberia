@@ -264,6 +264,19 @@ fun MainAppScreen(
                         unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 )
+                NavigationBarItem(
+                    icon = { Icon(Icons.Filled.AutoAwesome, "Asesor IA") },
+                    label = { Text("Asesor IA", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = 10.sp)) },
+                    selected = activeTab == "asesor",
+                    onClick = { activeTab = "asesor" },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        indicatorColor = Color.Transparent,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
 
                 NavigationBarItem(
                     icon = { Icon(Icons.Filled.People, "Barberos") },
@@ -379,7 +392,14 @@ fun MainAppScreen(
                         },
                         onRequestBooking = { showBookingWizard = true },
                         onNavigateToMap = { activeTab = "sucursales" },
+                        onNavigateToAdvisor = { activeTab = "asesor" },
                         onOpenProfile = { showProfileDialog = true }
+                    )
+                    "asesor" -> BarberAdvisorScreen(
+                        viewModel = viewModel,
+                        onRequestBooking = { serviceName ->
+                            showBookingWizard = true
+                        }
                     )
                     "barberos" -> BarbersScreen(
                         viewModel = viewModel,
@@ -828,6 +848,7 @@ fun HomeScreen(
     onGoToRegister: () -> Unit,
     onRequestBooking: () -> Unit,
     onNavigateToMap: () -> Unit = {},
+    onNavigateToAdvisor: () -> Unit = {},
     onOpenProfile: () -> Unit = {}
 ) {
     val loggedInUser by viewModel.loggedInUser.collectAsState()
@@ -929,6 +950,41 @@ fun HomeScreen(
                             }
                         }
                     }
+                }
+            }
+        }
+
+        // Banner Asesor IA Exclusivo Big Boys
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onNavigateToAdvisor() },
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF141414)),
+                border = BorderStroke(1.5.dp, GoldPrimary),
+                shape = RoundedCornerShape(18.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .background(GoldPrimary.copy(alpha = 0.2f), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Filled.AutoAwesome, null, tint = GoldPrimary, modifier = Modifier.size(24.dp))
+                    }
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("NOVEDAD EXCLUSIVA", color = GoldPrimary, fontSize = 9.sp, fontWeight = FontWeight.Black)
+                        }
+                        Text("Asesor de Estilo con IA", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = Color.White)
+                        Text("Encuentra tu corte y perfilado ideal según tu rostro", style = MaterialTheme.typography.bodySmall, color = Color.Gray, fontSize = 11.sp)
+                    }
+                    Icon(Icons.Filled.ChevronRight, null, tint = GoldPrimary)
                 }
             }
         }
