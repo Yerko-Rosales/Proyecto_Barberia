@@ -56,7 +56,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- Estilos Personalizados Big Boys -->
-  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="./css/styles.css?v=20261117">
 
   <!-- Detección y aplicación inmediata del tema guardado para evitar parpadeos -->
   <script>
@@ -2086,10 +2086,12 @@
                   <span className="text-[10px] font-extrabold tracking-[0.2em] text-[#FFD700] uppercase">
                     CHILE · TALAGANTE & PEÑAFLOR
                   </span>
-                  <span className="hidden md:inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-emerald-950/50 text-emerald-400 text-[9px] font-black tracking-wide border border-emerald-500/40">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>PostgreSQL Supabase Activo</span>
-                  </span>
+                  {isAdmin && !previewAsClient && (
+                    <span className="hidden md:inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-emerald-950/50 text-emerald-400 text-[9px] font-black tracking-wide border border-emerald-500/40">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                      <span>PostgreSQL Supabase Activo</span>
+                    </span>
+                  )}
                   {isAdmin && !previewAsClient && (
                     <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-[#FFD700] text-[9px] font-black uppercase tracking-wider border border-amber-500/40">
                       🛡️ MODO ADMINISTRADOR
@@ -2227,6 +2229,7 @@
     function BottomNav({ activeTab, onTabChange, hasUser, isAdmin, onOpenBooking }) {
       const tabs = [
         { id: 'inicio', label: 'Inicio', icon: '🏠' },
+        { id: 'asesor', label: 'Asesor IA', icon: '✨' },
         { id: 'barberos', label: 'Barberos', icon: '💈' },
         { id: 'sucursales', label: 'Sucursales', icon: '📍' },
         { id: 'fila', label: 'Fila', icon: '🎟️' },
@@ -2292,6 +2295,810 @@
             </div>
           </nav>
         </>
+      );
+    }
+
+    // ---------- Asesor de estilo con IA (idea de Jonathan, 19-11-2026) ----------
+    // La foto se reduce en el navegador y se envía a la Edge Function "asesor-ia" (Gemini).
+    // La clave de la IA está solo en Supabase; la foto no se guarda.
+    function reducirFotoAsesor(dataUrl) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const escala = Math.min(1, 1024 / Math.max(img.naturalWidth, img.naturalHeight));
+          const c = document.createElement('canvas');
+          c.width = Math.round(img.naturalWidth * escala); c.height = Math.round(img.naturalHeight * escala);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          resolve(c.toDataURL('image/jpeg', 0.88).split(',')[1]);
+        };
+        img.onerror = () => reject(new Error('No pudimos leer la imagen. Usa una foto JPG o PNG.'));
+        img.src = dataUrl;
+      });
+    }
+
+    async function callAsesorIA(imagenBase64) {
+      const sb = (typeof supabaseClient !== 'undefined' && supabaseClient) || window.supabaseClient;
+      if (!sb) throw new Error('El asesor necesita conexión con el servidor. Intenta más tarde.');
+      const { data, error } = await sb.functions.invoke('asesor-ia', {
+        body: { imagen: imagenBase64, mime: 'image/jpeg', consentimiento: true }
+      });
+      if (error) {
+        let msg = 'No pudimos analizar tu foto. Intenta de nuevo o usa el ajuste manual.';
+        try { const j = await error.context.json(); if (j && j.error) msg = j.error; } catch (e) {}
+        throw new Error(msg);
+      }
+      if (!data || !data.recommendedLook) throw new Error('No pudimos analizar tu foto. Intenta de nuevo o usa el ajuste manual.');
+      return data;
+    }
+
+    function BarberAdvisorScreen({ services, onBookService, isDarkMode }) {
+      const [acepta, setAcepta] = useState(false);
+      const [aiError, setAiError] = useState('');
+      const [advisorMode, setAdvisorMode] = useState('photo'); // 'photo' o 'manual'
+      const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState(null);
+      const [photoName, setPhotoName] = useState('');
+      const [isCameraActive, setIsCameraActive] = useState(false);
+      const [cameraError, setCameraError] = useState(null);
+
+      const [faceShape, setFaceShape] = useState('square');
+      const [hairType, setHairType] = useState('wavy');
+      const [beardType, setBeardType] = useState('short');
+      const [vibe, setVibe] = useState('modern_fade');
+
+      const [isAnalyzing, setIsAnalyzing] = useState(false);
+      const [analysisProgress, setAnalysisProgress] = useState(0);
+      const [analysisStepText, setAnalysisStepText] = useState('');
+      const [detectedMetrics, setDetectedMetrics] = useState(null);
+      const [advisorResult, setAdvisorResult] = useState(null);
+      const [copiedFicha, setCopiedFicha] = useState(false);
+
+      const fileInputRef = useRef(null);
+      const videoRef = useRef(null);
+      const streamRef = useRef(null);
+
+      // Iniciar cámara web en vivo
+      const startCamera = async () => {
+        setCameraError(null);
+        if (!acepta) { setCameraError('Para analizar tu foto, primero marca la casilla de consentimiento.'); return; }
+        setUploadedPhotoUrl(null);
+        try {
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            setCameraError('Tu navegador no permite acceso directo a la cámara. Puedes subir una foto desde tus archivos.');
+            return;
+          }
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 640 } },
+            audio: false
+          });
+          streamRef.current = stream;
+          setIsCameraActive(true);
+          // Permitir que el elemento <video> se monte y asociar el stream
+          setTimeout(() => {
+            if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+              videoRef.current.play().catch(e => console.warn('Video play error:', e));
+            }
+          }, 150);
+        } catch (err) {
+          console.error('Error al encender la cámara:', err);
+          setCameraError('Permiso de cámara denegado o no disponible en este dispositivo. Puedes seleccionar una foto de tu equipo.');
+          setIsCameraActive(false);
+        }
+      };
+
+      // Apagar cámara web
+      const stopCamera = () => {
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => track.stop());
+          streamRef.current = null;
+        }
+        setIsCameraActive(false);
+      };
+
+      // Capturar cuadro actual de la cámara web
+      const capturePhotoFromCamera = () => {
+        if (!videoRef.current) return;
+        const video = videoRef.current;
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+
+        stopCamera();
+        setUploadedPhotoUrl(dataUrl);
+        setPhotoName('Selfie en Vivo Capturada');
+        executeBiometricScan(dataUrl, 'webcam');
+      };
+
+      useEffect(() => {
+        return () => {
+          stopCamera();
+        };
+      }, []);
+
+      const FACE_SHAPES = [
+        { id: 'oval', label: 'Ovalado', icon: '🥚', desc: 'Proporciones balanceadas y simétricas' },
+        { id: 'square', label: 'Cuadrado', icon: '⏹️', desc: 'Mandíbula angular y frente ancha' },
+        { id: 'round', label: 'Redondo', icon: '⚪', desc: 'Facciones suaves que buscan estilización' },
+        { id: 'diamond', label: 'Diamante', icon: '📐', desc: 'Pómulos marcados y mentón afilado' },
+        { id: 'long', label: 'Alargado', icon: '📏', desc: 'Rasgos verticales con frente despejada' }
+      ];
+
+      const HAIR_TYPES = [
+        { id: 'straight', label: 'Lacio / Fino', icon: '💈', desc: 'Caída suave, requiere textura' },
+        { id: 'wavy', label: 'Ondulado', icon: '🌊', desc: 'Volumen natural y movimiento' },
+        { id: 'curly', label: 'Rizado / Crespo', icon: '🌀', desc: 'Definición de rizos y contornos' },
+        { id: 'afro', label: 'Afro / Compacto', icon: '⚡', desc: 'Densidad alta, ideal para fades' }
+      ];
+
+      const BEARD_TYPES = [
+        { id: 'full', label: 'Barba Tupida', icon: '🧔', desc: 'Barba completa que requiere perfilado' },
+        { id: 'short', label: 'Barba Media / 3 Días', icon: '✂️', desc: 'Delineado preciso a navaja' },
+        { id: 'stubble', label: 'Candado / Perfilada', icon: '🎯', desc: 'Diseño geométrico en mentón' },
+        { id: 'clean', label: 'Afeitado / Sin Barba', icon: '🪒', desc: 'Rostro despejado, foco en cabello' }
+      ];
+
+      const VIBES = [
+        { id: 'modern_fade', label: 'Fade Moderno', icon: '⚡', desc: 'Degradado a la piel (Low / Mid / High)' },
+        { id: 'classic', label: 'Clásico Ejecutivo', icon: '👔', desc: 'Línea formal, raya lateral o pompadour' },
+        { id: 'textured', label: 'Urbano Texturizado', icon: '🏄', desc: 'Crop top o messy con navaja' },
+        { id: 'vip', label: 'Transformación VIP', icon: '👑', desc: 'Corte + Barba + Mascarilla facial' }
+      ];
+
+      const handleFileSelected = (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        stopCamera();
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setUploadedPhotoUrl(event.target.result);
+          setPhotoName(file.name);
+          executeBiometricScan(event.target.result, 'custom');
+        };
+        reader.readAsDataURL(file);
+      };
+
+      const executeBiometricScan = async (imgUrl, type) => {
+        setIsAnalyzing(true);
+        setAdvisorResult(null);
+        setDetectedMetrics(null);
+        setAiError('');
+
+        // Modo manual: recomendación por reglas del catálogo (sin IA, rotulada como tal)
+        if (type === 'manual') {
+          setAnalysisProgress(60);
+          setAnalysisStepText('Aplicando las reglas de visagismo de Big Boys...');
+          return recomendacionPorReglas();
+        }
+
+        try {
+          setAnalysisProgress(30);
+          setAnalysisStepText('Preparando tu foto...');
+          const imagen = await reducirFotoAsesor(imgUrl);
+          setAnalysisProgress(60);
+          setAnalysisStepText('La IA está analizando tu rostro, cabello y barba...');
+          const aiData = await callAsesorIA(imagen);
+
+          setDetectedMetrics({
+            shapeLabel: aiData.morphologyLabel || '—',
+            hairLabel: aiData.hairTexture || '—',
+            beardLabel: aiData.beardType || '—',
+            engine: 'Google Gemini (' + (aiData.modelo || 'IA') + ')'
+          });
+          const matchedService = services.find(s => s.name === aiData.officialService) || services[0];
+          setAdvisorResult({
+            lookTitle: aiData.recommendedLook,
+            diagnosis: aiData.anatomicalDiagnosis,
+            suggestedService: matchedService,
+            complement: (aiData.stylingProduct ? aiData.stylingProduct + ' · ' : '') + 'Toalla caliente y perfilado a navaja.',
+            stylingTips: aiData.stylingTips || 'Aplica producto texturizador en seco para más definición.',
+            maintenanceDays: aiData.maintenanceDays || 14,
+            faceShapeLabel: aiData.morphologyLabel,
+            hairTypeLabel: aiData.hairTexture,
+            beardTypeLabel: aiData.beardType,
+            isRealAI: true,
+            engine: 'Google Gemini'
+          });
+          setAnalysisProgress(100);
+          setAnalysisStepText('Análisis completado con IA.');
+        } catch (err) {
+          setAiError(err.message || 'No pudimos analizar tu foto. Intenta de nuevo o usa el ajuste manual.');
+        }
+        setIsAnalyzing(false);
+      };
+
+      // Recomendación por reglas (modo manual): eliges tu forma de rostro y tu barba
+      const recomendacionPorReglas = () => {
+        const activeShape = faceShape;
+        const activeHair = hairType;
+        const activeBeard = beardType;
+        const activeVibe = vibe;
+
+        setDetectedMetrics({
+          shapeLabel: FACE_SHAPES.find(f => f.id === activeShape)?.label || 'Armónico',
+          hairLabel: HAIR_TYPES.find(h => h.id === activeHair)?.label || 'Normal',
+          beardLabel: BEARD_TYPES.find(b => b.id === activeBeard)?.label || 'Media',
+          engine: 'Reglas de visagismo Big Boys (sin IA)'
+        });
+
+        let lookTitle = '';
+        let diagnosis = '';
+        let suggestedService = null;
+        let complement = '';
+        let stylingTips = '';
+        let maintenanceDays = 15;
+
+        if (activeShape === 'round') {
+          lookTitle = 'High Skin Fade con Pompadour Texturizado';
+          diagnosis = 'Para un rostro redondo, de facciones suaves: Para alargar ópticamente tus facciones, se recomienda volumen superior y laterales rasurados con navaja.';
+          stylingTips = 'Aplica cera mate de alta fijación en cabello seco para máxima elevación.';
+          maintenanceDays = 14;
+        } else if (activeShape === 'square') {
+          lookTitle = 'Mid Taper Fade con Textured Crop';
+          diagnosis = 'Para un rostro cuadrado, de mandíbula marcada: Un degradado medio estiliza la sien sin perder la fuerza masculina de tus facciones.';
+          stylingTips = 'Polvo texturizador en seco para un acabado moderno de fácil peinado.';
+          maintenanceDays = 18;
+        } else if (activeShape === 'oval') {
+          lookTitle = 'Low Drop Fade con Quiff Ejecutivo';
+          diagnosis = 'El rostro ovalado es el más versátil: Admite prácticamente cualquier diseño de barbería; el Low Fade potencia la elegancia natural sin estridencias.';
+          stylingTips = 'Secado hacia atrás y bálsamo nutritivo con acabado satinado.';
+          maintenanceDays = 21;
+        } else if (activeShape === 'diamond') {
+          lookTitle = 'Mid Fade Clásico con Desconexión Superior';
+          diagnosis = 'Para pómulos pronunciados y mentón afilado: La transición media equilibra la zona temporal para armonizar con el contorno de tu barba.';
+          stylingTips = 'Pomada ligera para mantener textura sin aplastar los laterales.';
+          maintenanceDays = 18;
+        } else {
+          lookTitle = 'Side Part Fade con Caída Lateral';
+          diagnosis = 'Para un rostro alargado: Se equilibra con densidad media en sienes y peinado diagonal para aportar anchura visual.';
+          stylingTips = 'Cera clásica al agua con peine de dientes anchos.';
+          maintenanceDays = 20;
+        }
+
+        if (activeBeard === 'full') {
+          lookTitle += ' & Barba Esculpida a Navaja';
+          diagnosis += ' Con barba tupida, se aplicará perfilado angular a navaja con toalla caliente para una línea de mandíbula impecable.';
+        } else if (activeBeard === 'short' || activeBeard === 'stubble') {
+          lookTitle += ' & Perfilado de Barba';
+          diagnosis += ' Tu barba delineada con precisión potencia el contraste nítido con el degradado del corte.';
+        }
+
+        if (activeVibe === 'vip' || (activeBeard === 'full' && (activeVibe === 'modern_fade' || activeVibe === 'classic'))) {
+          suggestedService = services.find(s => s.name === 'S. Completo') || services[3] || { id: 4, name: 'S. Completo', price: 23800, duration: '60 min' };
+          complement = 'Mascarilla Facial Negra Purificante ($2.380) con toalla caliente y masaje capilar.';
+        } else if (activeBeard === 'full' || activeBeard === 'short' || activeBeard === 'stubble') {
+          suggestedService = services.find(s => s.name === 'Corte + Barba') || services[2] || { id: 3, name: 'Corte + Barba', price: 20230, duration: '50 min' };
+          complement = 'Lavado Revitalizante ($3.570) con exfoliación mentolada de cuero cabelludo.';
+        } else {
+          if (activeVibe === 'modern_fade') {
+            suggestedService = services.find(s => s.name === 'Corte + Cejas') || services[1] || { id: 2, name: 'Corte + Cejas', price: 15470, duration: '45 min' };
+            complement = 'Perfilado milimétrico de cejas con navaja para mirada más definida.';
+          } else {
+            suggestedService = services.find(s => s.name === 'Corte') || services[0] || { id: 1, name: 'Corte', price: 11900, duration: '40 min' };
+            complement = 'Toque final de loción after-shave y fijador mate.';
+          }
+        }
+
+        setAdvisorResult({
+          lookTitle,
+          diagnosis,
+          suggestedService,
+          complement,
+          stylingTips,
+          maintenanceDays,
+          faceShapeLabel: FACE_SHAPES.find(f => f.id === activeShape)?.label || 'Definido',
+          hairTypeLabel: HAIR_TYPES.find(h => h.id === activeHair)?.label || 'Normal',
+          beardTypeLabel: BEARD_TYPES.find(b => b.id === activeBeard)?.label || 'Corta',
+          vibeLabel: VIBES.find(v => v.id === activeVibe)?.label || 'Moderno',
+          isRealAI: false,
+          engine: 'Reglas de visagismo Big Boys (sin IA)'
+        });
+
+        setAnalysisProgress(100);
+        setAnalysisStepText('Recomendación lista.');
+        setIsAnalyzing(false);
+      };
+
+      const handleCopyFicha = () => {
+        if (!advisorResult) return;
+        const text = [
+          '💈 FICHA DE VISAGISMO · BIG BOYS 💈',
+          '================================================',
+          'Look Recomendado: ' + advisorResult.lookTitle,
+          'Forma del rostro: ' + advisorResult.faceShapeLabel,
+          'Textura Capilar: ' + advisorResult.hairTypeLabel + ' | Barba: ' + advisorResult.beardTypeLabel,
+          '',
+          'Diagnóstico:',
+          advisorResult.diagnosis,
+          '',
+          'Servicio Oficial Big Boys: ' + advisorResult.suggestedService.name + ' ($' + advisorResult.suggestedService.price.toLocaleString('es-CL') + ')',
+          'Tratamiento Sugerido: ' + advisorResult.complement,
+          'Mantenimiento: Retoque cada ' + advisorResult.maintenanceDays + ' días',
+          'Consejo de Peinado: ' + advisorResult.stylingTips,
+          '================================================',
+          'Recomendación: ' + advisorResult.engine + ' · Big Boys (Peñaflor & Talagante)'
+        ].join('\n');
+
+        navigator.clipboard.writeText(text);
+        setCopiedFicha(true);
+        setTimeout(() => setCopiedFicha(false), 2500);
+      };
+
+      return (
+        <div className="space-y-6 pb-20 md:pb-12 animate-fade-in max-w-5xl mx-auto">
+          {/* Header Banner */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-zinc-900 via-black to-zinc-950 p-6 md:p-8 border border-[#FFD700]/40 shadow-2xl">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-[#FFD700]/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <div className="inline-flex items-center space-x-2 px-3 py-1 bg-[#FFD700]/15 border border-[#FFD700]/30 rounded-full text-[11px] font-black text-[#FFD700] uppercase tracking-wider">
+                  <span className="animate-pulse">✨</span>
+                  <span>Asesor de estilo con IA</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black italic tracking-tighter text-white font-brand">
+                  BARBER ADVISOR <span className="text-[#FFD700]">LIVE SCAN</span>
+                </h1>
+                <p className="text-xs sm:text-sm text-zinc-300 max-w-2xl leading-relaxed">
+                  Enciende tu cámara o sube una foto: la IA analiza la forma de tu rostro, tu cabello y tu barba
+                  para recomendarte el corte y el perfilado que mejor te quedan.
+                </p>
+              </div>
+
+              {/* Selector de Modo: Foto vs Manual */}
+              <div className="shrink-0 flex items-center p-1 bg-zinc-800/90 border border-zinc-700 rounded-2xl">
+                <button
+                  type="button"
+                  onClick={() => setAdvisorMode('photo')}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+                    advisorMode === 'photo'
+                      ? 'bg-[#FFD700] text-black font-black shadow-md'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <span>📸</span>
+                  <span>Cámara / Foto</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { stopCamera(); setAdvisorMode('manual'); }}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+                    advisorMode === 'manual'
+                      ? 'bg-[#FFD700] text-black font-black shadow-md'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <span>⚙️</span>
+                  <span>Ajuste Manual</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* INPUT OCULTO PARA SUBIR DESDE ARCHIVOS */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelected}
+            accept="image/*"
+            className="hidden"
+          />
+
+          {/* MODO 1: ESCANEO POR CAMARA EN VIVO / FOTO (PRINCIPAL E INNOVADOR) */}
+          {advisorMode === 'photo' && (
+            <div className={`p-6 md:p-8 rounded-3xl border transition-all ${
+              isDarkMode ? 'bg-[#181818] border-zinc-800' : 'bg-white border-zinc-200 shadow-md'
+            }`}>
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+                {/* Zona de Visor / Cámara Web en Vivo */}
+                <div className="md:col-span-6 flex flex-col items-center">
+                  <div className={`relative w-full max-w-sm aspect-[4/5] rounded-3xl overflow-hidden border-2 transition-all flex flex-col items-center justify-center bg-black ${
+                    isCameraActive || uploadedPhotoUrl 
+                      ? 'border-[#FFD700] shadow-[0_0_35px_rgba(255,215,0,0.3)]' 
+                      : isDarkMode
+                        ? 'border-dashed border-zinc-700 hover:border-[#FFD700]/70'
+                        : 'border-dashed border-zinc-300 hover:border-[#FFD700]'
+                  }`}>
+
+                    {/* ESTADO A: CÁMARA WEB EN VIVO ACTIVA */}
+                    {isCameraActive ? (
+                      <>
+                        <video
+                          ref={videoRef}
+                          autoPlay
+                          playsInline
+                          muted
+                          className="w-full h-full object-cover scale-x-[-1]"
+                        ></video>
+
+                        {/* Retícula Biométrica en Vivo */}
+                        <div className="absolute inset-0 pointer-events-none">
+                          <div className="absolute top-4 left-4 w-7 h-7 border-t-2 border-l-2 border-[#FFD700]"></div>
+                          <div className="absolute top-4 right-4 w-7 h-7 border-t-2 border-r-2 border-[#FFD700]"></div>
+                          <div className="absolute bottom-4 left-4 w-7 h-7 border-b-2 border-l-2 border-[#FFD700]"></div>
+                          <div className="absolute bottom-4 right-4 w-7 h-7 border-b-2 border-r-2 border-[#FFD700]"></div>
+
+                          {/* Biomarcadores en Vivo */}
+                          <div className="absolute top-[35%] left-[36%] w-2.5 h-2.5 rounded-full bg-[#FFD700] shadow-[0_0_10px_#FFD700] animate-ping"></div>
+                          <div className="absolute top-[35%] right-[36%] w-2.5 h-2.5 rounded-full bg-[#FFD700] shadow-[0_0_10px_#FFD700] animate-ping"></div>
+                          <div className="absolute top-[52%] left-[49%] w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_12px_#10B981]"></div>
+                          <div className="absolute bottom-[28%] left-[42%] w-2.5 h-2.5 rounded-full bg-[#FFD700] shadow-[0_0_10px_#FFD700]"></div>
+                          <div className="absolute bottom-[28%] right-[42%] w-2.5 h-2.5 rounded-full bg-[#FFD700] shadow-[0_0_10px_#FFD700]"></div>
+
+                          {/* Badge de Cámara en Vivo */}
+                          <div className="absolute top-4 left-1/2 -translate-x-1/2 px-3.5 py-1.5 bg-black/80 backdrop-blur-md border border-[#FFD700]/60 rounded-full text-[10px] font-black text-[#FFD700] uppercase tracking-wider flex items-center space-x-2">
+                            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                            <span>CÁMARA EN VIVO · ENFOCA TU ROSTRO</span>
+                          </div>
+                        </div>
+                      </>
+                    ) : uploadedPhotoUrl ? (
+                      /* ESTADO B: FOTO YA CAPTURADA / SUBIDA */
+                      <>
+                        <img
+                          src={uploadedPhotoUrl}
+                          alt="Selfie Biometría"
+                         
+                          className="w-full h-full object-cover"
+                        />
+
+                        {/* Retícula de Escaneo */}
+                        <div className="absolute inset-0 pointer-events-none">
+                          <div className="absolute top-4 left-4 w-7 h-7 border-t-2 border-l-2 border-[#FFD700]"></div>
+                          <div className="absolute top-4 right-4 w-7 h-7 border-t-2 border-r-2 border-[#FFD700]"></div>
+                          <div className="absolute bottom-4 left-4 w-7 h-7 border-b-2 border-l-2 border-[#FFD700]"></div>
+                          <div className="absolute bottom-4 right-4 w-7 h-7 border-b-2 border-r-2 border-[#FFD700]"></div>
+
+                          {/* Línea Láser de Escaneo */}
+                          {isAnalyzing && (
+                            <div className="absolute left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-[#FFD700] to-transparent shadow-[0_0_20px_#FFD700] animate-scan-laser"></div>
+                          )}
+
+                          <div className="absolute top-4 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/80 backdrop-blur-md border border-[#FFD700]/40 rounded-full text-[9px] font-black text-[#FFD700] uppercase tracking-wider flex items-center space-x-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span>{isAnalyzing ? 'ANALIZANDO...' : 'FOTO LISTA'}</span>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      /* ESTADO C: SIN FOTO / SIN CÁMARA (BOTÓN INICIAL) */
+                      <div className="p-6 text-center space-y-4">
+                        <div className="w-20 h-20 rounded-full bg-[#FFD700]/15 border border-[#FFD700]/40 flex items-center justify-center text-4xl mx-auto shadow-inner">
+                          📷
+                        </div>
+                        <div>
+                          <h3 className={`text-base font-extrabold ${isDarkMode ? 'text-white' : 'text-zinc-900'}`}>
+                            Enciende tu Cámara Web
+                          </h3>
+                          <p className="text-xs text-zinc-400 mt-1 max-w-[220px] mx-auto">
+                            Activa tu cámara para enfocar tu rostro en vivo o sube una imagen desde tu PC.
+                          </p>
+                        </div>
+
+                        {cameraError && (
+                          <div className="p-3 bg-red-950/60 border border-red-500/50 rounded-xl text-xs text-red-300">
+                            {cameraError}
+                          </div>
+                        )}
+
+                        <div className="space-y-2 pt-2">
+                          <button
+                            type="button"
+                            onClick={startCamera}
+                            className="w-full px-5 py-3 bg-gradient-to-r from-[#FFD700] to-[#E5C100] text-black text-xs font-black uppercase tracking-wider rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center space-x-2"
+                          >
+                            <span>📸</span>
+                            <span>ENCENDER CÁMARA EN VIVO</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { if (!acepta) { setCameraError('Para analizar tu foto, primero marca la casilla de consentimiento.'); return; } fileInputRef.current && fileInputRef.current.click(); }}
+                            className="w-full px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold rounded-xl border border-zinc-700 transition-all flex items-center justify-center space-x-2"
+                          >
+                            <span>📁</span>
+                            <span>O Subir Archivo desde PC</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Controles bajo el visor */}
+                  <div className="mt-4 flex flex-wrap gap-2 justify-center">
+                    {isCameraActive ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={capturePhotoFromCamera}
+                          className="px-6 py-3 bg-gradient-to-r from-[#FFD700] to-[#E5C100] text-black text-xs font-black uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(255,215,0,0.4)] hover:scale-105 active:scale-95 transition-all flex items-center space-x-2"
+                        >
+                          <span>📸</span>
+                          <span>CAPTURAR Y ANALIZAR</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={stopCamera}
+                          className="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold rounded-xl border border-zinc-700 transition-all"
+                        >
+                          Cancelar
+                        </button>
+                      </>
+                    ) : uploadedPhotoUrl ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={startCamera}
+                          className="px-4 py-2 bg-[#FFD700] hover:bg-[#E5C100] text-black text-xs font-black uppercase rounded-xl shadow-md hover:scale-105 active:scale-95 transition-all flex items-center space-x-1.5"
+                        >
+                          <span>📸</span><span>Encender Mi Cámara</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { if (!acepta) { setCameraError('Para analizar tu foto, primero marca la casilla de consentimiento.'); return; } fileInputRef.current && fileInputRef.current.click(); }}
+                          className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold rounded-xl border border-zinc-700 transition-all flex items-center space-x-1.5"
+                        >
+                          <span>📁</span><span>Subir Archivo</span>
+                        </button>
+                      </>
+                    ) : null}
+                  </div>
+                </div>
+
+                {/* Consentimiento y estado del análisis */}
+                <div className="md:col-span-6 space-y-6">
+                  <div>
+                    <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-[#FFD700]/15 text-[#FFD700] text-[10px] font-black uppercase tracking-wider mb-2">
+                      <span>🔒</span><span>TU FOTO, TU DECISIÓN</span>
+                    </div>
+                    <h3 className={`text-lg font-black ${isDarkMode ? 'text-white' : 'text-zinc-900'}`}>
+                      Cómo funciona
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-1">
+                      Tomas o subes una foto de frente; la IA analiza la forma de tu rostro, tu cabello y tu barba, y te recomienda
+                      el corte y el servicio de Big Boys que mejor te quedan. ¿Prefieres no usar foto? Elige "Ajuste Manual".
+                    </p>
+                  </div>
+
+                  <label className="flex items-start gap-2 text-[11px] text-zinc-300 cursor-pointer p-3 rounded-xl border border-zinc-800 bg-zinc-900/60">
+                    <input type="checkbox" checked={acepta} onChange={e => { setAcepta(e.target.checked); setCameraError(null); }} className="mt-0.5 accent-[#FFD700]" />
+                    <span>
+                      Acepto que mi foto se envíe a Google (Gemini) solo para analizar mi rostro y recomendarme un corte.
+                      Big Boys no guarda la foto.{' '}
+                      <a href="privacidad.html" target="_blank" rel="noopener" className="text-[#FFD700] underline">Política de privacidad</a>
+                    </span>
+                  </label>
+
+                  {cameraError && (uploadedPhotoUrl || isCameraActive) && (
+                    <div className="p-3 bg-red-950/60 border border-red-500/50 rounded-xl text-xs text-red-300">{cameraError}</div>
+                  )}
+
+                  {aiError && (
+                    <div className="p-3 bg-red-950/60 border border-red-500/50 rounded-xl text-xs text-red-300 space-y-2">
+                      <p>⚠️ {aiError}</p>
+                      <button type="button" onClick={() => { stopCamera(); setAdvisorMode('manual'); setAiError(''); }}
+                        className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-200 border border-zinc-700 font-bold">
+                        Usar el ajuste manual
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Lo que detectó la IA */}
+                  {detectedMetrics && (
+                    <div className="p-4 rounded-2xl bg-zinc-900/90 border border-[#FFD700]/40 space-y-2">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-zinc-400 font-bold">Forma del rostro:</span>
+                        <span className="text-[#FFD700] font-black">{detectedMetrics.shapeLabel}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-zinc-400 font-bold">Cabello:</span>
+                        <span className="text-white">{detectedMetrics.hairLabel}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-zinc-400 font-bold">Barba:</span>
+                        <span className="text-white">{detectedMetrics.beardLabel}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-zinc-400 font-bold">Análisis:</span>
+                        <span className="text-emerald-400 font-black">{detectedMetrics.engine}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Barra de Progreso de Análisis Biométrico */}
+              {isAnalyzing && (
+                <div className="mt-8 p-5 rounded-2xl bg-[#121212] border border-[#FFD700]/40 space-y-3 animate-fade-in text-center">
+                  <div className="flex items-center justify-between text-xs text-[#FFD700] font-black">
+                    <span className="flex items-center space-x-1.5">
+                      <span className="animate-spin">⚙️</span>
+                      <span>{analysisStepText}</span>
+                    </span>
+                    <span>{analysisProgress}%</span>
+                  </div>
+                  <div className="w-full h-2.5 bg-zinc-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-[#FFD700] via-amber-400 to-emerald-400 rounded-full transition-all duration-300"
+                      style={{ width: `${analysisProgress}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* MODO 2: AJUSTE MANUAL SECUNDARIO */}
+          {advisorMode === 'manual' && (
+            <div className={`p-6 md:p-8 rounded-3xl border transition-all ${
+              isDarkMode ? 'bg-[#181818] border-zinc-800' : 'bg-white border-zinc-200 shadow-md'
+            }`}>
+              <div className="space-y-6">
+                <div>
+                  <h3 className={`text-sm font-extrabold uppercase tracking-wide mb-3 ${isDarkMode ? 'text-white' : 'text-zinc-900'}`}>
+                    1. Morfología Facial Manual
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    {FACE_SHAPES.map(f => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setFaceShape(f.id)}
+                        className={`p-3 rounded-2xl border text-left transition-all ${
+                          faceShape === f.id
+                            ? 'bg-[#FFD700]/15 border-[#FFD700] shadow-md ring-2 ring-[#FFD700]/50'
+                            : isDarkMode ? 'bg-zinc-900/60 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+                        }`}
+                      >
+                        <span className="text-xl">{f.icon}</span>
+                        <p className="text-xs font-black mt-1">{f.label}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className={`text-sm font-extrabold uppercase tracking-wide mb-3 ${isDarkMode ? 'text-white' : 'text-zinc-900'}`}>
+                    2. Vello Facial
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {BEARD_TYPES.map(b => (
+                      <button
+                        key={b.id}
+                        type="button"
+                        onClick={() => setBeardType(b.id)}
+                        className={`p-3 rounded-2xl border text-left transition-all ${
+                          beardType === b.id
+                            ? 'bg-[#FFD700]/15 border-[#FFD700] shadow-md ring-2 ring-[#FFD700]/50'
+                            : isDarkMode ? 'bg-zinc-900/60 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+                        }`}
+                      >
+                        <span className="text-xl">{b.icon}</span>
+                        <p className="text-xs font-black mt-1">{b.label}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-zinc-800 flex justify-end">
+                  <button
+                    type="button"
+                    disabled={isAnalyzing}
+                    onClick={() => executeBiometricScan(null, 'manual')}
+                    className="px-6 py-3 bg-[#FFD700] text-black font-black text-xs uppercase tracking-wider rounded-xl shadow-md hover:scale-105 active:scale-95 transition-all"
+                  >
+                    Generar Diagnóstico Manual →
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tarjeta de Resultado de Diagnóstico Biométrico */}
+          {advisorResult && !isAnalyzing && (
+            <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-br from-zinc-900 via-black to-zinc-950 border-2 border-[#FFD700] shadow-[0_0_35px_rgba(255,215,0,0.25)] space-y-6 animate-fade-in">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-5">
+                <div>
+                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-[#FFD700]/20 text-[#FFD700] text-[10px] font-black uppercase tracking-wider rounded-full mb-2">
+                    <span>👑</span>
+                    <span>RECOMENDACIÓN LISTA · {advisorResult.engine}</span>
+                  </div>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-black italic tracking-tight text-white font-brand">
+                    {advisorResult.lookTitle}
+                  </h2>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={handleCopyFicha}
+                    className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold rounded-xl border border-zinc-700 transition-all flex items-center space-x-1.5"
+                  >
+                    <span>{copiedFicha ? '✅' : '📋'}</span>
+                    <span>{copiedFicha ? '¡Ficha Copiada!' : 'Copiar Ficha'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Contenido del Diagnóstico */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-2 space-y-4">
+                  <div className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800">
+                    <h4 className="text-xs font-black uppercase tracking-wider text-[#FFD700] mb-1.5 flex items-center space-x-1.5">
+                      <span>📐</span><span>Fundamentación Anatómica y de Visagismo</span>
+                    </h4>
+                    <p className="text-xs text-zinc-300 leading-relaxed">
+                      {advisorResult.diagnosis}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-amber-400 mb-1 flex items-center space-x-1">
+                        <span>💡</span><span>Consejo de Peinado</span>
+                      </h4>
+                      <p className="text-xs text-zinc-300">{advisorResult.stylingTips}</p>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-amber-400 mb-1 flex items-center space-x-1">
+                        <span>🗓️</span><span>Frecuencia Recomendada</span>
+                      </h4>
+                      <p className="text-xs text-zinc-300">
+                        Retoque ideal cada <strong className="text-white">{advisorResult.maintenanceDays} días</strong> para conservar líneas nítidas.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Resumen de Servicio y Reserva Directa */}
+                <div className="p-5 rounded-2xl bg-gradient-to-b from-[#1E1A16] to-[#121212] border border-[#FFD700]/50 flex flex-col justify-between space-y-4">
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[#FFD700] block mb-1">
+                      Servicio Sugerido del Catálogo
+                    </span>
+                    <h3 className="text-base font-black text-white">
+                      {advisorResult.suggestedService.name}
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-0.5">
+                      Duración estimada: {advisorResult.suggestedService.duration}
+                    </p>
+
+                    <div className="mt-4 pt-4 border-t border-zinc-800 space-y-1.5 text-xs">
+                      <div className="flex justify-between text-zinc-300">
+                        <span>Precio Servicio:</span>
+                        <span className="font-bold">${advisorResult.suggestedService.price.toLocaleString('es-CL')}</span>
+                      </div>
+                      <div className="flex justify-between text-emerald-400">
+                        <span>Abono Webpay (Descontable):</span>
+                        <span className="font-bold">-$3.000</span>
+                      </div>
+                      <div className="flex justify-between text-[#FFD700] font-black pt-2 border-t border-zinc-800">
+                        <span>Saldo a Pagar en Sillón:</span>
+                        <span className="text-sm">${(advisorResult.suggestedService.price - 3000).toLocaleString('es-CL')}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-300">
+                      <strong>Tratamiento Sugerido:</strong> {advisorResult.complement}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => onBookService(advisorResult.suggestedService)}
+                    className="w-full py-3.5 bg-gradient-to-r from-[#FFD700] to-[#E5C100] text-black font-black text-xs uppercase tracking-wider rounded-xl shadow-lg hover:scale-103 active:scale-98 transition-all flex items-center justify-center space-x-2"
+                  >
+                    <span>✂️</span>
+                    <span>Agendar este Look Ahora</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       );
     }
 
@@ -2361,6 +3168,33 @@
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Banner Asesor de Estilo con Inteligencia Artificial */}
+          <div className="p-5 md:p-6 rounded-3xl bg-gradient-to-r from-zinc-900 via-[#181510] to-black border-2 border-[#FFD700]/50 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#FFD700]/20 border border-[#FFD700]/40 flex items-center justify-center text-2xl shrink-0 shadow-[0_0_15px_rgba(255,215,0,0.3)]">
+                ✨
+              </div>
+              <div>
+                <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-[#FFD700]/20 text-[#FFD700] text-[10px] font-black tracking-wider uppercase mb-1">
+                  <span>🚀 NOVEDAD EXCLUSIVA</span>
+                </div>
+                <h3 className="text-base sm:text-lg font-black text-white font-brand">
+                  Asesor de Estilo con Inteligencia Artificial (Visagismo AI)
+                </h3>
+                <p className="text-xs text-zinc-300 mt-0.5">
+                  ¿Indeciso con tu corte? Sube una foto y la IA te recomienda el corte que mejor va con tu rostro.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => onNavigateToTab && onNavigateToTab('asesor')}
+              className="w-full md:w-auto px-5 py-3 bg-gradient-to-r from-[#FFD700] to-[#E5C100] text-black font-black text-xs uppercase tracking-wider rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-all shrink-0 flex items-center justify-center space-x-2"
+            >
+              <span>✨</span>
+              <span>Probar Asesor IA →</span>
+            </button>
           </div>
 
           {/* Cupón Dorado si existe */}
@@ -2735,14 +3569,8 @@
                   </h2>
                 </div>
                 <p className="text-xs text-zinc-400 mt-1">
-                  Direcciones oficiales en Peñaflor y Talagante con visor satelital e interactivo de Google Maps API.
+                  Direcciones oficiales y horarios de atención en Peñaflor y Talagante.
                 </p>
-              </div>
-
-              {/* Badge Google Maps API */}
-              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 bg-[#1E1E1E] border border-[#FFD700]/40 rounded-xl text-xs font-bold text-[#FFD700] self-start sm:self-auto shadow-md">
-                <span className="w-2 h-2 rounded-full bg-[#FFD700] animate-pulse"></span>
-                <span>🗺️ Google Maps API Oficial</span>
               </div>
             </div>
 
@@ -5203,20 +6031,7 @@
           {subTab === 'reportes' && (
             <div className="space-y-4">
               {StaffSession.get() && <CashSummaryPanel staff={StaffSession.get()} />}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5">
-                  <span className="text-[10px] text-zinc-400 font-bold uppercase block">Recaudación Total</span>
-                  <h3 className="text-2xl font-black text-[#FFD700] mt-1">{AppFormatters.formatClp(totalRevenue)}</h3>
-                </div>
-                <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5">
-                  <span className="text-[10px] text-zinc-400 font-bold uppercase block">Abonos Garantizados</span>
-                  <h3 className="text-2xl font-black text-green-400 mt-1">{AppFormatters.formatClp(totalPrepay)}</h3>
-                </div>
-                <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5">
-                  <span className="text-[10px] text-zinc-400 font-bold uppercase block">Cortes Realizados</span>
-                  <h3 className="text-2xl font-black text-white mt-1">{completedAppts.length}</h3>
-                </div>
-              </div>
+              <SalesChartsPanel locations={locations} barbers={barbers} appointments={appointments} />
             </div>
           )}
 
@@ -8237,6 +9052,180 @@
       );
     }
 
+    // Gráficos de ventas del Dueño (19-11-2026): los mismos de la app (Admin → Reportes & Gráficos):
+    // filtro por sucursal, torta de ventas por sucursal, torta por barbero y volumen de citas por barbero.
+    const SALES_CHART_COLORS = ['#D4AF37', '#38BDF8', '#34D399', '#F472B6', '#A78BFA', '#FB923C', '#FACC15', '#2DD4BF'];
+
+    function SalesDonutChart({ title, subtitle, slices, centerLabel }) {
+      const total = slices.reduce((s, x) => s + x.value, 0);
+      const R = 70, STROKE = 26, C = 2 * Math.PI * R;
+      let acc = 0;
+      return (
+        <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5">
+          <span className="text-xs text-[#FFD700] font-black uppercase tracking-wider block">{title}</span>
+          <span className="text-[11px] text-zinc-400 block mb-4">{subtitle}</span>
+          {slices.length === 0 ? (
+            <div className="text-xs text-zinc-500 py-6 text-center">Sin datos para este filtro.</div>
+          ) : (
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="relative shrink-0" style={{ width: 180, height: 180 }}>
+                <svg viewBox="0 0 180 180" width="180" height="180" role="img" aria-label={title}>
+                  <circle cx="90" cy="90" r={R} fill="none" stroke="#3f3f46" strokeOpacity="0.35" strokeWidth={STROKE} />
+                  {total > 0 && slices.map((s, i) => {
+                    const len = (s.value / total) * C;
+                    const el = (
+                      <circle key={i} cx="90" cy="90" r={R} fill="none" stroke={s.color} strokeWidth={STROKE}
+                        strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-acc}
+                        transform="rotate(-90 90 90)">
+                        <title>{`${s.label}: ${AppFormatters.formatClp(s.value)} (${Math.round((s.value / total) * 100)}%)`}</title>
+                      </circle>
+                    );
+                    acc += len;
+                    return el;
+                  })}
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+                  <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider">{centerLabel}</span>
+                  <span className="text-sm font-black text-white font-mono">{AppFormatters.formatClp(total)}</span>
+                </div>
+              </div>
+              <div className="flex-1 w-full min-w-0 space-y-2">
+                {slices.map((s, i) => {
+                  const pct = total > 0 ? Math.round((s.value / total) * 100) : 0;
+                  return (
+                    <div key={i} className="flex items-center gap-3 bg-[#121212] border border-zinc-800 rounded-xl px-3 py-2">
+                      <span className="w-3 h-3 rounded-full shrink-0" style={{ background: s.color }}></span>
+                      {s.avatarUrl && <img src={s.avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" />}
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold text-white truncate">{s.label}</div>
+                        {s.subtitle && <div className="text-[10px] text-zinc-400">{s.subtitle}</div>}
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className="text-xs font-black text-[#FFD700] font-mono">{AppFormatters.formatClp(s.value)}</div>
+                        <div className="text-[10px] text-zinc-400">{pct}% · {s.count} citas</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function SalesChartsPanel({ locations, barbers, appointments }) {
+      const [locFilter, setLocFilter] = useState(null);      // null = todas las sucursales
+      const [chartFilter, setChartFilter] = useState('todos'); // 'todos' | 'locales' | 'barberos'
+      const shortName = (n) => String(n || '').replace('Big Boys - ', '');
+      const inLoc = (a) => locFilter === null || a.locationId === locFilter;
+
+      const completed = useMemo(() => appointments.filter(a => a.status === 'Completada' && inLoc(a)), [appointments, locFilter]);
+      const totalVentas = completed.reduce((s, a) => s + (a.servicePrice || 0), 0);
+      const totalAbonos = completed.reduce((s, a) => s + (a.prepayAmount || 0), 0);
+      const totalCitas = appointments.filter(inLoc).length;
+
+      const locationSlices = useMemo(() => locations.map((loc, i) => {
+        const done = appointments.filter(a => a.locationId === loc.id && a.status === 'Completada');
+        const all = appointments.filter(a => a.locationId === loc.id);
+        return {
+          label: shortName(loc.name),
+          value: done.reduce((s, a) => s + (a.servicePrice || 0), 0),
+          count: all.length,
+          color: SALES_CHART_COLORS[i % SALES_CHART_COLORS.length],
+          subtitle: `${done.length} completadas · ${all.length} agendadas`
+        };
+      }).filter(s => s.value > 0 || s.count > 0), [appointments, locations]);
+
+      const branchBarbers = useMemo(() => barbers.filter(b => locFilter === null || b.locationId === locFilter), [barbers, locFilter]);
+      const barberSlices = useMemo(() => branchBarbers.map((b, i) => {
+        const done = appointments.filter(a => a.barberId === b.id && a.status === 'Completada');
+        const all = appointments.filter(a => a.barberId === b.id);
+        return {
+          label: b.name,
+          value: done.reduce((s, a) => s + (a.servicePrice || 0), 0),
+          count: all.length,
+          color: SALES_CHART_COLORS[(i + 2) % SALES_CHART_COLORS.length],
+          subtitle: `${done.length} cortes completados`,
+          avatarUrl: b.avatarUrl
+        };
+      }).filter(s => s.value > 0 || s.count > 0), [appointments, branchBarbers]);
+
+      const volume = branchBarbers.map(b => ({ b, n: appointments.filter(a => a.barberId === b.id && inLoc(a)).length }));
+      const maxVol = Math.max(1, ...volume.map(v => v.n));
+      const selectedName = locFilter === null ? null : shortName((locations.find(l => l.id === locFilter) || {}).name);
+
+      const chip = (active) => `px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${active
+        ? 'bg-[#FFD700] text-black'
+        : 'bg-[#121212] text-zinc-300 border border-zinc-800 hover:text-white'}`;
+
+      return (
+        <div className="space-y-4">
+          <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5 space-y-3">
+            <span className="text-[10px] text-[#FFD700] font-bold uppercase tracking-wider block">Filtrar reportes y gráficos</span>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => setLocFilter(null)} className={chip(locFilter === null)}>Todas las sucursales</button>
+              {locations.map(loc => (
+                <button key={loc.id} onClick={() => setLocFilter(loc.id)} className={chip(locFilter === loc.id)}>{shortName(loc.name)}</button>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {[['todos', '📊 Todos los gráficos'], ['locales', '🥧 Torta por sucursales'], ['barberos', '🥧 Torta por barberos']].map(([id, label]) => (
+                <button key={id} onClick={() => setChartFilter(id)} className={chip(chartFilter === id)}>{label}</button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5">
+              <span className="text-[10px] text-zinc-400 font-bold uppercase block">Recaudación Total{selectedName ? ` · ${selectedName}` : ''}</span>
+              <h3 className="text-2xl font-black text-[#FFD700] mt-1">{AppFormatters.formatClp(totalVentas)}</h3>
+            </div>
+            <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5">
+              <span className="text-[10px] text-zinc-400 font-bold uppercase block">Abonos Garantizados</span>
+              <h3 className="text-2xl font-black text-green-400 mt-1">{AppFormatters.formatClp(totalAbonos)}</h3>
+            </div>
+            <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5">
+              <span className="text-[10px] text-zinc-400 font-bold uppercase block">Cortes Realizados · Total Citas</span>
+              <h3 className="text-2xl font-black text-white mt-1">{completed.length} <span className="text-sm text-zinc-400 font-bold">/ {totalCitas}</span></h3>
+            </div>
+          </div>
+
+          <div className={`grid grid-cols-1 gap-4 ${chartFilter === 'todos' ? 'xl:grid-cols-2' : ''}`}>
+            {(chartFilter === 'todos' || chartFilter === 'locales') && (
+              <SalesDonutChart title="🥧 Ventas por sucursal" subtitle="Participación y recaudación de cada local (citas completadas)"
+                slices={locationSlices} centerLabel="Total locales" />
+            )}
+            {(chartFilter === 'todos' || chartFilter === 'barberos') && (
+              <SalesDonutChart title={selectedName ? `🥧 Barberos · ${selectedName}` : '🥧 Desempeño por barbero'}
+                subtitle="Distribución de ingresos generados por cada profesional"
+                slices={barberSlices} centerLabel="Total equipo" />
+            )}
+          </div>
+
+          <div className="bg-[#1E1E1E] border border-zinc-800 rounded-2xl p-5">
+            <span className="text-xs text-[#FFD700] font-black uppercase tracking-wider block">📊 {selectedName ? `Volumen de citas · ${selectedName}` : 'Volumen de citas por barbero'}</span>
+            <span className="text-[11px] text-zinc-400 block mb-4">Total de citas agendadas por cada profesional.</span>
+            {volume.length === 0 ? (
+              <div className="text-xs text-zinc-500">No hay barberos registrados en esta sucursal.</div>
+            ) : (
+              <div className="space-y-2.5">
+                {volume.map(({ b, n }) => (
+                  <div key={b.id} className="flex items-center gap-3">
+                    <span className="w-44 text-xs text-white font-semibold truncate">{b.name}</span>
+                    <div className="flex-1 h-3 rounded-full bg-[#121212] border border-zinc-800 overflow-hidden">
+                      <div className="h-full rounded-full bg-[#FFD700]" style={{ width: `${(n / maxVol) * 100}%` }}></div>
+                    </div>
+                    <span className="w-16 text-right text-xs font-black text-[#FFD700] font-mono">{n} citas</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     function QueueManager({ staff, locations, barbers, fixedLocationId }) {
       const [locationId, setLocationId] = useState(() => fixedLocationId || (locations[0] && locations[0].id) || 1);
       const { queue, error, reload } = useQueue(locationId, 6000);
@@ -9037,6 +10026,14 @@
                     onOpenBooking={handleOpenBooking}
                     onOpenRegister={() => { setAuthModalMode('register'); setAuthModalOpen(true); }}
                     onNavigateToTab={(tab) => setActiveTab(tab)}
+                  />
+                )}
+
+                {activeTab === 'asesor' && (
+                  <BarberAdvisorScreen
+                    services={SERVICES_LIST}
+                    onBookService={() => handleOpenBooking()}
+                    isDarkMode={storeState.isDarkMode}
                   />
                 )}
 
