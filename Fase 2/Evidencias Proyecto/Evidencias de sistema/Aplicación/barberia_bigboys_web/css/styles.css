@@ -126,7 +126,7 @@ html.light-mode body {
   color: #18181B !important;
 }
 
-/* Fondos Generales */
+/* 1. FONDOS GENERALES Y ESTRUCTURA */
 body.light-mode .bg-\[\#121212\],
 body.light-mode .bg-\[\#0e0e10\],
 body.light-mode .bg-\[\#0e0e0f\],
@@ -136,9 +136,10 @@ body.light-mode .bg-black {
   background-color: #F4F4F6 !important;
 }
 
-/* Tarjetas y Contenedores */
+/* 2. TARJETAS, CONTENEDORES Y PANELES */
 body.light-mode .bg-\[\#1E1E1E\],
 body.light-mode .bg-\[\#18181b\],
+body.light-mode .bg-\[\#18181B\],
 body.light-mode .bg-\[\#1E1A16\],
 body.light-mode .bg-\[\#141416\],
 body.light-mode .bg-zinc-900,
@@ -149,27 +150,96 @@ body.light-mode .bg-zinc-950 {
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
 }
 
-/* Fondos Secundarios y Chips */
-body.light-mode .bg-zinc-800,
-body.light-mode .bg-\[\#171717\] {
+/* 3. FONDOS SECUNDARIOS, SUCURSALES Y CAJAS INTERNAS */
+body.light-mode .bg-\[\#181818\],
+body.light-mode .bg-\[\#151515\],
+body.light-mode .bg-\[\#191919\],
+body.light-mode .bg-\[\#141414\],
+body.light-mode .bg-\[\#171717\],
+body.light-mode .bg-zinc-800 {
   background-color: #F4F4F6 !important;
   color: #18181B !important;
   border-color: #E4E4E7 !important;
 }
 
+/* Botones selectores de sucursal inactivos en modo claro */
+body.light-mode button.bg-\[\#181818\],
+body.light-mode .border-zinc-800 button.bg-\[\#181818\] {
+  background-color: #FFFFFF !important;
+  color: #52525B !important;
+  border-color: #D4D4D8 !important;
+}
+
+body.light-mode button.bg-\[\#181818\]:hover {
+  background-color: #F4F4F6 !important;
+  color: #18181B !important;
+  border-color: #A1A1AA !important;
+}
+
+/* Caja de dirección en tarjetas de sucursales */
+body.light-mode div.bg-\[\#141414\] {
+  background-color: #F8F8FA !important;
+  border-color: #E4E4E7 !important;
+}
+
+body.light-mode div.bg-\[\#141414\] p {
+  color: #27272A !important;
+}
+
+body.light-mode div.bg-\[\#141414\] button {
+  background-color: #FFFFFF !important;
+  color: #27272A !important;
+  border: 1px solid #D4D4D8 !important;
+}
+
+body.light-mode div.bg-\[\#141414\] button:hover {
+  background-color: #E4E4E7 !important;
+}
+
+/* 4. OVERLAYS, FLOTANTES Y FONDOS CON TRANSPARENCIA */
+body.light-mode .bg-\[\#121212\]\/95,
+body.light-mode .bg-\[\#121212\]\/90,
+body.light-mode .bg-\[\#121212\]\/80,
+body.light-mode .bg-\[\#1E1E1E\]\/80 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: #18181B !important;
+  border-color: #E4E4E7 !important;
+}
+
+body.light-mode .bg-\[\#121212\]\/70,
+body.light-mode .bg-\[\#121212\]\/60,
+body.light-mode .bg-\[\#121212\]\/40 {
+  background-color: #F8F8FA !important;
+  color: #18181B !important;
+  border-color: #E4E4E7 !important;
+}
+
+/* Insignia flotante en el visor de mapa */
+body.light-mode .bg-\[\#121212\]\/95 span.text-white {
+  color: #18181B !important;
+}
+
+body.light-mode .bg-\[\#121212\]\/95 span.text-zinc-400 {
+  color: #52525B !important;
+}
+
+/* Opacidades zinc */
+body.light-mode .bg-zinc-800\/30,
 body.light-mode .bg-zinc-800\/50,
 body.light-mode .bg-zinc-800\/60,
 body.light-mode .bg-zinc-800\/80,
+body.light-mode .bg-zinc-800\/90,
 body.light-mode .bg-zinc-900\/50,
 body.light-mode .bg-zinc-900\/60,
 body.light-mode .bg-zinc-900\/70,
 body.light-mode .bg-zinc-900\/80,
 body.light-mode .bg-zinc-900\/90 {
   background-color: #F8F8FA !important;
+  color: #18181B !important;
   border-color: #E4E4E7 !important;
 }
 
-/* Cabeceras y Navegación */
+/* 5. CABECERAS Y NAVEGACIÓN */
 body.light-mode header,
 body.light-mode nav,
 body.light-mode .sticky.top-0,
@@ -179,7 +249,7 @@ body.light-mode .fixed.bottom-0 {
   backdrop-filter: blur(12px) !important;
 }
 
-/* Tipografía y Textos */
+/* 6. TIPOGRAFÍA Y TEXTOS */
 body.light-mode .text-white,
 body.light-mode .text-zinc-100,
 body.light-mode .text-zinc-200 {
@@ -195,7 +265,7 @@ body.light-mode .text-zinc-500 {
   color: #71717A !important;
 }
 
-/* Bordes y Divisores */
+/* 7. BORDES Y DIVISORES */
 body.light-mode .border-zinc-800,
 body.light-mode .border-zinc-700,
 body.light-mode .border-zinc-900,
@@ -213,10 +283,11 @@ body.light-mode .divide-zinc-800\/60 > :not([hidden]) ~ :not([hidden]) {
   border-color: #E4E4E7 !important;
 }
 
-/* Inputs, Selects y Textareas */
+/* 8. INPUTS, SELECTS, TEXTAREAS Y CAPTCHA */
 body.light-mode input:not([type="checkbox"]):not([type="radio"]),
 body.light-mode select,
-body.light-mode textarea {
+body.light-mode textarea,
+body.light-mode .bg-\[\#1a1a1a\] {
   background-color: #FFFFFF !important;
   color: #18181B !important;
   border-color: #D4D4D8 !important;
@@ -234,7 +305,7 @@ body.light-mode textarea::placeholder {
   color: #A1A1AA !important;
 }
 
-/* Estados Hover */
+/* 9. ESTADOS HOVER */
 body.light-mode .hover\:bg-zinc-800:hover {
   background-color: #E4E4E7 !important;
 }
@@ -251,27 +322,83 @@ body.light-mode .hover\:text-white:hover {
   color: #09090B !important;
 }
 
-/* Modales y Ventanas */
-body.light-mode .fixed.inset-0.bg-black\/90,
-body.light-mode .fixed.inset-0.bg-black\/80,
-body.light-mode .fixed.inset-0.bg-black\/70,
-body.light-mode .fixed.inset-0.bg-black\/60 {
-  background-color: rgba(0, 0, 0, 0.55) !important;
-}
-
-body.light-mode .fixed.inset-0 .bg-\[\#121212\],
-body.light-mode .fixed.inset-0 .bg-\[\#18181b\],
-body.light-mode .fixed.inset-0 .bg-\[\#1E1E1E\] {
-  background-color: #FFFFFF !important;
+/* 10. BOTONES DE ACCIONES Y TARJETAS EN SUCURSALES (Google Maps y Waze) */
+body.light-mode .grid-cols-2 button.bg-zinc-800 {
+  background-color: #F4F4F6 !important;
   color: #18181B !important;
-  border-color: #E4E4E7 !important;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid #E4E4E7 !important;
 }
 
-/* Alertas y Notificaciones */
+body.light-mode .grid-cols-2 button.bg-zinc-800:hover {
+  background-color: #E4E4E7 !important;
+  border-color: #D4D4D8 !important;
+}
+
+/* 11. BADGES DE ESTADO (VERDES, ROJOS, CYAN, AMBER) */
+/* Badges de éxito */
+body.light-mode .bg-emerald-950\/50,
+body.light-mode .bg-emerald-950\/40,
+body.light-mode .bg-emerald-950\/30,
+body.light-mode .bg-emerald-950\/80,
+body.light-mode .bg-emerald-900\/50,
+body.light-mode .bg-emerald-900\/60,
+body.light-mode .bg-green-950\/40,
+body.light-mode .bg-\[\#101914\] {
+  background-color: #ECFDF5 !important;
+  border-color: #A7F3D0 !important;
+  color: #065F46 !important;
+}
+
+body.light-mode .bg-emerald-950\/50 span,
+body.light-mode .bg-emerald-950\/50 p,
+body.light-mode .bg-emerald-950\/30 span,
+body.light-mode .bg-emerald-950\/40 span {
+  color: #065F46 !important;
+}
+
+/* Badge Errores y Alertas */
+body.light-mode .bg-red-950\/50,
+body.light-mode .bg-red-950\/40,
+body.light-mode .bg-red-950\/30,
+body.light-mode .bg-red-950\/20,
+body.light-mode .bg-red-950\/60,
+body.light-mode .bg-red-900,
+body.light-mode .bg-red-900\/60,
+body.light-mode .bg-\[\#181111\] {
+  background-color: #FEF2F2 !important;
+  border-color: #FECACA !important;
+  color: #991B1B !important;
+}
+
+body.light-mode .bg-red-950\/50 span,
+body.light-mode .bg-red-950\/50 p,
+body.light-mode .bg-red-950\/30 span,
+body.light-mode .bg-red-950\/40 span {
+  color: #991B1B !important;
+}
+
+/* Badge Barberos y Cyan */
+body.light-mode .bg-cyan-950,
+body.light-mode .bg-cyan-950\/30,
+body.light-mode .bg-cyan-950\/60 {
+  background-color: #F0F9FF !important;
+  border-color: #BAE6FD !important;
+  color: #0369A1 !important;
+}
+
+body.light-mode .bg-cyan-950 span,
+body.light-mode .bg-cyan-950 p,
+body.light-mode .bg-cyan-950\/30 span {
+  color: #0369A1 !important;
+}
+
+/* Alertas y Notificaciones Ámbar */
 body.light-mode .bg-amber-950\/30,
 body.light-mode .bg-amber-950\/20,
-body.light-mode .bg-amber-950\/40 {
+body.light-mode .bg-amber-950\/40,
+body.light-mode .bg-amber-950\/60,
+body.light-mode .bg-amber-950\/80,
+body.light-mode .bg-amber-900\/60 {
   background-color: #FFFBEB !important;
   border-color: #FDE68A !important;
 }
@@ -298,3 +425,31 @@ body.light-mode .from-amber-950.via-zinc-900.to-amber-950 .text-\[\#FFD700\] {
   color: #92400E !important;
 }
 
+/* 12. MODALES Y BACKDROPS */
+body.light-mode .fixed.inset-0.bg-black\/90,
+body.light-mode .fixed.inset-0.bg-black\/85,
+body.light-mode .fixed.inset-0.bg-black\/80,
+body.light-mode .fixed.inset-0.bg-black\/70,
+body.light-mode .fixed.inset-0.bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.55) !important;
+}
+
+body.light-mode .fixed.inset-0 .bg-\[\#121212\],
+body.light-mode .fixed.inset-0 .bg-\[\#18181b\],
+body.light-mode .fixed.inset-0 .bg-\[\#1E1E1E\] {
+  background-color: #FFFFFF !important;
+  color: #18181B !important;
+  border-color: #E4E4E7 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* 13. CONTRASTE WCAG 2.1 AA (Dorado oscuro sobre fondo claro) */
+body.light-mode .text-\[\#FFD700\],
+body.light-mode .text-gold {
+  color: #8C6D05 !important;
+}
+
+body.light-mode button.text-\[\#FFD700\],
+body.light-mode a.text-\[\#FFD700\] {
+  color: #7A5C00 !important;
+}

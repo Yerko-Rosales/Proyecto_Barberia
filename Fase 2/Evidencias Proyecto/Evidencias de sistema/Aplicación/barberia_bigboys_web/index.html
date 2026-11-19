@@ -56,7 +56,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- Estilos Personalizados Big Boys -->
-  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="./css/styles.css?v=20261117">
 
   <!-- Detección y aplicación inmediata del tema guardado para evitar parpadeos -->
   <script>
@@ -2086,10 +2086,12 @@
                   <span className="text-[10px] font-extrabold tracking-[0.2em] text-[#FFD700] uppercase">
                     CHILE · TALAGANTE & PEÑAFLOR
                   </span>
-                  <span className="hidden md:inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-emerald-950/50 text-emerald-400 text-[9px] font-black tracking-wide border border-emerald-500/40">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>PostgreSQL Supabase Activo</span>
-                  </span>
+                  {isAdmin && !previewAsClient && (
+                    <span className="hidden md:inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-emerald-950/50 text-emerald-400 text-[9px] font-black tracking-wide border border-emerald-500/40">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                      <span>PostgreSQL Supabase Activo</span>
+                    </span>
+                  )}
                   {isAdmin && !previewAsClient && (
                     <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-[#FFD700] text-[9px] font-black uppercase tracking-wider border border-amber-500/40">
                       🛡️ MODO ADMINISTRADOR
@@ -2735,14 +2737,8 @@
                   </h2>
                 </div>
                 <p className="text-xs text-zinc-400 mt-1">
-                  Direcciones oficiales en Peñaflor y Talagante con visor satelital e interactivo de Google Maps API.
+                  Direcciones oficiales y horarios de atención en Peñaflor y Talagante.
                 </p>
-              </div>
-
-              {/* Badge Google Maps API */}
-              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 bg-[#1E1E1E] border border-[#FFD700]/40 rounded-xl text-xs font-bold text-[#FFD700] self-start sm:self-auto shadow-md">
-                <span className="w-2 h-2 rounded-full bg-[#FFD700] animate-pulse"></span>
-                <span>🗺️ Google Maps API Oficial</span>
               </div>
             </div>
 
