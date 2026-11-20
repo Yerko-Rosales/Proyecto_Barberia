@@ -2,9 +2,12 @@ package com.example.ui.screens
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import android.util.Base64
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
@@ -36,6 +39,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -119,14 +123,21 @@ fun BarberAdvisorScreen(
         analizarConIA(bitmap)
     }
 
-    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap: Bitmap? ->
-        if (bitmap != null) recibirFoto(bitmap)
+    // La cámara guarda la foto a resolución completa en un archivo temporal (la miniatura
+    // de TakePicturePreview es muy pequeña y la IA no distinguía bien el rostro).
+    val fotoUri = remember {
+        val archivo = File(File(context.cacheDir, "asesor").apply { mkdirs() }, "selfie.jpg")
+        FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", archivo)
+    }
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok: Boolean ->
+        if (ok) {
+            val bitmap = runCatching { cargarFotoReducida(context, fotoUri) }.getOrNull()
+            if (bitmap != null) recibirFoto(bitmap) else errorText = "No pudimos leer la foto. Intenta de nuevo."
+        }
     }
     val photoPickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
-            val bitmap = runCatching {
-                context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it) }
-            }.getOrNull()
+            val bitmap = runCatching { cargarFotoReducida(context, uri) }.getOrNull()
             if (bitmap != null) recibirFoto(bitmap) else errorText = "No pudimos leer la imagen. Usa una foto JPG o PNG."
         }
     }
@@ -237,7 +248,7 @@ fun BarberAdvisorScreen(
                                 .clip(RoundedCornerShape(16.dp))
                                 .background(Color(0xFF101010))
                                 .border(2.dp, if (photo != null) GoldPrimary else Color.DarkGray, RoundedCornerShape(16.dp))
-                                .clickable { if (pedirConsentimiento()) cameraLauncher.launch(null) },
+                                .clickable { if (pedirConsentimiento()) cameraLauncher.launch(fotoUri) },
                             contentAlignment = Alignment.Center
                         ) {
                             val actual = photo
@@ -277,7 +288,7 @@ fun BarberAdvisorScreen(
                         Spacer(modifier = Modifier.height(14.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(
-                                onClick = { if (pedirConsentimiento()) cameraLauncher.launch(null) },
+                                onClick = { if (pedirConsentimiento()) cameraLauncher.launch(fotoUri) },
                                 enabled = !isAnalyzing,
                                 colors = ButtonDefaults.buttonColors(containerColor = GoldPrimary, contentColor = DarkBackground),
                                 shape = RoundedCornerShape(12.dp),
@@ -515,6 +526,32 @@ private fun OpcionesChips(opciones: List<Pair<String, String>>, seleccion: Strin
 
 private fun clp(valor: Int): String = "$" + String.format(java.util.Locale("es", "CL"), "%,d", valor).replace(',', '.')
 
+// Lee la foto sin cargarla entera en memoria (~1024 px) y la endereza según su EXIF,
+// porque muchas cámaras guardan la selfie girada y la IA no reconocía el rostro de lado.
+private fun cargarFotoReducida(context: android.content.Context, uri: Uri): Bitmap? {
+    val cr = context.contentResolver
+    val limites = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    cr.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, limites) }
+    if (limites.outWidth <= 0 || limites.outHeight <= 0) return null
+    var muestra = 1
+    while (maxOf(limites.outWidth, limites.outHeight) / (muestra * 2) >= 1024) muestra *= 2
+    val bitmap = cr.openInputStream(uri)?.use {
+        BitmapFactory.decodeStream(it, null, BitmapFactory.Options().apply { inSampleSize = muestra })
+    } ?: return null
+    val grados = runCatching {
+        cr.openInputStream(uri)?.use {
+            when (ExifInterface(it).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> 90f
+                ExifInterface.ORIENTATION_ROTATE_180 -> 180f
+                ExifInterface.ORIENTATION_ROTATE_270 -> 270f
+                else -> 0f
+            }
+        }
+    }.getOrNull() ?: 0f
+    if (grados == 0f) return bitmap
+    return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, Matrix().apply { postRotate(grados) }, true)
+}
+
 // Reduce la foto a 1024 px como máximo y la codifica en JPEG/base64
 private fun bitmapABase64(bitmap: Bitmap): String {
     val escala = minOf(1f, 1024f / maxOf(bitmap.width, bitmap.height))
@@ -535,7 +572,7 @@ private fun llamarAsesorIA(base64Image: String): JSONObject {
     conn.setRequestProperty("apikey", SupabaseClientProvider.SUPABASE_ANON_KEY)
     conn.doOutput = true
     conn.connectTimeout = 15_000
-    conn.readTimeout = 120_000 // el modelo puede tardar hasta ~1 minuto
+    conn.readTimeout = 150_000 // la función corta a los ~140 s con un mensaje claro
     val body = JSONObject()
         .put("imagen", base64Image)
         .put("mime", "image/jpeg")

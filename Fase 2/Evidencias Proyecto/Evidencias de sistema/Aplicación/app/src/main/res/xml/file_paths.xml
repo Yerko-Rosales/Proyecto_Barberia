@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Foto temporal del Asesor IA (se sobrescribe en cada toma; no se sube a ningún lado salvo a la IA) -->
+    <cache-path name="asesor" path="asesor/" />
+</paths>

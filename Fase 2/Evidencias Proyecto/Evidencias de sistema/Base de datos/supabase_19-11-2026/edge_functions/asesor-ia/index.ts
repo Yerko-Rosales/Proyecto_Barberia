@@ -36,7 +36,8 @@ function cors(origin: string) {
 
 const PROMPT = `Actúa como un Maestro Barbero y Especialista en Visagismo Facial de "Big Boys Barberías Chile" (locales en Peñaflor y Talagante).
 Analiza la morfología facial del cliente a partir de su fotografía: forma del rostro, mandíbula, frente, textura del cabello y vello facial.
-Si la foto no muestra con claridad un rostro humano de frente, responde {"error": "sin_rostro"}.
+Si la foto está algo borrosa, oscura, girada o en ángulo pero se distingue un rostro humano, analízalo igual con tu mejor estimación.
+Solo si en la foto no hay ningún rostro humano, responde {"error": "sin_rostro"}.
 Cruza el diagnóstico con el catálogo oficial de servicios de Big Boys:
 - "Corte" ($11.900 CLP)
 - "Corte + Cejas" ($15.470 CLP)
@@ -82,17 +83,43 @@ Deno.serve(async (req) => {
   if (!key) return responder(500, { error: 'El asesor de IA aún no está configurado.' });
   const modelo = Deno.env.get('GEMINI_MODEL') ?? 'gemini-2.5-flash';
 
-  let r: Response;
-  try {
-    r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`, {
+  // Supabase corta la función a los 150 s: dejamos margen para responder un error claro.
+  const inicio = Date.now();
+  const LIMITE_MS = 135_000;
+  const llamarGemini = async (conPensamientoBajo: boolean): Promise<Response> => {
+    const generationConfig: Record<string, unknown> = { responseMimeType: 'application/json', temperature: 0.2 };
+    // Razonamiento mínimo: el análisis es simple y así la respuesta baja de ~60 s a ~30 s.
+    if (conPensamientoBajo) generationConfig.thinkingConfig = { thinkingLevel: 'minimal' };
+    return await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
       body: JSON.stringify({
         contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: mime, data: imagen } }] }],
-        generationConfig: { responseMimeType: 'application/json', temperature: 0.2 },
+        generationConfig,
       }),
+      signal: AbortSignal.timeout(Math.max(5_000, LIMITE_MS - (Date.now() - inicio))),
     });
-  } catch {
+  };
+
+  let r: Response;
+  try {
+    r = await llamarGemini(true);
+    // Si el modelo no acepta el ajuste de razonamiento, se repite sin él.
+    if (r.status === 400) {
+      const detalle = await r.clone().text().catch(() => '');
+      if (/thinking/i.test(detalle)) r = await llamarGemini(false);
+    }
+    // Saturación momentánea de Gemini: un reintento si aún queda tiempo.
+    if ((r.status === 503 || r.status === 429 || r.status === 500) && Date.now() - inicio < 30_000) {
+      console.error('Gemini', r.status, 'reintentando');
+      await new Promise((ok) => setTimeout(ok, 2_000));
+      r = await llamarGemini(true);
+    }
+  } catch (e) {
+    if (e instanceof DOMException && (e.name === 'TimeoutError' || e.name === 'AbortError')) {
+      console.error('Gemini tiempo agotado', Date.now() - inicio, 'ms');
+      return responder(504, { error: 'La IA tardó demasiado en responder. Intenta de nuevo en un momento.' });
+    }
     return responder(502, { error: 'No pudimos conectar con el servicio de IA. Intenta de nuevo.' });
   }
 
@@ -100,7 +127,7 @@ Deno.serve(async (req) => {
     // Solo el código y el mensaje del proveedor; nunca la imagen.
     const detalle = await r.text().catch(() => '');
     console.error('Gemini', r.status, detalle.slice(0, 500));
-    if (r.status === 429) return responder(429, { error: 'El servicio de IA está con mucha demanda. Intenta en un minuto.' });
+    if (r.status === 429 || r.status === 503) return responder(429, { error: 'El servicio de IA está con mucha demanda. Intenta en un minuto.' });
     return responder(502, { error: 'El servicio de IA no pudo analizar la foto.' });
   }
 
