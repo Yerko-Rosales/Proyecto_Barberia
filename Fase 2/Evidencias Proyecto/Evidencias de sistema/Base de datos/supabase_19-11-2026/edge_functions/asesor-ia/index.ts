@@ -104,18 +104,26 @@ Deno.serve(async (req) => {
   };
 
   let r: Response;
-  try {
-    r = await llamarGemini(true);
-    // Si el modelo no acepta el ajuste de razonamiento, se repite sin él.
-    if (r.status === 400) {
-      const detalle = await r.clone().text().catch(() => '');
-      if (/thinking/i.test(detalle)) r = await llamarGemini(false);
+  let pensamientoBajo = true;
+  // Si el modelo no acepta el ajuste de razonamiento, se repite sin él (y ya no se vuelve a pedir).
+  const llamarConAjuste = async (): Promise<Response> => {
+    let resp = await llamarGemini(pensamientoBajo);
+    if (resp.status === 400 && pensamientoBajo) {
+      const detalle = await resp.clone().text().catch(() => '');
+      if (/thinking/i.test(detalle)) {
+        pensamientoBajo = false;
+        resp = await llamarGemini(false);
+      }
     }
+    return resp;
+  };
+  try {
+    r = await llamarConAjuste();
     // Saturación momentánea de Gemini: un reintento si aún queda tiempo.
     if ((r.status === 503 || r.status === 429 || r.status === 500) && Date.now() - inicio < 30_000) {
       console.error('Gemini', r.status, 'reintentando');
       await new Promise((ok) => setTimeout(ok, 2_000));
-      r = await llamarGemini(true);
+      r = await llamarConAjuste();
     }
   } catch (e) {
     if (e instanceof DOMException && (e.name === 'TimeoutError' || e.name === 'AbortError')) {
