@@ -8,7 +8,6 @@
 
 const ORIGENES = [
   'https://big-boys-barber.netlify.app',
-  'https://barberia-bigboys.netlify.app',
   'https://yerko-rosales.github.io',
   'http://localhost:3000',
   'http://localhost:3123',
