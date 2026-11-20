@@ -1,0 +1,22 @@
+# Configuración del sitio en Netlify (barberia-bigboys.netlify.app). GitHub Pages ignora este archivo.
+[build]
+  publish = "."
+
+# Transbank vuelve desde Webpay con un POST; un sitio estático no puede responder POST,
+# así que esta función lo convierte en un GET con los mismos parámetros (token_ws / TBK_TOKEN).
+[[edge_functions]]
+  function = "webpay-return"
+  path = "/"
+
+[[edge_functions]]
+  function = "webpay-return"
+  path = "/index.html"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(self), microphone=(), geolocation=(self)"
