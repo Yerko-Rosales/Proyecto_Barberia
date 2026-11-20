@@ -1,7 +1,9 @@
 // Edge Function "asesor-ia" (19-11-2026): Asesor de estilo con IA (visagismo) de Big Boys.
 // Recibe la foto del cliente (base64) y le pide a Gemini un diagnóstico y el corte recomendado,
 // cruzado con el catálogo de servicios. La clave de Gemini vive solo aquí (secreto GEMINI_API_KEY),
-// nunca en la web ni en la app. La foto no se guarda: viaja a Gemini y se descarta (Ley 21.719).
+// nunca en la web ni en la app. Big Boys no guarda la foto: viaja a Gemini y aquí se descarta (Ley 21.719).
+// Con el plan gratuito de la Gemini API, Google puede usar el contenido para mejorar sus productos;
+// por eso la web y la app lo informan en la casilla de consentimiento (Política de Privacidad v1.2).
 // Secretos: GEMINI_API_KEY y, opcional, GEMINI_MODEL (por defecto gemini-2.5-flash).
 
 const ORIGENES = [

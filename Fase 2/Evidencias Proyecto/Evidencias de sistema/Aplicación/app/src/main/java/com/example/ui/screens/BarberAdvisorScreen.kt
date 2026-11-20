@@ -232,7 +232,7 @@ fun BarberAdvisorScreen(
                                 colors = CheckboxDefaults.colors(checkedColor = GoldPrimary, checkmarkColor = DarkBackground)
                             )
                             Text(
-                                "Acepto que mi foto se envíe a Google (Gemini) solo para analizar mi rostro y recomendarme un corte. Big Boys no guarda la foto.",
+                                "Acepto que mi foto se envíe a Google (Gemini) para analizar mi rostro y recomendarme un corte. Big Boys no guarda la foto; Google puede usarla para mejorar sus productos.",
                                 fontSize = 11.sp,
                                 color = Color.LightGray,
                                 modifier = Modifier.padding(top = 12.dp)
