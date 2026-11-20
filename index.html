@@ -2225,6 +2225,86 @@
       );
     }
 
+    // Botón flotante "Agendar Cita" que se puede arrastrar (dedo o mouse) para que no tape contenido.
+    // Un toque sin arrastrar abre la reserva; la posición elegida se recuerda en este navegador.
+    function BotonAgendarArrastrable({ onOpenBooking }) {
+      const CLAVE = 'bigboys_pos_boton_agendar';
+      const ref = useRef(null);
+      const arrastre = useRef(null);
+      const [pos, setPos] = useState(() => {
+        try { return JSON.parse(localStorage.getItem(CLAVE)) || null; } catch (e) { return null; }
+      });
+
+      // Mantiene el botón dentro de la pantalla (también al girar el teléfono o cambiar el tamaño).
+      const ajustar = (p) => {
+        const el = ref.current;
+        if (!p || !el) return p;
+        const w = el.offsetWidth, h = el.offsetHeight, m = 8;
+        return {
+          x: Math.min(Math.max(m, p.x), window.innerWidth - w - m),
+          y: Math.min(Math.max(m, p.y), window.innerHeight - h - m)
+        };
+      };
+      useEffect(() => {
+        const alCambiar = () => setPos(p => ajustar(p));
+        alCambiar();
+        window.addEventListener('resize', alCambiar);
+        // Al cargar, los estilos llegan después y el botón cambia de tamaño: se vuelve a ajustar.
+        const obs = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(alCambiar) : null;
+        if (obs && ref.current) obs.observe(ref.current);
+        return () => { window.removeEventListener('resize', alCambiar); if (obs) obs.disconnect(); };
+      }, []);
+
+      const alPresionar = (e) => {
+        if (e.button !== undefined && e.button !== 0) return;
+        const r = ref.current.getBoundingClientRect();
+        arrastre.current = { x0: e.clientX, y0: e.clientY, dx: e.clientX - r.left, dy: e.clientY - r.top, movido: false };
+        ref.current.setPointerCapture(e.pointerId);
+      };
+      const alMover = (e) => {
+        const a = arrastre.current;
+        if (!a) return;
+        if (!a.movido && Math.hypot(e.clientX - a.x0, e.clientY - a.y0) < 8) return;
+        a.movido = true;
+        setPos(ajustar({ x: e.clientX - a.dx, y: e.clientY - a.dy }));
+      };
+      const alSoltar = (e) => {
+        const a = arrastre.current;
+        arrastre.current = null;
+        if (!a) return;
+        if (a.movido) {
+          const r = ref.current.getBoundingClientRect();
+          try { localStorage.setItem(CLAVE, JSON.stringify({ x: r.left, y: r.top })); } catch (err) {}
+        } else {
+          onOpenBooking();
+        }
+      };
+
+      const estilo = pos ? { position: 'fixed', left: pos.x, top: pos.y, touchAction: 'none' } : { touchAction: 'none' };
+      return (
+        <div
+          ref={ref}
+          style={estilo}
+          className={`fixed z-30 animate-fade-in select-none ${pos ? '' : 'bottom-20 md:bottom-8 right-6'}`}
+          onPointerDown={alPresionar}
+          onPointerMove={alMover}
+          onPointerUp={alSoltar}
+          onPointerCancel={() => { arrastre.current = null; }}
+        >
+          <button
+            onClick={(e) => { if (e.detail === 0) onOpenBooking(); }}
+            title="Toca para agendar · Mantén y arrastra para moverlo"
+            aria-label="Agendar cita (puedes arrastrar este botón)"
+            className="flex items-center space-x-2 px-5 py-3.5 bg-gradient-to-r from-[#FFD700] to-[#E5C100] text-black font-black text-sm tracking-wider uppercase rounded-2xl shadow-[0_4px_25px_rgba(255,215,0,0.5)] hover:scale-105 active:scale-95 transition-all cursor-grab active:cursor-grabbing"
+          >
+            <span className="text-lg">✂️</span>
+            <span>Agendar Cita</span>
+            <span className="text-base opacity-60 pl-1" aria-hidden="true">⠿</span>
+          </button>
+        </div>
+      );
+    }
+
     // BottomNav
     function BottomNav({ activeTab, onTabChange, hasUser, isAdmin, onOpenBooking }) {
       const tabs = [
@@ -2240,17 +2320,7 @@
 
       return (
         <>
-          {activeTab !== 'admin' && (
-            <div className="fixed bottom-20 md:bottom-8 right-6 z-30 animate-fade-in">
-              <button
-                onClick={onOpenBooking}
-                className="flex items-center space-x-2 px-5 py-3.5 bg-gradient-to-r from-[#FFD700] to-[#E5C100] text-black font-black text-sm tracking-wider uppercase rounded-2xl shadow-[0_4px_25px_rgba(255,215,0,0.5)] hover:scale-105 active:scale-95 transition-all"
-              >
-                <span className="text-lg">✂️</span>
-                <span>Agendar Cita</span>
-              </button>
-            </div>
-          )}
+          {activeTab !== 'admin' && <BotonAgendarArrastrable onOpenBooking={onOpenBooking} />}
 
           <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#121212]/95 backdrop-blur-md border-t border-zinc-800 px-2 py-1.5 transition-colors">
             <div className="flex items-center justify-around">
