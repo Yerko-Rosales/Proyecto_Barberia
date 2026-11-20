@@ -36,6 +36,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import kotlin.math.roundToInt
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -94,6 +102,9 @@ fun MainAppScreen(
     var showSplashScreen by rememberSaveable { mutableStateOf(initialShowSplash) }
     var activeTab by remember { mutableStateOf("inicio") }
     var showBookingWizard by remember { mutableStateOf(false) }
+    // Desplazamiento del botón AGENDAR respecto de su lugar habitual (abajo a la derecha)
+    var fabX by rememberSaveable { mutableFloatStateOf(0f) }
+    var fabY by rememberSaveable { mutableFloatStateOf(0f) }
     var showNotificationsDropdown by remember { mutableStateOf(false) }
     var showProfileDialog by remember { mutableStateOf(false) }
     var isGuestBypass by remember { mutableStateOf(false) }
@@ -353,11 +364,32 @@ fun MainAppScreen(
         },
         floatingActionButton = {
             if (activeTab != "reseñas") {
+                // Botón "AGENDAR" arrastrable: se mueve manteniéndolo y deslizando, para que no tape
+                // contenido; un toque simple sigue abriendo la reserva. Nunca sale de la pantalla.
+                val densidad = LocalDensity.current
+                val config = LocalConfiguration.current
+                val margenPx = with(densidad) { 16.dp.toPx() }
+                val anchoPantalla = with(densidad) { config.screenWidthDp.dp.toPx() }
+                // Alto útil: descuenta barra superior y barra de navegación inferior.
+                val altoUtil = with(densidad) { (config.screenHeightDp.dp - 170.dp).toPx() }
+                var tamanoFab by remember { mutableStateOf(IntSize.Zero) }
                 FloatingActionButton(
                     onClick = { showBookingWizard = true },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = if (isDarkMode) DarkBackground else Color.White,
-                    modifier = Modifier.testTag("book_fab")
+                    modifier = Modifier
+                        .testTag("book_fab")
+                        .onSizeChanged { tamanoFab = it }
+                        .offset { IntOffset(fabX.roundToInt(), fabY.roundToInt()) }
+                        .pointerInput(Unit) {
+                            detectDragGestures { cambio, arrastre ->
+                                cambio.consume()
+                                val minX = -(anchoPantalla - tamanoFab.width - 2 * margenPx).coerceAtLeast(0f)
+                                val minY = -(altoUtil - tamanoFab.height - margenPx).coerceAtLeast(0f)
+                                fabX = (fabX + arrastre.x).coerceIn(minX, 0f)
+                                fabY = (fabY + arrastre.y).coerceIn(minY, 0f)
+                            }
+                        }
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 16.dp),
