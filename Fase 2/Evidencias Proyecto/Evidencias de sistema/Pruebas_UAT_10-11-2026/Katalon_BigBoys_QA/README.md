@@ -55,6 +55,6 @@ Las pruebas se validaron antes de ejecutarlas en Katalon:
 | 10:45 | 17 | 17 aprobados | Primera ejecución con la corrección |
 | 10:51 | 17 | 17 aprobados | Grabada en video (`../capturas/Prueba_UAT_Katalon_11-11-2026.mp4`). El video mostró la «Cuenta de Prueba Rápida» publicada en la web: DEF-018, corregido el mismo día y cubierto por KAT-WEB-08 |
 | 11:40 | 18 | 18 aprobados | Primera ejecución con KAT-WEB-08 |
-| 11:45 | 18 | **18 aprobados** | Ejecución final, en 3 min 36 s (`Reports/20261111_114552`) |
+| 11:45 | 18 | **18 aprobados** | Ejecución final, en 3 min 36 s (`Reports/20261111_114552`). Grabada en video (`../capturas/Prueba_UAT_Katalon_18_casos_11-11-2026.mp4`) |
 
 Si Katalon no toma un cambio de `Keywords/`, abre el archivo en Katalon y guárdalo (Ctrl+S) para que lo compile.
