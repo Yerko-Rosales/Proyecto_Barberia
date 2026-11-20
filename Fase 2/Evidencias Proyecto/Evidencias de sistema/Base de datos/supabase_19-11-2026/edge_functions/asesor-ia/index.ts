@@ -7,6 +7,7 @@
 // Secretos: GEMINI_API_KEY y, opcional, GEMINI_MODEL (por defecto gemini-2.5-flash).
 
 const ORIGENES = [
+  'https://big-boys-barber.netlify.app',
   'https://barberia-bigboys.netlify.app',
   'https://yerko-rosales.github.io',
   'http://localhost:3000',

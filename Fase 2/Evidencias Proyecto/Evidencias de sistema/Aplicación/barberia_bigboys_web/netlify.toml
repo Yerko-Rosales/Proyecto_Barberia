@@ -1,4 +1,4 @@
-# Configuración del sitio en Netlify (barberia-bigboys.netlify.app). GitHub Pages ignora este archivo.
+# Configuración del sitio en Netlify (big-boys-barber.netlify.app). GitHub Pages ignora este archivo.
 [build]
   publish = "."
 
