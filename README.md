@@ -67,12 +67,13 @@ En días de mayor demanda se atienden ~130 clientes y **26 se van sin atención 
 │   ├── Evidencias Grupales/      # Guías 2.4 y 2.6
 │   ├── Evidencias Individuales/  # Diarios de reflexión 2.1
 │   ├── Evidencias Proyecto/
-│   │   ├── Avance_Proyecto_Barberia*.pptx (original, v2 y v3) y Seguimiento/Roadmap 09-10
+│   │   ├── Roadmap_Proyecto_Barberia_DD-MM.xlsx  # Roadmaps al 09-10, 23-10, 30-10 y 06-11
 │   │   ├── Evidencias de documentación/  # Documentos del proyecto
 │   │   └── Evidencias de sistema/
 │   │       ├── Aplicación/               # Código de la web y la app (sin secretos; ver .env.example)
 │   │       └── Base de datos/            # Script DDL y diagramas de BD
-│   └── Seguimiento semanal/
+│   └── Seguimiento semanal/      # Seguimiento semana a semana (S5 a S15), presentaciones de avance,
+│                                 # presentación del producto y presentación final (plantilla Duoc)
 └── Fase 3/
     ├── Evidencias Grupales/      # Presentación final del proyecto
     └── Evidencias Individuales/  # Diarios de reflexión 3.1
